@@ -1,1464 +1,1703 @@
 
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#D71920">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Cabin PA Player</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#e31e36">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Cabin PA Player</title>
+  <link rel="manifest" href="./manifest.json">
 
-<link rel="manifest" href="./manifest.json">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --surface2: #f0f1f4;
+      --text: #20232b;
+      --muted: #727784;
+      --border: #e4e5e9;
+      --primary: #e31e36;
+      --primary-soft: #fff0f2;
+      --danger: #c52232;
+      --shadow: 0 5px 20px rgba(22, 26, 38, .06);
+    }
 
-<style>
-:root {
-  --red: #D71920;
-  --red-dark: #B51219;
-  --bg: #FFFFFF;
-  --surface: #FFFFFF;
-  --soft: #F7F7F8;
-  --text: #171717;
-  --muted: #777777;
-  --border: #E7E7E9;
-  --shadow: 0 3px 14px rgba(0,0,0,.045);
-}
-body.dark {
-  --bg: #151515;
-  --surface: #222222;
-  --soft: #2C2C2E;
-  --text: #F5F5F5;
-  --muted: #B0B0B0;
-  --border: #414141;
-  --shadow: none;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Noto Sans KR", sans-serif;
-  -webkit-tap-highlight-color: transparent;
-}
-button, input, select { font: inherit; }
-button { cursor: pointer; }
-button:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 3px solid rgba(215,25,32,.3);
-  outline-offset: 2px;
-}
-button:disabled { opacity: .4; cursor: not-allowed; }
+    body.dark {
+      color-scheme: dark;
+      --bg: #11141b;
+      --surface: #1b202a;
+      --surface2: #272d38;
+      --text: #f3f4f7;
+      --muted: #a2a8b5;
+      --border: #343b49;
+      --primary: #ff5267;
+      --primary-soft: #39212a;
+      --danger: #ff7887;
+      --shadow: 0 5px 20px rgba(0, 0, 0, .18);
+    }
 
-.app {
-  width: 100%;
-  max-width: 760px;
-  min-height: 100dvh;
-  margin: 0 auto;
-  padding: 16px 18px calc(30px + env(safe-area-inset-bottom));
-}
-.header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  margin-bottom: 25px;
-}
-.logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  flex: 0 0 48px;
-}
-.brand { flex: 1; min-width: 0; }
-.brand h1 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.6px; }
-.brand p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
-.icon-button {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 13px;
-  flex-shrink: 0;
-}
-.icon-button svg { width: 22px; height: 22px; }
-.screen { display: none; }
-.screen.active { display: block; }
-.page-title { font-size: 25px; line-height: 1.3; margin: 0 0 8px; font-weight: 800; letter-spacing: -.7px; }
-.page-subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; line-height: 1.5; }
+    * {
+      box-sizing: border-box;
+    }
 
-.home-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(138px, 1fr));
-  gap: 12px;
-}
-.home-tile {
-  min-width: 0;
-  min-height: 138px;
-  border: 1.5px solid var(--red);
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
-  padding: 15px 8px;
-  transition: background .12s, transform .12s;
-}
-.home-tile:active { background: rgba(215,25,32,.07); transform: scale(.98); }
-.home-tile.manage {
-  background: var(--soft);
-  border-color: var(--border);
-}
-.home-tile svg { width: 35px; height: 35px; color: var(--red); }
-.home-tile.manage svg { color: var(--muted); }
-.home-tile span { font-size: 16px; font-weight: 750; text-align: center; overflow-wrap: anywhere; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Noto Sans", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      transition: background .2s, color .2s;
+    }
 
-.back-row { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
-.back-button {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  border: 1px solid var(--border);
-  border-radius: 13px;
-  background: var(--surface);
-  color: var(--text);
-  display: grid;
-  place-items: center;
-}
-.back-button svg { width: 22px; height: 22px; }
-.back-label { font-size: 13px; color: var(--muted); margin-bottom: 3px; }
-.back-title { font-size: 22px; font-weight: 800; }
-.big-list { display: grid; gap: 12px; }
-.big-choice {
-  min-height: 78px;
-  width: 100%;
-  padding: 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 16px;
-  text-align: left;
-  box-shadow: var(--shadow);
-}
-.big-choice:active { border-color: var(--red); background: var(--soft); }
-.big-choice .choice-label { font-size: 17px; font-weight: 750; flex: 1; }
-.big-choice svg { width: 24px; height: 24px; color: var(--red); flex-shrink: 0; }
-.choice-index {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  color: var(--red);
-  background: rgba(215,25,32,.08);
-  flex-shrink: 0;
-}
-.choice-index svg { width: 22px; height: 22px; }
+    button, input, select {
+      font: inherit;
+    }
 
-.filter-row {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 2px 0 12px;
-  margin-bottom: 12px;
-  scrollbar-width: none;
-}
-.filter-row::-webkit-scrollbar { display: none; }
-.chip {
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 11px 16px;
-  background: var(--surface);
-  color: var(--text);
-  white-space: nowrap;
-  font-size: 14px;
-  font-weight: 650;
-}
-.chip.selected { background: var(--red); border-color: var(--red); color: #fff; }
-.search {
-  width: 100%;
-  height: 48px;
-  padding: 0 15px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 13px;
-  margin-bottom: 16px;
-}
-.track-list { display: grid; gap: 10px; }
-.track-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 15px;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  background: var(--surface);
-  min-width: 0;
-}
-.track-play {
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
-  display: grid;
-  place-items: center;
-  background: var(--red);
-  border: 0;
-  border-radius: 14px;
-  color: #fff;
-}
-.track-play svg { width: 25px; height: 25px; }
-.track-info { flex: 1; min-width: 0; }
-.track-name { font-size: 15px; font-weight: 750; overflow-wrap: anywhere; line-height: 1.4; }
-.track-meta { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
-.track-actions { display: flex; gap: 5px; }
-.track-actions button {
-  width: 38px; height: 38px;
-  display: grid; place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  background: var(--surface);
-  color: var(--text);
-}
-.track-actions svg { width: 18px; height: 18px; }
-.empty {
-  padding: 35px 18px;
-  text-align: center;
-  color: var(--muted);
-  background: var(--soft);
-  border-radius: 16px;
-  line-height: 1.7;
-}
-.primary, .secondary, .danger {
-  min-height: 50px;
-  border-radius: 13px;
-  padding: 13px 17px;
-  font-weight: 750;
-  border: 1px solid transparent;
-}
-.primary { background: var(--red); color: #fff; }
-.primary:active { background: var(--red-dark); }
-.secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
-.danger { background: #fff0f0; color: #B51219; border-color: #F2CACA; }
-body.dark .danger { background: #421F21; color: #FFB9BD; border-color: #633235; }
-.button-row { display: flex; gap: 9px; flex-wrap: wrap; }
-.button-row > button { flex: 1; }
-.section-title { font-size: 17px; font-weight: 800; margin: 22px 0 12px; }
-.field { display: grid; gap: 7px; margin-bottom: 15px; }
-.field label { font-size: 13px; font-weight: 750; }
-.field input, .field select {
-  width: 100%;
-  min-height: 49px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px;
-  background: var(--surface);
-  color: var(--text);
-}
-.notice { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 12px 0; }
-.check-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.check-row input { width: 20px; height: 20px; accent-color: var(--red); }
-.check-row span { flex: 1; font-size: 14px; overflow-wrap: anywhere; }
-.player-box {
-  margin-top: 20px;
-  padding: 22px 16px;
-  background: var(--soft);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-}
-.player-current { text-align: center; margin-bottom: 20px; }
-.player-current .eyebrow { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-.player-current .name { font-size: 18px; font-weight: 800; overflow-wrap: anywhere; }
-.progress { width: 100%; accent-color: var(--red); margin: 8px 0; }
-.time-row { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
-.player-controls { display: flex; justify-content: center; align-items: center; gap: 22px; margin: 20px 0 8px; }
-.player-controls button {
-  width: 52px; height: 52px;
-  border: 0; border-radius: 50%;
-  display: grid; place-items: center;
-  color: var(--text); background: var(--surface);
-}
-.player-controls button svg { width: 24px; height: 24px; }
-.player-controls .main-play { width: 76px; height: 76px; background: var(--red); color: #fff; }
-.player-controls .main-play svg { width: 34px; height: 34px; }
-.playlist-card { border: 1px solid var(--border); background: var(--surface); border-radius: 15px; padding: 15px; margin-bottom: 12px; }
-.playlist-head { display: flex; gap: 10px; align-items: center; }
-.playlist-head .name { flex: 1; font-weight: 800; overflow-wrap: anywhere; }
-.playlist-tracks { margin: 12px 0; }
-.playlist-track { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); }
-.playlist-track span { flex: 1; font-size: 13px; overflow-wrap: anywhere; }
-.playlist-track button { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); width: 32px; height: 32px; }
-.small-button { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 9px 11px; font-size: 12px; font-weight: 700; }
-.toast {
-  position: fixed;
-  bottom: calc(18px + env(safe-area-inset-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: calc(100vw - 32px);
-  padding: 13px 18px;
-  background: #242424;
-  color: white;
-  border-radius: 12px;
-  font-size: 13px;
-  z-index: 20;
-  display: none;
-}
-.toast.show { display: block; }
-dialog {
-  width: min(540px, calc(100vw - 28px));
-  max-height: 88dvh;
-  overflow-y: auto;
-  padding: 22px;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  color: var(--text);
-  background: var(--surface);
-}
-dialog::backdrop { background: rgba(0,0,0,.5); }
-dialog h2 { margin: 0 0 20px; font-size: 21px; }
-@media (max-width: 360px) {
-  .app { padding-left: 12px; padding-right: 12px; }
-  .home-grid { gap: 9px; grid-template-rows: repeat(3, minmax(125px, 1fr)); }
-  .home-tile { min-height: 125px; }
-  .home-tile span { font-size: 14px; }
-  .home-tile svg { width: 31px; height: 31px; }
-}
-</style>
+    button {
+      cursor: pointer;
+    }
+
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid rgba(227, 30, 54, .28);
+      outline-offset: 2px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 0 18px 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 45px;
+      height: 45px;
+      flex: 0 0 45px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: white;
+      background: var(--primary);
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -.5px;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 1.3px;
+      font-weight: 700;
+    }
+
+    .theme-button, .icon-button {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 12px;
+      min-height: 42px;
+      padding: 9px 12px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: appear .16s ease-out;
+    }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .eyebrow {
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 5px 0 8px;
+      font-size: clamp(25px, 5vw, 34px);
+      letter-spacing: -1px;
+      line-height: 1.2;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -.4px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .description {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .page-heading {
+      margin-bottom: 24px;
+    }
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 13px;
+    }
+
+    .home-tile {
+      min-height: 148px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      text-align: left;
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      color: var(--text);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transition: transform .15s, border-color .15s;
+    }
+
+    .home-tile:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .tile-icon {
+      display: grid;
+      place-items: center;
+      width: 43px;
+      height: 43px;
+      border-radius: 13px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-size: 23px;
+    }
+
+    .tile-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 15px;
+    }
+
+    .tile-arrow {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .toolbar > * {
+      flex: 1 1 145px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      font-size: 12px;
+      font-weight: 750;
+      color: var(--muted);
+    }
+
+    input, select {
+      width: 100%;
+      min-width: 0;
+      padding: 12px 13px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    input[type="file"] {
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 7px;
+      min-height: 43px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .button.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .button.subtle {
+      background: var(--primary-soft);
+      border-color: transparent;
+      color: var(--primary);
+    }
+
+    .button.danger {
+      color: var(--danger);
+    }
+
+    .button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .button-row .button {
+      flex: 1 1 auto;
+    }
+
+    .panel {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .track-list, .playlist-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .track-card {
+      padding: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      min-width: 0;
+    }
+
+    .track-number {
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .track-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .track-name {
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .track-meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .track-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+
+    .track-actions .button {
+      min-height: 35px;
+      padding: 7px 9px;
+      font-size: 12px;
+    }
+
+    .now-playing {
+      border: 0;
+      background: var(--primary);
+      color: white;
+      padding: 20px;
+      border-radius: 19px;
+      margin-bottom: 16px;
+    }
+
+    .now-playing .eyebrow {
+      color: rgba(255,255,255,.8);
+    }
+
+    .now-playing h2 {
+      margin: 6px 0 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .now-playing audio {
+      display: none;
+      width: 100%;
+    }
+
+    .player-controls {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr 1fr;
+      gap: 9px;
+    }
+
+    .player-controls .button {
+      min-height: 49px;
+      background: rgba(255,255,255,.15);
+      color: white;
+      border-color: rgba(255,255,255,.3);
+    }
+
+    .player-controls .button.main-control {
+      background: white;
+      color: var(--primary);
+      border-color: white;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 15px;
+      background: var(--surface);
+    }
+
+    .empty-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .back-button {
+      margin-bottom: 18px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,.55);
+      overflow-y: auto;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 19px;
+      background: var(--surface);
+      box-shadow: 0 20px 70px rgba(0,0,0,.25);
+    }
+
+    .modal h2 {
+      margin-bottom: 18px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 8px;
+      max-height: 230px;
+      overflow-y: auto;
+      margin: 12px 0;
+    }
+
+    .check-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .check-item input {
+      width: auto;
+    }
+
+    .order-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .order-row .order-name {
+      flex: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .order-row .button {
+      min-height: 34px;
+      padding: 5px 9px;
+    }
+
+    .toast {
+      position: fixed;
+      z-index: 30;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      max-width: calc(100% - 32px);
+      padding: 12px 17px;
+      border-radius: 12px;
+      color: white;
+      background: #252936;
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    footer {
+      padding: 28px 0 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 11px;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        padding: 0 14px 36px;
+      }
+
+      header {
+        margin-bottom: 24px;
+      }
+
+      .brand-title {
+        font-size: 17px;
+      }
+
+      .brand-subtitle {
+        font-size: 9px;
+        letter-spacing: .7px;
+      }
+
+      .home-tile {
+        min-height: 133px;
+        padding: 14px;
+      }
+
+      .tile-title {
+        font-size: 16px;
+      }
+
+      .panel {
+        padding: 14px;
+      }
+
+      .track-card {
+        align-items: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .track-info {
+        padding-top: 5px;
+      }
+
+      .track-actions {
+        width: 100%;
+        justify-content: flex-start;
+        padding-left: 48px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-<div class="app">
-  <header class="header">
-    <img class="logo" src="./eastar-logo.png" alt="이스타항공 로고"
-         onerror="this.style.display='none'">
-    <div class="brand">
-      <h1>Cabin PA Player</h1>
-      <p>Cabin Announcement Audio</p>
-    </div>
-    <button class="icon-button" id="themeButton" aria-label="다크 모드 전환"></button>
-  </header>
-
-  <!-- HOME: 이 2×3 첫 화면 구성은 변경하지 않습니다. -->
-  <main>
-    <section class="screen active" id="homeScreen">
-      <h2 class="page-title">Select Announcement Type</h2>
-      <p class="page-subtitle">Choose a category to continue.</p>
-
-      <div class="home-grid">
-        <button class="home-tile" data-category="탑승">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span>Boarding</span>
-        </button>
-
-        <button class="home-tile" data-category="안전">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/><path d="m9 12 2 2 4-4"/></svg>
-          <span>Safety</span>
-        </button>
-
-        <button class="home-tile" data-category="서비스">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5a3.5 3.5 0 0 1-7 0V2M6.5 2v20M21 15V2c-3 1-5 4-5 8v5h5zm-5 0v7"/></svg>
-          <span>Service</span>
-        </button>
-
-        <button class="home-tile" data-category="도착">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5 22 3l-5.5 19-4-8-10.5-5.5z"/><path d="M12.5 14 22 3"/></svg>
-          <span>Arrival</span>
-        </button>
-
-        <button class="home-tile" data-category="기타">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-          <span>Other</span>
-        </button>
-
-        <button class="home-tile manage" id="manageHomeButton">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1 0 1.7z"/></svg>
-          <span>Manage Audio</span>
-        </button>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="brand-mark">✈</div>
+        <div>
+          <div class="brand-title">Cabin PA Player</div>
+          <div class="brand-subtitle">PERSONAL ANNOUNCEMENT LIBRARY</div>
+        </div>
       </div>
-    </section>
+      <button class="theme-button" id="themeToggle" type="button">
+        🌙 Dark
+      </button>
+    </header>
 
-    <section class="screen" id="destinationScreen">
-      <div class="back-row">
-        <button class="back-button" data-back="homeScreen" aria-label="뒤로">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div><div class="back-label" id="destinationStepLabel">STEP 2</div><div class="back-title">Select Destination</div></div>
-      </div>
-      <h2 class="page-title" id="destinationHeading">Choose a destination</h2>
-      <p class="page-subtitle">Select the destination for your announcement.</p>
-      <div class="big-list" id="destinationList"></div>
-    </section>
+    <main>
+      <section class="screen active" id="homeScreen">
+        <div class="page-heading">
+          <div class="eyebrow">Cabin announcement system</div>
+          <h1>Select Announcement Type</h1>
+          <p class="description">Choose a category to continue.</p>
+        </div>
 
-    <section class="screen" id="languageScreen">
-      <div class="back-row">
-        <button class="back-button" data-back="destinationScreen" aria-label="뒤로">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div><div class="back-label">STEP 3</div><div class="back-title">Select Language</div></div>
-      </div>
-      <h2 class="page-title">Choose a language</h2>
-      <p class="page-subtitle" id="languageSubtitle"></p>
-      <div class="big-list" id="languageList"></div>
-    </section>
+        <div class="home-grid">
+          <button class="home-tile" data-category="Boarding">
+            <span class="tile-icon">✈</span>
+            <span>
+              <span class="tile-title">Boarding</span>
+              <span class="tile-arrow">Boarding announcements →</span>
+            </span>
+          </button>
 
-    <section class="screen" id="tracksScreen">
-      <div class="back-row">
-        <button class="back-button" data-back="languageScreen" aria-label="뒤로">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div><div class="back-label">STEP 4</div><div class="back-title">Audio Library</div></div>
-      </div>
-      <h2 class="page-title" id="trackHeading">Announcements</h2>
-      <p class="page-subtitle" id="trackSubtitle"></p>
-      <input class="search" id="trackSearch" type="search" placeholder="Search audio" aria-label="음원 검색">
-      <div class="filter-row" id="trackFilterRow"></div>
-      <div class="track-list" id="trackList"></div>
-      <div class="player-box" id="playerBox">
-        <div class="player-current">
+          <button class="home-tile" data-category="Safety">
+            <span class="tile-icon">◈</span>
+            <span>
+              <span class="tile-title">Safety</span>
+              <span class="tile-arrow">Safety announcements →</span>
+            </span>
+          </button>
+
+          <button class="home-tile" data-category="Service">
+            <span class="tile-icon">♧</span>
+            <span>
+              <span class="tile-title">Service</span>
+              <span class="tile-arrow">Onboard service →</span>
+            </span>
+          </button>
+
+          <button class="home-tile" data-category="Arrival">
+            <span class="tile-icon">⌖</span>
+            <span>
+              <span class="tile-title">Arrival</span>
+              <span class="tile-arrow">Arrival announcements →</span>
+            </span>
+          </button>
+
+          <button class="home-tile" data-category="Other">
+            <span class="tile-icon">☰</span>
+            <span>
+              <span class="tile-title">Other</span>
+              <span class="tile-arrow">Other announcements →</span>
+            </span>
+          </button>
+
+          <button class="home-tile" id="manageHome">
+            <span class="tile-icon">⚙</span>
+            <span>
+              <span class="tile-title">Manage Audio</span>
+              <span class="tile-arrow">Import and organize audio →</span>
+            </span>
+          </button>
+        </div>
+      </section>
+
+      <section class="screen" id="languageScreen">
+        <button class="button back-button" data-go="homeScreen">← Home</button>
+        <div class="page-heading">
+          <div class="eyebrow" id="languageEyebrow">Announcement category</div>
+          <h1 id="languageTitle">Choose Language</h1>
+          <p class="description">Select a language to view the audio library.</p>
+        </div>
+        <div class="home-grid" id="languageGrid"></div>
+      </section>
+
+      <section class="screen" id="playerScreen">
+        <button class="button back-button" id="playerBack">← Categories</button>
+
+        <div class="page-heading">
+          <div class="eyebrow" id="playerEyebrow">Boarding · English</div>
+          <h1>Audio Player</h1>
+          <p class="description">Play and organize your announcements.</p>
+        </div>
+
+        <div class="now-playing">
           <div class="eyebrow">NOW PLAYING</div>
-          <div class="name" id="playerName">Select an audio track</div>
+          <h2 id="nowPlayingName">Select an audio track</h2>
+          <audio id="audioElement" preload="metadata"></audio>
+          <div class="player-controls">
+            <button class="button" id="previousButton" type="button">⏮ Previous</button>
+            <button class="button main-control" id="playPauseButton" type="button">▶ Play</button>
+            <button class="button" id="nextButton" type="button">Next ⏭</button>
+          </div>
+          <div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,.8)" id="playerStatus">
+            Ready to play
+          </div>
         </div>
-        <input id="progress" class="progress" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
-        <div class="time-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
-        <div class="player-controls">
-          <button id="previousButton" aria-label="이전 음원">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20 9 12l10-8v16z"/><path d="M5 19V5"/></svg>
-          </button>
-          <button class="main-play" id="playButton" aria-label="재생">
-            <svg id="playIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 5 12 7-12 7z" fill="currentColor"/></svg>
-          </button>
-          <button id="nextButton" aria-label="다음 음원">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 4 10 8-10 8V4z"/><path d="M19 5v14"/></svg>
-          </button>
+
+        <div class="toolbar">
+          <button class="button primary" id="addPlayerAudio" type="button">＋ Add Audio</button>
+          <input id="playerSearch" type="search" placeholder="Search audio...">
         </div>
-      </div>
-    </section>
 
-    <section class="screen" id="manageScreen">
-      <div class="back-row">
-        <button class="back-button" data-back="homeScreen" aria-label="뒤로">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div><div class="back-label">LIBRARY</div><div class="back-title">Manage Audio</div></div>
-      </div>
-      <h2 class="page-title">Audio Management</h2>
-      <p class="page-subtitle">Import, edit and organize your announcement audio.</p>
+        <div class="toolbar">
+          <select id="playerCategoryFilter" aria-label="Filter category"></select>
+          <select id="playerLanguageFilter" aria-label="Filter language"></select>
+        </div>
 
-      <div class="button-row">
-        <button class="primary" id="importButton">Import Audio</button>
-        <button class="secondary" id="playlistButton">Broadcast Sets</button>
-      </div>
-      <input id="fileInput" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.mp4" multiple hidden>
+        <div class="panel">
+          <div class="panel-heading">
+            <h2>Audio Library</h2>
+            <span class="track-meta" id="playerTrackCount">0 tracks</span>
+          </div>
+          <div class="track-list" id="playerTrackList"></div>
+        </div>
+      </section>
 
-      <div class="section-title">Audio Library</div>
-      <input class="search" id="manageSearch" type="search" placeholder="Search audio" aria-label="관리 음원 검색">
-      <div class="track-list" id="manageTrackList"></div>
+      <section class="screen" id="manageScreen">
+        <button class="button back-button" data-go="homeScreen">← Home</button>
+        <div class="page-heading">
+          <div class="eyebrow">Library settings</div>
+          <h1>Manage Audio</h1>
+          <p class="description">Import, rename, categorize, and delete your audio files.</p>
+        </div>
 
-      <div class="section-title">Storage</div>
-      <div class="empty" id="storageInfo">Loading storage information...</div>
-    </section>
+        <div class="panel">
+          <h2 style="margin-bottom:14px">Import Audio</h2>
+          <form id="manageImportForm">
+            <div class="field">
+              <label for="manageFile">Audio file</label>
+              <input id="manageFile" type="file" accept="audio/*" multiple required>
+            </div>
+            <div class="field">
+              <label for="manageCategory">Category</label>
+              <select id="manageCategory"></select>
+            </div>
+            <div class="field">
+              <label for="manageLanguage">Language</label>
+              <select id="manageLanguage"></select>
+            </div>
+            <button class="button primary" type="submit">＋ Import Selected Files</button>
+          </form>
+        </div>
 
-    <section class="screen" id="playlistsScreen">
-      <div class="back-row">
-        <button class="back-button" data-back="manageScreen" aria-label="뒤로">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <div><div class="back-label">AUDIO MANAGEMENT</div><div class="back-title">Broadcast Sets</div></div>
-      </div>
-      <h2 class="page-title">Broadcast Sets</h2>
-      <p class="page-subtitle">Create a playlist and arrange the announcement order.</p>
-      <button class="primary" id="newPlaylistButton" style="width:100%;margin-bottom:16px">+ Create Broadcast Set</button>
-      <div id="playlistList"></div>
-    </section>
-  </main>
-</div>
+        <div class="toolbar">
+          <input id="manageSearch" type="search" placeholder="Search audio...">
+          <select id="manageCategoryFilter" aria-label="Filter category"></select>
+          <select id="manageLanguageFilter" aria-label="Filter language"></select>
+        </div>
 
-<dialog id="trackDialog">
-  <h2 id="trackDialogTitle">Edit Audio</h2>
-  <form id="trackForm">
-    <input type="hidden" id="editTrackId">
-    <div class="field">
-      <label for="editTrackName">Audio name</label>
-      <input id="editTrackName" required maxlength="240">
+        <div class="panel">
+          <div class="panel-heading">
+            <h2>Saved Audio</h2>
+            <span class="track-meta" id="manageTrackCount">0 tracks</span>
+          </div>
+          <div class="track-list" id="manageTrackList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-heading">
+            <h2>Playlists</h2>
+            <button class="button subtle" id="createPlaylistButton" type="button">＋ Create</button>
+          </div>
+          <p class="description" style="margin-bottom:14px">
+            Create playlists and arrange tracks for sequential playback.
+          </p>
+          <div class="playlist-list" id="playlistList"></div>
+        </div>
+      </section>
+
+      <section class="screen" id="playlistScreen">
+        <button class="button back-button" data-go="manageScreen">← Manage Audio</button>
+        <div class="page-heading">
+          <div class="eyebrow">Playlist editor</div>
+          <h1 id="playlistEditorTitle">Create Playlist</h1>
+          <p class="description">Choose tracks and arrange their playback order.</p>
+        </div>
+
+        <div class="panel">
+          <div class="field">
+            <label for="playlistName">Playlist name</label>
+            <input id="playlistName" maxlength="100" placeholder="e.g. Boarding Sequence">
+          </div>
+          <h3>Select tracks</h3>
+          <div class="check-list" id="playlistTrackChoices"></div>
+          <div class="button-row">
+            <button class="button primary" id="savePlaylistButton" type="button">Save Playlist</button>
+            <button class="button" id="cancelPlaylistButton" type="button">Cancel</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 style="margin-bottom:8px">Track order</h2>
+          <p class="description">Use the arrows to change the order of selected tracks.</p>
+          <div id="playlistOrderList"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>Cabin PA Player · Personal audio library</footer>
+  </div>
+
+  <div class="modal-backdrop" id="editModal">
+    <div class="modal">
+      <h2>Edit Audio</h2>
+      <form id="editForm">
+        <input type="hidden" id="editTrackId">
+        <div class="field">
+          <label for="editTitle">Audio title</label>
+          <input id="editTitle" maxlength="200" required>
+        </div>
+        <div class="field">
+          <label for="editCategory">Category</label>
+          <select id="editCategory"></select>
+        </div>
+        <div class="field">
+          <label for="editLanguage">Language</label>
+          <select id="editLanguage"></select>
+        </div>
+        <div class="button-row">
+          <button class="button primary" type="submit">Save Changes</button>
+          <button class="button" type="button" id="cancelEditButton">Cancel</button>
+        </div>
+      </form>
     </div>
-    <div class="field">
-      <label for="editCategory">Announcement type</label>
-      <select id="editCategory">
-        <option value="탑승">Boarding</option>
-        <option value="안전">Safety</option>
-        <option value="서비스">Service</option>
-        <option value="도착">Arrival</option>
-        <option value="기타">Other</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="editDestination">Destination</label>
-      <select id="editDestination"></select>
-    </div>
-    <div class="field">
-      <label for="editLanguage">Language</label>
-      <select id="editLanguage"></select>
-    </div>
-    <div class="button-row">
-      <button class="secondary" type="button" id="cancelTrackEdit">Cancel</button>
-      <button class="primary" type="submit">Save</button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="importDialog">
-  <h2>Import Audio</h2>
-  <p class="notice" id="importFileSummary"></p>
-  <form id="importForm">
-    <div class="field">
-      <label for="importCategory">Announcement type</label>
-      <select id="importCategory">
-        <option value="탑승">Boarding</option>
-        <option value="안전">Safety</option>
-        <option value="서비스">Service</option>
-        <option value="도착">Arrival</option>
-        <option value="기타">Other</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="importDestination">Destination</label>
-      <select id="importDestination"></select>
-    </div>
-    <div class="field">
-      <label for="importLanguage">Language</label>
-      <select id="importLanguage"></select>
-    </div>
-    <p class="notice">선택한 파일 전체에 같은 분류가 적용됩니다. 기존 음원은 삭제되지 않습니다.</p>
-    <div class="button-row">
-      <button class="secondary" type="button" id="cancelImport">Cancel</button>
-      <button class="primary" type="submit">Import</button>
-    </div>
-  </form>
-</dialog>
-
-<dialog id="playlistDialog">
-  <h2 id="playlistDialogTitle">Create Broadcast Set</h2>
-  <form id="playlistForm">
-    <input type="hidden" id="editPlaylistId">
-    <div class="field">
-      <label for="playlistName">Set name</label>
-      <input id="playlistName" required maxlength="120" placeholder="e.g. Tokyo Boarding">
-    </div>
-    <div class="field">
-      <label for="playlistDestination">Destination</label>
-      <select id="playlistDestination"></select>
-    </div>
-    <div class="field">
-      <label>Select audio in playback order</label>
-      <div id="playlistTrackChoices"></div>
-    </div>
-    <p class="notice">선택한 음원의 순서는 아래 화살표로 저장 후 변경할 수 있습니다.</p>
-    <div class="button-row">
-      <button class="secondary" type="button" id="cancelPlaylist">Cancel</button>
-      <button class="primary" type="submit">Save Set</button>
-    </div>
-  </form>
-</dialog>
-
-<div class="toast" id="toast"></div>
-<audio id="audioElement" preload="metadata"></audio>
-
-<script>
-(() => {
-  "use strict";
-
-  const DB_NAME = "CabinPAPlayer";
-  const DB_VERSION = 2;
-  const TRACK_STORE = "tracks";
-  const PLAYLIST_STORE = "playlists";
-
-  const CATEGORIES = [
-    { value: "탑승", label: "Boarding" },
-    { value: "안전", label: "Safety" },
-    { value: "서비스", label: "Service" },
-    { value: "도착", label: "Arrival" },
-    { value: "기타", label: "Other" }
-  ];
-
-  const DESTINATIONS = [
-    { value: "도쿄", label: "Tokyo" },
-    { value: "제주", label: "Jeju" },
-    { value: "중국", label: "China" },
-    { value: "대만", label: "Taiwan" },
-    { value: "일본", label: "Japan (Other)" },
-    { value: "동남아", label: "Southeast Asia" },
-    { value: "기타", label: "Other Destination" },
-    { value: "미분류", label: "Unassigned" }
-  ];
-
-  const LANGUAGES = [
-    { value: "한국어", label: "한국어 · Korean" },
-    { value: "영어", label: "English" },
-    { value: "일본어", label: "日本語 · Japanese" },
-    { value: "중국어", label: "中文 · Chinese" },
-    { value: "기타", label: "Other" },
-    { value: "legacy", label: "기존 음원 · Legacy" }
-  ];
-
-  const LANGUAGE_ORDER = ["한국어", "영어", "일본어", "중국어", "기타", "legacy"];
-
-  const state = {
-    db: null,
-    category: "",
-    destination: "",
-    language: "",
-    tracks: [],
-    playlists: [],
-    visibleTracks: [],
-    queue: [],
-    currentTrackId: null,
-    pendingFiles: [],
-    editPlaylistOrder: [],
-    toastTimer: null
-  };
-
-  const $ = id => document.getElementById(id);
-  const audio = $("audioElement");
-
-  const ICONS = {
-    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>',
-    moon: '<path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/>',
-    chevron: '<path d="m9 18 6-6-6-6"/>',
-    play: '<path d="m8 5 12 7-12 7z" fill="currentColor"/>',
-    pause: '<path d="M8 5h3v14H8zM15 5h3v14h-3z" fill="currentColor"/>',
-    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
-    trash: '<path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/>',
-    music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'
-  };
-
-  function icon(name) {
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
-  }
-
-  function toast(message) {
-    const el = $("toast");
-    el.textContent = message;
-    el.classList.add("show");
-    clearTimeout(state.toastTimer);
-    state.toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
-  }
-
-  function openDatabase() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-      request.onupgradeneeded = event => {
-        const db = event.target.result;
-
-        // Keep the existing tracks store intact.
-        if (!db.objectStoreNames.contains(TRACK_STORE)) {
-          db.createObjectStore(TRACK_STORE, { keyPath: "id", autoIncrement: true });
-        }
-
-        if (!db.objectStoreNames.contains(PLAYLIST_STORE)) {
-          db.createObjectStore(PLAYLIST_STORE, { keyPath: "id", autoIncrement: true });
-        }
-      };
-
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-      request.onblocked = () => toast("다른 탭의 앱을 닫고 다시 시도해 주세요.");
-    });
-  }
-
-  function getAll(storeName) {
-    return new Promise((resolve, reject) => {
-      const tx = state.db.transaction(storeName, "readonly");
-      const request = tx.objectStore(storeName).getAll();
-      request.onsuccess = () => resolve(request.result || []);
-      request.onerror = () => reject(request.error);
-    });
-  }
-
-  function putItem(storeName, item) {
-    return new Promise((resolve, reject) => {
-      const tx = state.db.transaction(storeName, "readwrite");
-      const request = tx.objectStore(storeName).put(item);
-      request.onsuccess = () => {
-        if (item.id == null) item.id = request.result;
-      };
-      tx.oncomplete = () => resolve(item);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error || new Error("Save failed"));
-    });
-  }
-
-  function addItem(storeName, item) {
-    return new Promise((resolve, reject) => {
-      const tx = state.db.transaction(storeName, "readwrite");
-      const request = tx.objectStore(storeName).add(item);
-      request.onsuccess = () => { item.id = request.result; };
-      tx.oncomplete = () => resolve(item);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error || new Error("Add failed"));
-    });
-  }
-
-  function deleteItem(storeName, id) {
-    return new Promise((resolve, reject) => {
-      const tx = state.db.transaction(storeName, "readwrite");
-      tx.objectStore(storeName).delete(id);
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    });
-  }
-
-  async function reloadData() {
-    state.tracks = await getAll(TRACK_STORE);
-    state.playlists = await getAll(PLAYLIST_STORE);
-    state.tracks.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "ko"));
-    renderManageTracks();
-    renderPlaylists();
-    renderStorageInfo();
-  }
-
-  function showScreen(id) {
-    document.querySelectorAll(".screen").forEach(screen => {
-      screen.classList.toggle("active", screen.id === id);
-    });
-    window.scrollTo({ top: 0, behavior: "instant" });
-  }
-
-  function fillSelect(select, options, includeAll = false) {
-    select.innerHTML = "";
-    if (includeAll) {
-      const all = document.createElement("option");
-      all.value = "";
-      all.textContent = "All destinations";
-      select.appendChild(all);
-    }
-    options.forEach(item => {
-      const option = document.createElement("option");
-      option.value = item.value;
-      option.textContent = item.label;
-      select.appendChild(option);
-    });
-  }
-
-  function languageLabel(value) {
-    return LANGUAGES.find(item => item.value === value)?.label || value || "기존 음원";
-  }
-
-  function destinationLabel(value) {
-    return DESTINATIONS.find(item => item.value === value)?.label || value || "Unassigned";
-  }
-
-  function categoryLabel(value) {
-    return CATEGORIES.find(item => item.value === value)?.label || value || "Other";
-  }
-
-  function getTrackLanguage(track) {
-    return track.language || "legacy";
-  }
-
-  function getTrackDestination(track) {
-    return track.destination || "미분류";
-  }
-
-  function renderDestinations() {
-    const matching = state.tracks.filter(track => track.category === state.category);
-    const found = new Set(matching.map(getTrackDestination));
-    const list = $("destinationList");
-    list.innerHTML = "";
-
-    const destinationOptions = DESTINATIONS.filter(item =>
-      found.has(item.value) || item.value === "미분류"
-    );
-
-    destinationOptions.forEach(destination => {
-      const count = matching.filter(track => getTrackDestination(track) === destination.value).length;
-      const button = document.createElement("button");
-      button.className = "big-choice";
-      button.innerHTML = `
-        <span class="choice-index">${icon("music")}</span>
-        <span class="choice-label">${escapeHtml(destination.label)}</span>
-        <span style="color:var(--muted);font-size:12px">${count}</span>
-        ${icon("chevron")}`;
-      button.addEventListener("click", () => {
-        state.destination = destination.value;
-        renderLanguages();
-        showScreen("languageScreen");
-      });
-      list.appendChild(button);
-    });
-
-    if (!destinationOptions.length) {
-      list.innerHTML = '<div class="empty">이 상황에 등록된 음원이 없습니다.<br>Manage Audio에서 음원을 가져와 주세요.</div>';
-    }
-  }
-
-  function renderLanguages() {
-    const matching = state.tracks.filter(track =>
-      track.category === state.category &&
-      getTrackDestination(track) === state.destination
-    );
-    const found = new Set(matching.map(getTrackLanguage));
-    const list = $("languageList");
-    list.innerHTML = "";
-    $("languageSubtitle").textContent =
-      `${categoryLabel(state.category)} · ${destinationLabel(state.destination)}`;
-
-    const languageOptions = LANGUAGES.filter(item =>
-      found.has(item.value) || item.value === "legacy"
-    );
-
-    languageOptions.forEach(language => {
-      const count = matching.filter(track => getTrackLanguage(track) === language.value).length;
-      const button = document.createElement("button");
-      button.className = "big-choice";
-      button.innerHTML = `
-        <span class="choice-index">${icon("music")}</span>
-        <span class="choice-label">${escapeHtml(language.label)}</span>
-        <span style="color:var(--muted);font-size:12px">${count}</span>
-        ${icon("chevron")}`;
-      button.addEventListener("click", () => {
-        state.language = language.value;
-        $("trackSearch").value = "";
-        renderTrackScreen();
-        showScreen("tracksScreen");
-      });
-      list.appendChild(button);
-    });
-
-    if (!languageOptions.length) {
-      list.innerHTML = '<div class="empty">등록된 언어가 없습니다.</div>';
-    }
-  }
-
-  function renderTrackScreen() {
-    $("trackHeading").textContent = `${categoryLabel(state.category)} · ${destinationLabel(state.destination)}`;
-    $("trackSubtitle").textContent = languageLabel(state.language);
-
-    const matching = state.tracks.filter(track =>
-      track.category === state.category &&
-      getTrackDestination(track) === state.destination &&
-      getTrackLanguage(track) === state.language
-    );
-
-    const search = $("trackSearch").value.trim().toLowerCase();
-    state.visibleTracks = matching.filter(track =>
-      String(track.name || "").toLowerCase().includes(search)
-    );
-
-    renderTrackFilters();
-    renderTrackList();
-  }
-
-  function renderTrackFilters() {
-    const row = $("trackFilterRow");
-    row.innerHTML = "";
-    const filters = [
-      { label: "All", value: "all" },
-      { label: "Boarding", value: "탑승" },
-      { label: "Safety", value: "안전" },
-      { label: "Service", value: "서비스" },
-      { label: "Arrival", value: "도착" },
-      { label: "Other", value: "기타" }
-    ];
-    filters.forEach(filter => {
-      const button = document.createElement("button");
-      button.className = "chip" + ((filter.value === "all" || filter.value === state.category) ? " selected" : "");
-      button.textContent = filter.label;
-      button.addEventListener("click", () => {
-        if (filter.value !== "all") {
-          state.category = filter.value;
-          renderDestinations();
-          showScreen("destinationScreen");
-          return;
-        }
-        renderTrackScreen();
-      });
-      row.appendChild(button);
-    });
-  }
-
-  function createTrackCard(track, manage = false) {
-    const card = document.createElement("article");
-    card.className = "track-card";
-
-    const play = document.createElement("button");
-    play.className = "track-play";
-    play.setAttribute("aria-label", "음원 재생");
-    play.innerHTML = icon("play");
-    play.addEventListener("click", () => startQueue(
-      manage ? state.tracks : state.visibleTracks, track.id
-    ));
-
-    const info = document.createElement("div");
-    info.className = "track-info";
-    const name = document.createElement("div");
-    name.className = "track-name";
-    name.textContent = track.name || "Unnamed audio";
-    const meta = document.createElement("div");
-    meta.className = "track-meta";
-    meta.textContent = `${categoryLabel(track.category)} · ${destinationLabel(getTrackDestination(track))} · ${languageLabel(getTrackLanguage(track))}`;
-    info.append(name, meta);
-    card.append(play, info);
-
-    if (manage) {
-      const actions = document.createElement("div");
-      actions.className = "track-actions";
-
-      const edit = document.createElement("button");
-      edit.setAttribute("aria-label", "음원 수정");
-      edit.innerHTML = icon("edit");
-      edit.addEventListener("click", () => openTrackEdit(track));
-
-      const remove = document.createElement("button");
-      remove.setAttribute("aria-label", "음원 삭제");
-      remove.innerHTML = icon("trash");
-      remove.addEventListener("click", () => removeTrack(track));
-
-      actions.append(edit, remove);
-      card.appendChild(actions);
-    }
-
-    return card;
-  }
-
-  function renderTrackList() {
-    const list = $("trackList");
-    list.innerHTML = "";
-    if (!state.visibleTracks.length) {
-      list.innerHTML = '<div class="empty">No audio found.<br>다른 언어를 선택하거나 음원을 추가해 주세요.</div>';
-      return;
-    }
-    state.visibleTracks.forEach(track => list.appendChild(createTrackCard(track)));
-  }
-
-  function renderManageTracks() {
-    const list = $("manageTrackList");
-    if (!list) return;
-    list.innerHTML = "";
-    const search = ($("manageSearch")?.value || "").trim().toLowerCase();
-    const tracks = state.tracks.filter(track =>
-      String(track.name || "").toLowerCase().includes(search)
-    );
-    if (!tracks.length) {
-      list.innerHTML = '<div class="empty">저장된 음원이 없습니다.<br>Import Audio로 파일을 추가해 주세요.</div>';
-      return;
-    }
-    tracks.forEach(track => list.appendChild(createTrackCard(track, true)));
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-    }[char]));
-  }
-
-  function startQueue(tracks, trackId) {
-    const playable = tracks.filter(track => track && track.blob);
-    if (!playable.length) {
-      toast("재생할 수 있는 음원이 없습니다.");
-      return;
-    }
-    state.queue = playable.map(track => track.id);
-    const index = state.queue.indexOf(trackId);
-    playQueueIndex(index >= 0 ? index : 0);
-    $("playerBox").scrollIntoView({ behavior: "smooth", block: "center" });
-  }
-
-  function playQueueIndex(index) {
-    if (index < 0 || index >= state.queue.length) {
-      audio.pause();
-      return;
-    }
-    const trackId = state.queue[index];
-    const track = state.tracks.find(item => item.id === trackId);
-    if (!track || !track.blob) {
-      toast("음원 파일을 찾을 수 없습니다.");
-      return;
-    }
-    state.currentTrackId = trackId;
-
-    if (audio.dataset.objectUrl) URL.revokeObjectURL(audio.dataset.objectUrl);
-    const url = URL.createObjectURL(track.blob);
-    audio.dataset.objectUrl = url;
-    audio.src = url;
-    $("playerName").textContent = track.name || "Unnamed audio";
-    audio.play().then(updatePlayButton).catch(() => {
-      updatePlayButton();
-      toast("재생할 수 없습니다. 파일 형식을 확인해 주세요.");
-    });
-    renderTrackList();
-  }
-
-  function currentQueueIndex() {
-    return state.queue.indexOf(state.currentTrackId);
-  }
-
-  function updatePlayButton() {
-    $("playIcon").innerHTML = audio.paused ? ICONS.play : ICONS.pause;
-    $("playButton").setAttribute("aria-label", audio.paused ? "재생" : "일시정지");
-  }
-
-  function formatTime(seconds) {
-    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
-    return `${mins}:${secs}`;
-  }
-
-  function renderStorageInfo() {
-    const bytes = state.tracks.reduce((sum, track) => {
-      return sum + (track.blob && Number(track.blob.size) ? track.blob.size : 0);
-    }, 0);
-    const mb = (bytes / (1024 * 1024)).toFixed(1);
-    $("storageInfo").textContent =
-      `저장된 음원 ${state.tracks.length}개 · 약 ${mb} MB · 브라우저 내부 저장소`;
-  }
-
-  async function removeTrack(track) {
-    if (!confirm(`"${track.name}" 음원을 삭제할까요?\n삭제 후에는 복구할 수 없습니다.`)) return;
-    if (state.currentTrackId === track.id) {
-      audio.pause();
-      state.currentTrackId = null;
-      $("playerName").textContent = "Select an audio track";
-    }
-    await deleteItem(TRACK_STORE, track.id);
-    state.playlists = state.playlists.map(playlist => ({
-      ...playlist,
-      trackIds: (playlist.trackIds || []).filter(id => id !== track.id)
-    }));
-    for (const playlist of state.playlists) {
-      await putItem(PLAYLIST_STORE, playlist);
-    }
-    await reloadData();
-    renderTrackScreen();
-    toast("음원을 삭제했습니다.");
-  }
-
-  function openTrackEdit(track) {
-    $("trackDialogTitle").textContent = "Edit Audio";
-    $("editTrackId").value = track.id;
-    $("editTrackName").value = track.name || "";
-    $("editCategory").value = track.category || "기타";
-    $("editDestination").value = getTrackDestination(track);
-    $("editLanguage").value = getTrackLanguage(track);
-    $("trackDialog").showModal();
-  }
-
-  async function saveTrackEdit(event) {
-    event.preventDefault();
-    const id = Number($("editTrackId").value);
-    const track = state.tracks.find(item => item.id === id);
-    if (!track) return;
-
-    track.name = $("editTrackName").value.trim();
-    track.category = $("editCategory").value;
-    track.destination = $("editDestination").value;
-    track.language = $("editLanguage").value === "legacy" ? undefined : $("editLanguage").value;
-
-    await putItem(TRACK_STORE, track);
-    $("trackDialog").close();
-    await reloadData();
-    renderTrackScreen();
-    toast("음원 정보를 저장했습니다.");
-  }
-
-  function openImportDialog(files) {
-    state.pendingFiles = Array.from(files || []);
-    if (!state.pendingFiles.length) return;
-    $("importFileSummary").textContent =
-      `${state.pendingFiles.length}개 파일 선택됨: ${state.pendingFiles.slice(0, 4).map(file => file.name).join(", ")}${state.pendingFiles.length > 4 ? " ..." : ""}`;
-    $("importDialog").showModal();
-  }
-
-  async function importFiles(event) {
-    event.preventDefault();
-    if (!state.pendingFiles.length) return;
-    const category = $("importCategory").value;
-    const destination = $("importDestination").value;
-    const language = $("importLanguage").value;
-
-    let added = 0;
-    for (const file of state.pendingFiles) {
-      if (!file.type.startsWith("audio/") &&
-          !/\.(mp3|m4a|wav|aac|ogg|mp4|caf|aiff?)$/i.test(file.name)) {
-        continue;
-      }
-      await addItem(TRACK_STORE, {
-        name: file.name.replace(/\.[^.]+$/, ""),
-        category,
-        destination,
-        language: language === "legacy" ? undefined : language,
-        blob: file,
-        addedAt: Date.now()
-      });
-      added++;
-    }
-
-    state.pendingFiles = [];
-    $("fileInput").value = "";
-    $("importDialog").close();
-    await reloadData();
-    toast(`${added}개 음원을 추가했습니다.`);
-  }
-
-  function openPlaylistEditor(playlist = null) {
-    $("playlistDialogTitle").textContent = playlist ? "Edit Broadcast Set" : "Create Broadcast Set";
-    $("editPlaylistId").value = playlist?.id ?? "";
-    $("playlistName").value = playlist?.name || "";
-    $("playlistDestination").value = playlist?.destination || "미분류";
-    state.editPlaylistOrder = [...(playlist?.trackIds || [])];
-    renderPlaylistTrackChoices();
-    $("playlistDialog").showModal();
-  }
-
-  function renderPlaylistTrackChoices() {
-    const container = $("playlistTrackChoices");
-    container.innerHTML = "";
-    const chosen = new Set(state.editPlaylistOrder);
-
-    state.tracks.forEach(track => {
-      const row = document.createElement("label");
-      row.className = "check-row";
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = chosen.has(track.id);
-      checkbox.addEventListener("change", () => {
-        if (checkbox.checked) {
-          if (!state.editPlaylistOrder.includes(track.id)) state.editPlaylistOrder.push(track.id);
-        } else {
-          state.editPlaylistOrder = state.editPlaylistOrder.filter(id => id !== track.id);
-        }
-        renderPlaylistTrackChoices();
-      });
-      const text = document.createElement("span");
-      text.textContent = `${track.name} · ${categoryLabel(track.category)} · ${languageLabel(getTrackLanguage(track))}`;
-      row.append(checkbox, text);
-      container.appendChild(row);
-    });
-
-    if (!state.tracks.length) {
-      container.innerHTML = '<div class="empty">먼저 음원을 추가해 주세요.</div>';
-    }
-
-    if (state.editPlaylistOrder.length) {
-      const orderHeading = document.createElement("div");
-      orderHeading.className = "section-title";
-      orderHeading.textContent = "Playback Order";
-      container.appendChild(orderHeading);
-
-      state.editPlaylistOrder.forEach((id, index) => {
-        const track = state.tracks.find(item => item.id === id);
-        if (!track) return;
-        const row = document.createElement("div");
-        row.className = "playlist-track";
-        const number = document.createElement("b");
-        number.textContent = String(index + 1);
-        const name = document.createElement("span");
-        name.textContent = track.name;
-        const up = document.createElement("button");
-        up.textContent = "↑";
-        up.disabled = index === 0;
-        up.setAttribute("aria-label", "순서 위로");
-        up.addEventListener("click", () => {
-          const temp = state.editPlaylistOrder[index - 1];
-          state.editPlaylistOrder[index - 1] = state.editPlaylistOrder[index];
-          state.editPlaylistOrder[index] = temp;
-          renderPlaylistTrackChoices();
-        });
-        const down = document.createElement("button");
-        down.textContent = "↓";
-        down.disabled = index === state.editPlaylistOrder.length - 1;
-        down.setAttribute("aria-label", "순서 아래로");
-        down.addEventListener("click", () => {
-          const temp = state.editPlaylistOrder[index + 1];
-          state.editPlaylistOrder[index + 1] = state.editPlaylistOrder[index];
-          state.editPlaylistOrder[index] = temp;
-          renderPlaylistTrackChoices();
-        });
-        row.append(number, name, up, down);
-        container.appendChild(row);
-      });
-    }
-  }
-
-  async function savePlaylist(event) {
-    event.preventDefault();
-    const name = $("playlistName").value.trim();
-    if (!name) return;
-    const idValue = $("editPlaylistId").value;
-    const existing = idValue ? state.playlists.find(item => item.id === Number(idValue)) : null;
-    const playlist = {
-      ...(existing || {}),
-      name,
-      destination: $("playlistDestination").value,
-      trackIds: [...state.editPlaylistOrder],
-      updatedAt: Date.now()
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    "use strict";
+
+    const DB_NAME = "CabinPAPlayer";
+    const DB_VERSION = 2;
+    const TRACK_STORE = "tracks";
+    const PLAYLIST_STORE = "playlists";
+
+    const CATEGORIES = ["Boarding", "Safety", "Service", "Arrival", "Other"];
+    const LANGUAGES = ["Korean", "English", "Japanese", "Chinese", "Other"];
+
+    const state = {
+      db: null,
+      category: "Boarding",
+      language: "English",
+      currentTrackId: null,
+      queue: [],
+      objectUrl: null,
+      editingPlaylistId: null,
+      playlistDraft: [],
+      theme: "light"
     };
-    if (existing) await putItem(PLAYLIST_STORE, playlist);
-    else {
-      playlist.createdAt = Date.now();
-      await addItem(PLAYLIST_STORE, playlist);
-    }
-    $("playlistDialog").close();
-    await reloadData();
-    toast("방송 세트를 저장했습니다.");
-  }
 
-  function renderPlaylists() {
-    const container = $("playlistList");
-    if (!container) return;
-    container.innerHTML = "";
-    if (!state.playlists.length) {
-      container.innerHTML = '<div class="empty">저장된 방송 세트가 없습니다.<br>Create Broadcast Set을 눌러 만들어 주세요.</div>';
-      return;
+    const $ = id => document.getElementById(id);
+
+    function makeId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      return "id-" + Date.now() + "-" + Math.random().toString(16).slice(2);
     }
 
-    state.playlists.forEach(playlist => {
-      const card = document.createElement("div");
-      card.className = "playlist-card";
-      const head = document.createElement("div");
-      head.className = "playlist-head";
-      const name = document.createElement("div");
-      name.className = "name";
-      name.textContent = playlist.name;
-      const play = document.createElement("button");
-      play.className = "primary small-button";
-      play.textContent = "Play";
-      play.addEventListener("click", () => {
-        const ids = (playlist.trackIds || []).filter(id =>
-          state.tracks.some(track => track.id === id && track.blob)
-        );
-        if (!ids.length) {
-          toast("이 세트에 재생 가능한 음원이 없습니다.");
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2600);
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.toggle("active", screen.id === id);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        if (!("indexedDB" in window)) {
+          reject(new Error("IndexedDB is not supported in this browser."));
           return;
         }
-        state.queue = ids;
-        playQueueIndex(0);
-        showScreen("tracksScreen");
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = event => {
+          const db = event.target.result;
+
+          // Preserve the existing tracks store. Only create it if absent.
+          if (!db.objectStoreNames.contains(TRACK_STORE)) {
+            const tracks = db.createObjectStore(TRACK_STORE, { keyPath: "id" });
+            tracks.createIndex("category", "category", { unique: false });
+            tracks.createIndex("language", "language", { unique: false });
+          }
+
+          // Add playlists without deleting existing audio records.
+          if (!db.objectStoreNames.contains(PLAYLIST_STORE)) {
+            db.createObjectStore(PLAYLIST_STORE, { keyPath: "id" });
+          }
+        };
+
+        request.onsuccess = () => {
+          state.db = request.result;
+          state.db.onversionchange = () => state.db.close();
+          resolve(state.db);
+        };
+
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => {
+          showToast("Close other open Cabin PA Player tabs and try again.");
+        };
       });
-      head.append(name, play);
-      card.appendChild(head);
+    }
 
-      const meta = document.createElement("div");
-      meta.className = "track-meta";
-      meta.textContent = `${destinationLabel(playlist.destination)} · ${(playlist.trackIds || []).length} tracks`;
-      card.appendChild(meta);
+    function getAll(storeName) {
+      return new Promise((resolve, reject) => {
+        const tx = state.db.transaction(storeName, "readonly");
+        const request = tx.objectStore(storeName).getAll();
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error);
+      });
+    }
 
-      const order = document.createElement("div");
-      order.className = "playlist-tracks";
-      (playlist.trackIds || []).forEach((id, index) => {
-        const track = state.tracks.find(item => item.id === id);
-        if (!track) return;
-        const row = document.createElement("div");
-        row.className = "playlist-track";
-        const number = document.createElement("b");
-        number.textContent = `${index + 1}.`;
-        const text = document.createElement("span");
-        text.textContent = track.name;
-        row.append(number, text);
-        card.appendChild(order);
-        order.appendChild(row);
+    function getRecord(storeName, id) {
+      return new Promise((resolve, reject) => {
+        const tx = state.db.transaction(storeName, "readonly");
+        const request = tx.objectStore(storeName).get(id);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+    }
+
+    function putRecord(storeName, record) {
+      return new Promise((resolve, reject) => {
+        const tx = state.db.transaction(storeName, "readwrite");
+        tx.objectStore(storeName).put(record);
+        tx.oncomplete = () => resolve(record);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error("Save aborted."));
+      });
+    }
+
+    function deleteRecord(storeName, id) {
+      return new Promise((resolve, reject) => {
+        const tx = state.db.transaction(storeName, "readwrite");
+        tx.objectStore(storeName).delete(id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error("Delete aborted."));
+      });
+    }
+
+    async function allTracks() {
+      const tracks = await getAll(TRACK_STORE);
+      return tracks.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    }
+
+    async function allPlaylists() {
+      return getAll(PLAYLIST_STORE);
+    }
+
+    function normalizeTrack(track) {
+      return {
+        ...track,
+        name: track.name || track.title || "Untitled audio",
+        category: track.category || "Other",
+        language: track.language || "Other"
+      };
+    }
+
+    function populateSelect(selectId, values, includeAll = false) {
+      const select = $(selectId);
+      const previous = select.value;
+      const options = [];
+
+      if (includeAll) {
+        options.push('<option value="__ALL__">All categories</option>');
+      }
+
+      values.forEach(value => {
+        options.push(
+          '<option value="' + escapeHTML(value) + '">' +
+          escapeHTML(value) + '</option>'
+        );
       });
 
-      const actions = document.createElement("div");
-      actions.className = "button-row";
-      const edit = document.createElement("button");
-      edit.className = "secondary";
-      edit.textContent = "Edit";
-      edit.addEventListener("click", () => openPlaylistEditor(playlist));
-      const remove = document.createElement("button");
-      remove.className = "secondary";
-      remove.textContent = "Delete";
-      remove.addEventListener("click", async () => {
-        if (!confirm(`"${playlist.name}" 방송 세트를 삭제할까요?`)) return;
-        await deleteItem(PLAYLIST_STORE, playlist.id);
-        await reloadData();
-        toast("방송 세트를 삭제했습니다.");
-      });
-      actions.append(edit, remove);
-      card.appendChild(actions);
-      container.appendChild(card);
-    });
-  }
+      select.innerHTML = options.join("");
 
-  function applyTheme(dark) {
-    document.body.classList.toggle("dark", dark);
-    $("themeButton").innerHTML = icon(dark ? "sun" : "moon");
-    $("themeButton").setAttribute("aria-label", dark ? "라이트 모드로 전환" : "다크 모드로 전환");
-    document.querySelector('meta[name="theme-color"]').setAttribute("content", dark ? "#151515" : "#D71920");
-  }
+      if ([...select.options].some(option => option.value === previous)) {
+        select.value = previous;
+      }
+    }
 
-  function loadTheme() {
-    try { return localStorage.getItem("CabinPAPlayerTheme") === "dark"; }
-    catch (_) { return false; }
-  }
+    function populateControls() {
+      populateSelect("manageCategory", CATEGORIES);
+      populateSelect("manageLanguage", LANGUAGES);
+      populateSelect("editCategory", CATEGORIES);
+      populateSelect("editLanguage", LANGUAGES);
+      populateSelect("playerCategoryFilter", CATEGORIES, true);
+      populateSelect("manageCategoryFilter", CATEGORIES, true);
 
-  function saveTheme(dark) {
-    try { localStorage.setItem("CabinPAPlayerTheme", dark ? "dark" : "light"); }
-    catch (_) {}
-  }
+      const languageOptions = [
+        '<option value="__ALL__">All languages</option>',
+        ...LANGUAGES.map(language =>
+          '<option value="' + escapeHTML(language) + '">' +
+          escapeHTML(language) + '</option>'
+        ),
+        '<option value="__LEGACY__">Legacy · Unspecified</option>'
+      ];
 
-  function wireEvents() {
-    document.querySelectorAll(".home-tile[data-category]").forEach(button => {
-      button.addEventListener("click", () => {
-        state.category = button.dataset.category;
-        renderDestinations();
-        showScreen("destinationScreen");
-      });
-    });
+      $("playerLanguageFilter").innerHTML = languageOptions.join("");
+      $("manageLanguageFilter").innerHTML = languageOptions.join("");
 
-    $("manageHomeButton").addEventListener("click", () => {
-      reloadData().then(() => showScreen("manageScreen"));
-    });
+      $("playerCategoryFilter").value = state.category;
+      $("playerLanguageFilter").value = state.language;
+      $("manageCategoryFilter").value = "__ALL__";
+      $("manageLanguageFilter").value = "__ALL__";
+    }
 
-    document.querySelectorAll("[data-back]").forEach(button => {
-      button.addEventListener("click", () => showScreen(button.dataset.back));
-    });
+    function categoryLanguage(track) {
+      const category = track.category || "Other";
+      const language = track.language || "Legacy · Unspecified";
+      return category + " · " + language;
+    }
 
-    $("themeButton").addEventListener("click", () => {
-      const dark = !document.body.classList.contains("dark");
-      applyTheme(dark);
-      saveTheme(dark);
-    });
+    function matchesFilters(track, prefix) {
+      const query = $(prefix + "Search").value.trim().toLowerCase();
+      const category = $(prefix + "CategoryFilter").value;
+      const language = $(prefix + "LanguageFilter").value;
 
-    $("trackSearch").addEventListener("input", renderTrackScreen);
-    $("manageSearch").addEventListener("input", renderManageTracks);
+      if (category !== "__ALL__" && (track.category || "Other") !== category) {
+        return false;
+      }
 
-    $("importButton").addEventListener("click", () => $("fileInput").click());
-    $("fileInput").addEventListener("change", event => openImportDialog(event.target.files));
-    $("cancelImport").addEventListener("click", () => {
-      state.pendingFiles = [];
-      $("fileInput").value = "";
-      $("importDialog").close();
-    });
-    $("importForm").addEventListener("submit", event => {
-      importFiles(event).catch(error => {
-        console.error(error);
-        toast("가져오기에 실패했습니다. 저장 공간을 확인해 주세요.");
-      });
-    });
+      if (language === "__LEGACY__" && track.language) return false;
+      if (
+        language !== "__ALL__" &&
+        language !== "__LEGACY__" &&
+        (track.language || "Other") !== language
+      ) {
+        return false;
+      }
 
-    $("trackForm").addEventListener("submit", event => {
-      saveTrackEdit(event).catch(error => {
-        console.error(error);
-        toast("저장에 실패했습니다.");
-      });
-    });
-    $("cancelTrackEdit").addEventListener("click", () => $("trackDialog").close());
+      return !query || (track.name || "").toLowerCase().includes(query);
+    }
 
-    $("playlistButton").addEventListener("click", () => {
-      renderPlaylists();
-      showScreen("playlistsScreen");
-    });
-    $("newPlaylistButton").addEventListener("click", () => openPlaylistEditor());
-    $("playlistForm").addEventListener("submit", event => {
-      savePlaylist(event).catch(error => {
-        console.error(error);
-        toast("방송 세트를 저장하지 못했습니다.");
-      });
-    });
-    $("cancelPlaylist").addEventListener("click", () => $("playlistDialog").close());
+    function emptyState(message) {
+      return '<div class="empty-state">' +
+        '<div class="empty-icon">♫</div>' +
+        escapeHTML(message) +
+        '</div>';
+    }
 
-    $("playButton").addEventListener("click", () => {
-      if (!state.currentTrackId) {
-        toast("먼저 음원을 선택해 주세요.");
+    function trackCard(track, index, mode) {
+      const trackName = escapeHTML(track.name || "Untitled audio");
+      const meta = escapeHTML(categoryLanguage(track));
+      const isCurrent = state.currentTrackId === track.id;
+
+      return `
+        <div class="track-card">
+          <div class="track-number">${isCurrent ? "▶" : index + 1}</div>
+          <div class="track-info">
+            <div class="track-name">${trackName}</div>
+            <div class="track-meta">${meta}</div>
+          </div>
+          <div class="track-actions">
+            <button class="button subtle" data-action="play" data-id="${escapeHTML(track.id)}">▶ Play</button>
+            <button class="button" data-action="edit" data-id="${escapeHTML(track.id)}">Edit</button>
+            <button class="button danger" data-action="delete" data-id="${escapeHTML(track.id)}">Delete</button>
+          </div>
+        </div>`;
+    }
+
+    async function renderPlayerTracks() {
+      const tracks = (await allTracks()).map(normalizeTrack);
+      const filtered = tracks.filter(track => matchesFilters(track, "player"));
+
+      $("playerTrackCount").textContent = filtered.length + " tracks";
+      $("playerTrackList").innerHTML = filtered.length
+        ? filtered.map((track, index) => trackCard(track, index, "player")).join("")
+        : emptyState("No audio found. Add an audio file to get started.");
+
+      state.queue = filtered.map(track => track.id);
+    }
+
+    async function renderManageTracks() {
+      const tracks = (await allTracks()).map(normalizeTrack);
+      const filtered = tracks.filter(track => matchesFilters(track, "manage"));
+
+      $("manageTrackCount").textContent = filtered.length + " tracks";
+      $("manageTrackList").innerHTML = filtered.length
+        ? filtered.map((track, index) => trackCard(track, index, "manage")).join("")
+        : emptyState("No saved audio yet. Import files above.");
+
+      await renderPlaylists();
+    }
+
+    async function renderPlaylists() {
+      const playlists = await allPlaylists();
+
+      $("playlistList").innerHTML = playlists.length
+        ? playlists.map(playlist => `
+          <div class="track-card">
+            <div class="track-number">♫</div>
+            <div class="track-info">
+              <div class="track-name">${escapeHTML(playlist.name)}</div>
+              <div class="track-meta">${(playlist.trackIds || []).length} tracks</div>
+            </div>
+            <div class="track-actions">
+              <button class="button primary" data-playlist-action="play" data-id="${escapeHTML(playlist.id)}">Play</button>
+              <button class="button" data-playlist-action="edit" data-id="${escapeHTML(playlist.id)}">Edit</button>
+              <button class="button danger" data-playlist-action="delete" data-id="${escapeHTML(playlist.id)}">Delete</button>
+            </div>
+          </div>`).join("")
+        : emptyState("No playlists created yet.");
+    }
+
+    async function renderAll() {
+      await renderPlayerTracks();
+      await renderManageTracks();
+    }
+
+    function revokeCurrentUrl() {
+      if (state.objectUrl) {
+        URL.revokeObjectURL(state.objectUrl);
+        state.objectUrl = null;
+      }
+    }
+
+    async function playTrack(id, queueIds) {
+      const track = await getRecord(TRACK_STORE, id);
+      if (!track) {
+        showToast("This audio file could not be found.");
         return;
       }
-      if (audio.paused) {
-        audio.play().then(updatePlayButton).catch(() => toast("음원을 재생할 수 없습니다."));
+
+      if (!track.blob) {
+        showToast("This track has no saved audio data.");
+        return;
+      }
+
+      state.currentTrackId = id;
+      if (queueIds) state.queue = [...queueIds];
+
+      revokeCurrentUrl();
+      state.objectUrl = URL.createObjectURL(track.blob);
+
+      const audio = $("audioElement");
+      audio.src = state.objectUrl;
+      $("nowPlayingName").textContent = track.name || "Untitled audio";
+      $("playerStatus").textContent = categoryLanguage(normalizeTrack(track));
+      $("playPauseButton").textContent = "Ⅱ Pause";
+
+      try {
+        await audio.play();
+      } catch (error) {
+        $("playPauseButton").textContent = "▶ Play";
+        showToast("Tap Play to start audio.");
+      }
+
+      await renderPlayerTracks();
+    }
+
+    async function playRelative(direction) {
+      if (!state.queue.length) {
+        showToast("No tracks in the current list.");
+        return;
+      }
+
+      let index = state.queue.indexOf(state.currentTrackId);
+
+      if (index < 0) {
+        index = direction > 0 ? -1 : 0;
+      }
+
+      const nextIndex = index + direction;
+
+      if (nextIndex < 0 || nextIndex >= state.queue.length) {
+        if (direction > 0) {
+          $("playerStatus").textContent = "Playlist finished";
+          $("playPauseButton").textContent = "▶ Play";
+        }
+        return;
+      }
+
+      await playTrack(state.queue[nextIndex], state.queue);
+    }
+
+    async function importFiles(fileInput, category, language) {
+      const files = [...(fileInput.files || [])].filter(file =>
+        file.type.startsWith("audio/") ||
+        /\.(mp3|m4a|wav|aac|ogg|opus|flac|aiff?)$/i.test(file.name)
+      );
+
+      if (!files.length) {
+        showToast("Choose at least one audio file.");
+        return;
+      }
+
+      for (const file of files) {
+        const track = {
+          id: makeId(),
+          name: file.name.replace(/\.[^.]+$/, ""),
+          category,
+          language,
+          blob: file,
+          addedAt: Date.now()
+        };
+
+        await putRecord(TRACK_STORE, track);
+      }
+
+      fileInput.value = "";
+      showToast(files.length + " audio file(s) imported.");
+      await renderAll();
+    }
+
+    function openEdit(track) {
+      $("editTrackId").value = track.id;
+      $("editTitle").value = track.name || track.title || "";
+      $("editCategory").value = CATEGORIES.includes(track.category)
+        ? track.category : "Other";
+      $("editLanguage").value = LANGUAGES.includes(track.language)
+        ? track.language : "Other";
+      $("editModal").classList.add("open");
+    }
+
+    function closeEdit() {
+      $("editModal").classList.remove("open");
+    }
+
+    async function editTrack(id) {
+      const track = await getRecord(TRACK_STORE, id);
+      if (track) openEdit(normalizeTrack(track));
+    }
+
+    async function removeTrack(id) {
+      const track = await getRecord(TRACK_STORE, id);
+      if (!track) return;
+
+      if (!confirm('Delete "' + (track.name || "Untitled audio") + '"?')) {
+        return;
+      }
+
+      if (state.currentTrackId === id) {
+        $("audioElement").pause();
+        $("audioElement").removeAttribute("src");
+        $("audioElement").load();
+        state.currentTrackId = null;
+        revokeCurrentUrl();
+        $("nowPlayingName").textContent = "Select an audio track";
+        $("playPauseButton").textContent = "▶ Play";
+      }
+
+      await deleteRecord(TRACK_STORE, id);
+
+      const playlists = await allPlaylists();
+      for (const playlist of playlists) {
+        playlist.trackIds = (playlist.trackIds || []).filter(trackId => trackId !== id);
+        await putRecord(PLAYLIST_STORE, playlist);
+      }
+
+      showToast("Audio deleted.");
+      await renderAll();
+    }
+
+    async function handleTrackAction(event) {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+
+      const id = button.dataset.id;
+      const action = button.dataset.action;
+
+      if (action === "play") {
+        const list = await allTracks();
+        const track = list.find(item => item.id === id);
+        if (!track) return;
+
+        state.category = track.category || "Other";
+        state.language = track.language || "Other";
+        $("playerCategoryFilter").value = "__ALL__";
+        $("playerLanguageFilter").value = "__ALL__";
+        $("playerSearch").value = "";
+        $("playerEyebrow").textContent = categoryLanguage(normalizeTrack(track));
+        showScreen("playerScreen");
+        const visibleTracks = (await allTracks()).map(normalizeTrack);
+        const queue = visibleTracks.map(item => item.id);
+        await playTrack(id, queue);
+      }
+
+      if (action === "edit") await editTrack(id);
+      if (action === "delete") await removeTrack(id);
+    }
+
+    function openLanguageScreen(category) {
+      state.category = category;
+      $("languageEyebrow").textContent = category + " announcements";
+      $("languageTitle").textContent = "Choose Language";
+
+      $("languageGrid").innerHTML = LANGUAGES.map((language, index) => {
+        const icons = ["🇰🇷", "🇬🇧", "🇯🇵", "🇨🇳", "🌐"];
+        return `
+          <button class="home-tile" data-language="${escapeHTML(language)}">
+            <span class="tile-icon">${icons[index]}</span>
+            <span>
+              <span class="tile-title">${escapeHTML(language)}</span>
+              <span class="tile-arrow">View audio →</span>
+            </span>
+          </button>`;
+      }).join("");
+
+      showScreen("languageScreen");
+    }
+
+    async function openPlayer(category, language) {
+      state.category = category;
+      state.language = language;
+
+      $("playerEyebrow").textContent = category + " · " + language;
+      $("playerCategoryFilter").value = category;
+      $("playerLanguageFilter").value = language;
+      $("playerSearch").value = "";
+
+      showScreen("playerScreen");
+      await renderPlayerTracks();
+    }
+
+    async function startPlaylist(playlist) {
+      const ids = (playlist.trackIds || []).filter(Boolean);
+      if (!ids.length) {
+        showToast("This playlist is empty.");
+        return;
+      }
+
+      const existing = [];
+      for (const id of ids) {
+        if (await getRecord(TRACK_STORE, id)) existing.push(id);
+      }
+
+      if (!existing.length) {
+        showToast("No available audio tracks in this playlist.");
+        return;
+      }
+
+      state.queue = existing;
+      $("playerCategoryFilter").value = "__ALL__";
+      $("playerLanguageFilter").value = "__ALL__";
+      $("playerSearch").value = "";
+      $("playerEyebrow").textContent = "Playlist · " + playlist.name;
+      showScreen("playerScreen");
+      await playTrack(existing[0], existing);
+    }
+
+    async function openPlaylistEditor(id = null) {
+      state.editingPlaylistId = id;
+      state.playlistDraft = [];
+
+      $("playlistName").value = "";
+      $("playlistEditorTitle").textContent = id ? "Edit Playlist" : "Create Playlist";
+
+      if (id) {
+        const playlist = await getRecord(PLAYLIST_STORE, id);
+        if (!playlist) {
+          showToast("Playlist not found.");
+          return;
+        }
+        $("playlistName").value = playlist.name || "";
+        state.playlistDraft = [...(playlist.trackIds || [])];
+      }
+
+      await renderPlaylistEditor();
+      showScreen("playlistScreen");
+    }
+
+    async function renderPlaylistEditor() {
+      const tracks = (await allTracks()).map(normalizeTrack);
+      const trackMap = new Map(tracks.map(track => [track.id, track]));
+
+      $("playlistTrackChoices").innerHTML = tracks.length
+        ? tracks.map(track => `
+          <label class="check-item">
+            <input type="checkbox" data-choice-id="${escapeHTML(track.id)}"
+              ${state.playlistDraft.includes(track.id) ? "checked" : ""}>
+            <span>
+              <strong>${escapeHTML(track.name)}</strong>
+              <span class="track-meta" style="display:block">
+                ${escapeHTML(categoryLanguage(track))}
+              </span>
+            </span>
+          </label>`).join("")
+        : emptyState("Import audio files before creating a playlist.");
+
+      $("playlistOrderList").innerHTML = state.playlistDraft.length
+        ? state.playlistDraft.map((id, index) => {
+          const track = trackMap.get(id);
+          const name = track ? track.name : "Missing audio";
+          return `
+            <div class="order-row">
+              <strong>${index + 1}.</strong>
+              <span class="order-name">${escapeHTML(name)}</span>
+              <button class="button" data-order="up" data-id="${escapeHTML(id)}"
+                ${index === 0 ? "disabled" : ""}>↑</button>
+              <button class="button" data-order="down" data-id="${escapeHTML(id)}"
+                ${index === state.playlistDraft.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="button danger" data-order="remove" data-id="${escapeHTML(id)}">×</button>
+            </div>`;
+        }).join("")
+        : emptyState("Select tracks to build the playlist.");
+    }
+
+    function syncPlaylistChoices() {
+      const checked = [...$("playlistTrackChoices").querySelectorAll(
+        "input[data-choice-id]:checked"
+      )].map(input => input.dataset.choiceId);
+
+      const previous = state.playlistDraft;
+      state.playlistDraft = [
+        ...previous.filter(id => checked.includes(id)),
+        ...checked.filter(id => !previous.includes(id))
+      ];
+    }
+
+    async function savePlaylist() {
+      syncPlaylistChoices();
+
+      const name = $("playlistName").value.trim();
+      if (!name) {
+        showToast("Enter a playlist name.");
+        $("playlistName").focus();
+        return;
+      }
+
+      const existing = state.editingPlaylistId
+        ? await getRecord(PLAYLIST_STORE, state.editingPlaylistId)
+        : null;
+
+      const playlist = {
+        id: state.editingPlaylistId || makeId(),
+        name,
+        trackIds: [...state.playlistDraft],
+        createdAt: existing?.createdAt || Date.now(),
+        updatedAt: Date.now()
+      };
+
+      await putRecord(PLAYLIST_STORE, playlist);
+      showToast("Playlist saved.");
+      await renderPlaylists();
+      showScreen("manageScreen");
+    }
+
+    async function handlePlaylistAction(event) {
+      const button = event.target.closest("button[data-playlist-action]");
+      if (!button) return;
+
+      const id = button.dataset.id;
+      const action = button.dataset.playlistAction;
+      const playlist = await getRecord(PLAYLIST_STORE, id);
+      if (!playlist) return;
+
+      if (action === "play") await startPlaylist(playlist);
+      if (action === "edit") await openPlaylistEditor(id);
+
+      if (action === "delete") {
+        if (!confirm('Delete playlist "' + playlist.name + '"?')) return;
+        await deleteRecord(PLAYLIST_STORE, id);
+        showToast("Playlist deleted.");
+        await renderPlaylists();
+      }
+    }
+
+    function changeDraftOrder(id, direction) {
+      const index = state.playlistDraft.indexOf(id);
+      if (index < 0) return;
+
+      if (direction === "remove") {
+        state.playlistDraft.splice(index, 1);
       } else {
-        audio.pause();
+        const next = index + direction;
+        if (next < 0 || next >= state.playlistDraft.length) return;
+        [state.playlistDraft[index], state.playlistDraft[next]] =
+          [state.playlistDraft[next], state.playlistDraft[index]];
       }
-      updatePlayButton();
-    });
-
-    $("previousButton").addEventListener("click", () => {
-      const index = currentQueueIndex();
-      if (index > 0) playQueueIndex(index - 1);
-      else toast("첫 번째 음원입니다.");
-    });
-
-    $("nextButton").addEventListener("click", () => {
-      const index = currentQueueIndex();
-      if (index >= 0 && index < state.queue.length - 1) playQueueIndex(index + 1);
-      else toast("마지막 음원입니다.");
-    });
-
-    audio.addEventListener("play", updatePlayButton);
-    audio.addEventListener("pause", updatePlayButton);
-    audio.addEventListener("ended", () => {
-      const index = currentQueueIndex();
-      if (index >= 0 && index < state.queue.length - 1) playQueueIndex(index + 1);
-      else updatePlayButton();
-    });
-    audio.addEventListener("loadedmetadata", () => {
-      $("duration").textContent = formatTime(audio.duration);
-    });
-    audio.addEventListener("timeupdate", () => {
-      $("currentTime").textContent = formatTime(audio.currentTime);
-      $("duration").textContent = formatTime(audio.duration);
-      if (Number.isFinite(audio.duration) && audio.duration > 0) {
-        $("progress").value = Math.round(audio.currentTime / audio.duration * 1000);
-      }
-    });
-    $("progress").addEventListener("input", () => {
-      if (Number.isFinite(audio.duration) && audio.duration > 0) {
-        audio.currentTime = Number($("progress").value) / 1000 * audio.duration;
-      }
-    });
-
-    // Closing a dialog by tapping outside does not lose saved audio.
-    ["trackDialog", "importDialog", "playlistDialog"].forEach(id => {
-      $(id).addEventListener("click", event => {
-        if (event.target === $(id)) $(id).close();
-      });
-    });
-  }
-
-  async function init() {
-    fillSelect($("editDestination"), DESTINATIONS);
-    fillSelect($("importDestination"), DESTINATIONS);
-    fillSelect($("playlistDestination"), DESTINATIONS);
-    fillSelect($("editLanguage"), LANGUAGES);
-    fillSelect($("importLanguage"), LANGUAGES);
-
-    applyTheme(loadTheme());
-    wireEvents();
-
-    try {
-      state.db = await openDatabase();
-      await reloadData();
-    } catch (error) {
-      console.error(error);
-      toast("저장소를 열 수 없습니다. 브라우저 설정을 확인해 주세요.");
     }
 
-    // Optional PWA service worker registration; sw.js remains unchanged.
-    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-      navigator.serviceWorker.register("./sw.js").catch(error => {
-        console.warn("Service worker registration failed:", error);
+    function setupEvents() {
+      document.querySelectorAll("[data-category]").forEach(button => {
+        button.addEventListener("click", () => {
+          openLanguageScreen(button.dataset.category);
+        });
       });
-    }
-  }
 
-  init();
-})();
-</script>
+      $("languageGrid").addEventListener("click", event => {
+        const button = event.target.closest("button[data-language]");
+        if (!button) return;
+        openPlayer(state.category, button.dataset.language);
+      });
+
+      document.querySelectorAll("[data-go]").forEach(button => {
+        button.addEventListener("click", () => showScreen(button.dataset.go));
+      });
+
+      $("manageHome").addEventListener("click", () => {
+        showScreen("manageScreen");
+      });
+
+      $("playerBack").addEventListener("click", () => {
+        openLanguageScreen(state.category);
+      });
+
+      $("themeToggle").addEventListener("click", () => {
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        document.body.classList.toggle("dark", state.theme === "dark");
+        $("themeToggle").textContent = state.theme === "dark" ? "☀ Light" : "🌙 Dark";
+      });
+
+      $("addPlayerAudio").addEventListener("click", () => {
+        $("manageCategory").value = state.category;
+        $("manageLanguage").value = state.language;
+        showScreen("manageScreen");
+        $("manageFile").focus();
+      });
+
+      $("manageImportForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        try {
+          await importFiles(
+            $("manageFile"),
+            $("manageCategory").value,
+            $("manageLanguage").value
+          );
+        } catch (error) {
+          console.error(error);
+          showToast("Import failed. Please try again.");
+        }
+      });
+
+      ["playerSearch", "playerCategoryFilter", "playerLanguageFilter"].forEach(id => {
+        $(id).addEventListener("input", () => renderPlayerTracks().catch(console.error));
+        $(id).addEventListener("change", () => renderPlayerTracks().catch(console.error));
+      });
+
+      ["manageSearch", "manageCategoryFilter", "manageLanguageFilter"].forEach(id => {
+        $(id).addEventListener("input", () => renderManageTracks().catch(console.error));
+        $(id).addEventListener("change", () => renderManageTracks().catch(console.error));
+      });
+
+      $("playerTrackList").addEventListener("click", handleTrackAction);
+      $("manageTrackList").addEventListener("click", handleTrackAction);
+      $("playlistList").addEventListener("click", handlePlaylistAction);
+
+      $("playPauseButton").addEventListener("click", async () => {
+        const audio = $("audioElement");
+
+        if (!audio.src) {
+          if (state.queue.length) {
+            await playTrack(state.queue[0], state.queue);
+          } else {
+            showToast("Select an audio track first.");
+          }
+          return;
+        }
+
+        if (audio.paused) {
+          try {
+            await audio.play();
+          } catch (error) {
+            showToast("Unable to play this audio.");
+          }
+        } else {
+          audio.pause();
+        }
+      });
+
+      $("previousButton").addEventListener("click", () => {
+        playRelative(-1).catch(console.error);
+      });
+
+      $("nextButton").addEventListener("click", () => {
+        playRelative(1).catch(console.error);
+      });
+
+      $("audioElement").addEventListener("play", () => {
+        $("playPauseButton").textContent = "Ⅱ Pause";
+      });
+
+      $("audioElement").addEventListener("pause", () => {
+        $("playPauseButton").textContent = "▶ Play";
+      });
+
+      $("audioElement").addEventListener("ended", () => {
+        playRelative(1).catch(console.error);
+      });
+
+      $("editForm").addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const id = $("editTrackId").value;
+        const track = await getRecord(TRACK_STORE, id);
+        if (!track) {
+          closeEdit();
+          showToast("Audio track not found.");
+          return;
+        }
+
+        track.name = $("editTitle").value.trim();
+        track.category = $("editCategory").value;
+        track.language = $("editLanguage").value;
+
+        await putRecord(TRACK_STORE, track);
+
+        if (state.currentTrackId === id) {
+          $("nowPlayingName").textContent = track.name;
+          $("playerEyebrow").textContent = categoryLanguage(track);
+        }
+
+        closeEdit();
+        showToast("Audio updated.");
+        await renderAll();
+      });
+
+      $("cancelEditButton").addEventListener("click", closeEdit);
+
+      $("editModal").addEventListener("click", event => {
+        if (event.target === $("editModal")) closeEdit();
+      });
+
+      $("createPlaylistButton").addEventListener("click", () => {
+        openPlaylistEditor().catch(console.error);
+      });
+
+      $("savePlaylistButton").addEventListener("click", () => {
+        savePlaylist().catch(error => {
+          console.error(error);
+          showToast("Could not save playlist.");
+        });
+      });
+
+      $("cancelPlaylistButton").addEventListener("click", () => {
+        showScreen("manageScreen");
+      });
+
+      $("playlistTrackChoices").addEventListener("change", async event => {
+        if (!event.target.matches("input[data-choice-id]")) return;
+        syncPlaylistChoices();
+        await renderPlaylistEditor();
+      });
+
+      $("playlistOrderList").addEventListener("click", async event => {
+        const button = event.target.closest("button[data-order]");
+        if (!button) return;
+
+        const action = button.dataset.order;
+        const direction = action === "up" ? -1 : action === "down" ? 1 : "remove";
+        changeDraftOrder(button.dataset.id, direction);
+        await renderPlaylistEditor();
+      });
+
+      window.addEventListener("beforeunload", revokeCurrentUrl);
+    }
+
+    async function init() {
+      populateControls();
+      setupEvents();
+
+      try {
+        await openDB();
+        await renderAll();
+      } catch (error) {
+        console.error("Cabin PA Player initialization failed:", error);
+        showToast("Database error. Check the browser console.");
+      }
+
+      // Register the existing service worker if present.
+      if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+        navigator.serviceWorker.register("./sw.js").catch(error => {
+          console.warn("Service worker registration failed:", error);
+        });
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
