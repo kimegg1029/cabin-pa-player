@@ -4,601 +4,1460 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#d71920">
-<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#D71920">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Cabin PA Player</title>
+
+<link rel="manifest" href="./manifest.json">
+
 <style>
-:root{color-scheme:light;--bg:#f6f7f9;--surface:#fff;--surface2:#fff3f3;--text:#17212f;--muted:#758092;--accent:#d71920;--accent2:#b90f18;--border:#e6e9ee;--shadow:0 8px 24px rgba(20,32,50,.07);--header:#fff;--soft:#f0f2f5}
-body.dark{color-scheme:dark;--bg:#10151d;--surface:#1a2330;--surface2:#321f25;--text:#f4f6f9;--muted:#aab5c4;--accent:#ff454c;--accent2:#ff656a;--border:#303b4a;--shadow:0 8px 24px rgba(0,0,0,.2);--header:#151d28;--soft:#222d3b}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s,color .2s}
-button,input,select{font:inherit}
-button{border:0;border-radius:14px;padding:12px 14px;background:var(--soft);color:var(--text);font-weight:650;cursor:pointer;transition:transform .12s,background .15s}
-button:active{transform:scale(.98)}
-button:disabled{opacity:.45;cursor:not-allowed}
-.primary{background:var(--accent);color:white}
-.primary:hover{background:var(--accent2)}
-.ghost{background:transparent;border:1px solid var(--border)}
-header{background:var(--header);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.header-inner{max-width:760px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:12px}
-.brand-mark{width:42px;height:42px;border-radius:14px;background:var(--accent);display:grid;place-items:center;color:white;flex-shrink:0}
-.brand-mark svg{width:25px;height:25px}
-.brand{flex:1;min-width:0}
-.brand h1{font-size:17px;line-height:1.2;margin:0 0 4px;font-weight:850;letter-spacing:-.35px}
-.brand p{font-size:10px;letter-spacing:1.35px;color:var(--muted);margin:0;font-weight:750}
-.icon-btn{width:42px;height:42px;padding:0;border:1px solid var(--border);border-radius:14px;background:var(--surface);display:grid;place-items:center;font-size:18px}
-main{max-width:760px;margin:0 auto;padding:24px 18px 40px;min-height:calc(100dvh - 72px)}
-.screen{display:none}
-.screen.active{display:block;animation:enter .18s ease-out}
-@keyframes enter{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:none}}
-.eyebrow{font-size:11px;color:var(--accent);letter-spacing:1.4px;font-weight:850;text-transform:uppercase;margin:0 0 9px}
-.screen-title{font-size:28px;line-height:1.15;letter-spacing:-.9px;margin:0 0 9px;font-weight:850}
-.screen-desc{font-size:14px;line-height:1.5;color:var(--muted);margin:0}
-.hero{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:24px 20px;margin-bottom:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-.hero:after{content:"";position:absolute;width:125px;height:125px;border-radius:50%;background:var(--surface2);right:-40px;top:-44px;pointer-events:none}
-.hero>*{position:relative;z-index:1}
-.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.home-tile{background:var(--surface);border:1px solid var(--border);border-radius:22px;min-height:142px;padding:18px 16px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;box-shadow:var(--shadow)}
-.home-tile:hover{border-color:var(--accent)}
-.tile-icon{width:43px;height:43px;display:grid;place-items:center;background:var(--surface2);color:var(--accent);border-radius:15px}
-.tile-icon svg{width:23px;height:23px}
-.tile-label{font-size:15px;font-weight:800;letter-spacing:-.2px}
-.tile-arrow{font-size:12px;color:var(--muted);margin-left:7px}
-.section-head{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
-.section-head h3{font-size:14px;margin:0;font-weight:800}
-.section-head .line{height:1px;background:var(--border);flex:1}
-.back-row{display:flex;align-items:center;gap:9px;margin-bottom:20px}
-.back-row button{padding:9px 12px}
-.back-row span{font-size:12px;color:var(--muted);font-weight:650}
-.choice-list{display:grid;gap:10px;margin-top:22px}
-.choice{display:flex;align-items:center;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--border);padding:15px;border-radius:17px;min-height:72px}
-.choice .choice-icon{width:42px;height:42px;border-radius:13px;background:var(--surface2);color:var(--accent);display:grid;place-items:center;font-size:18px;flex-shrink:0}
-.choice .choice-text{flex:1}
-.choice strong{display:block;font-size:15px}
-.choice small{display:block;color:var(--muted);font-size:12px;margin-top:4px;font-weight:500}
-.choice .chevron{color:var(--muted);font-size:20px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
-.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}
-.toolbar button{min-height:46px}
-.field{margin:13px 0}
-.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:7px}
-input[type=search],input[type=text],select{width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);outline:none}
-input:focus,select:focus{border-color:var(--accent)}
-#addPanel{display:none;margin:14px 0}
-#selectedFiles{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;overflow-wrap:anywhere}
-.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
-#list{display:grid;gap:10px;margin-top:14px}
-.track{background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:15px}
-.tracktop{display:flex;align-items:center;gap:10px}
-.trackname{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:800}
-.trackbadge{display:inline-flex;background:var(--surface2);color:var(--accent);border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;margin-top:8px}
-.sub{color:var(--muted);font-size:12px;margin-top:7px}
-.actions{display:flex;gap:7px;margin-top:13px}
-.actions button{flex:1;padding:10px 8px;font-size:12px}
-#now{margin-top:16px}
-.now-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.album-art{width:54px;height:54px;border-radius:17px;background:var(--accent);display:grid;place-items:center;color:white;flex-shrink:0}
-.album-art svg{width:27px;height:27px}
-.now-copy{flex:1;min-width:0}
-.now-label{font-size:10px;letter-spacing:1.2px;color:var(--accent);font-weight:850;margin-bottom:5px}
-#nowTitle{font-weight:800;font-size:15px;overflow-wrap:anywhere}
-#nowMeta{font-size:12px;color:var(--muted);margin-top:4px}
-audio{width:100%;height:42px;display:block}
-.play-controls{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:9px;margin-top:12px}
-.play-controls button{min-height:46px}
-.play-controls .primary{font-size:14px}
-#status{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;min-height:18px}
-.empty{padding:24px 15px;text-align:center;border:1px dashed var(--border);border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6}
-.track-check{display:flex;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
-.track-check input{accent-color:var(--accent);width:18px;height:18px}
-.track-check span{flex:1;overflow-wrap:anywhere}
-.playlist-card{padding:15px;border:1px solid var(--border);background:var(--surface);border-radius:17px;margin-top:10px}
-.playlist-title{font-weight:800;overflow-wrap:anywhere}
-.playlist-actions{display:flex;gap:7px;margin-top:12px}
-.playlist-actions button{flex:1;font-size:12px;padding:10px 8px}
-.order-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
-.order-row .order-name{flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere}
-.order-row button{padding:8px 10px}
-footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
-@media(min-width:560px){main{padding-top:30px}.home-tile{min-height:158px;padding:21px}.hero{padding:28px}.screen-title{font-size:31px}}
-@media(max-width:370px){.screen-title{font-size:25px}.home-tile{min-height:128px;padding:14px}.tile-label{font-size:13px}.filters{grid-template-columns:1fr}.actions{gap:5px}}
+:root {
+  --red: #D71920;
+  --red-dark: #B51219;
+  --bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --soft: #F7F7F8;
+  --text: #171717;
+  --muted: #777777;
+  --border: #E7E7E9;
+  --shadow: 0 3px 14px rgba(0,0,0,.045);
+}
+body.dark {
+  --bg: #151515;
+  --surface: #222222;
+  --soft: #2C2C2E;
+  --text: #F5F5F5;
+  --muted: #B0B0B0;
+  --border: #414141;
+  --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Noto Sans KR", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid rgba(215,25,32,.3);
+  outline-offset: 2px;
+}
+button:disabled { opacity: .4; cursor: not-allowed; }
+
+.app {
+  width: 100%;
+  max-width: 760px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 16px 18px calc(30px + env(safe-area-inset-bottom));
+}
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 58px;
+  margin-bottom: 25px;
+}
+.logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex: 0 0 48px;
+}
+.brand { flex: 1; min-width: 0; }
+.brand h1 { margin: 0; font-size: 21px; font-weight: 800; letter-spacing: -.6px; }
+.brand p { margin: 4px 0 0; font-size: 12px; color: var(--muted); }
+.icon-button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 13px;
+  flex-shrink: 0;
+}
+.icon-button svg { width: 22px; height: 22px; }
+.screen { display: none; }
+.screen.active { display: block; }
+.page-title { font-size: 25px; line-height: 1.3; margin: 0 0 8px; font-weight: 800; letter-spacing: -.7px; }
+.page-subtitle { color: var(--muted); font-size: 14px; margin: 0 0 24px; line-height: 1.5; }
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(138px, 1fr));
+  gap: 12px;
+}
+.home-tile {
+  min-width: 0;
+  min-height: 138px;
+  border: 1.5px solid var(--red);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px 8px;
+  transition: background .12s, transform .12s;
+}
+.home-tile:active { background: rgba(215,25,32,.07); transform: scale(.98); }
+.home-tile.manage {
+  background: var(--soft);
+  border-color: var(--border);
+}
+.home-tile svg { width: 35px; height: 35px; color: var(--red); }
+.home-tile.manage svg { color: var(--muted); }
+.home-tile span { font-size: 16px; font-weight: 750; text-align: center; overflow-wrap: anywhere; }
+
+.back-row { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+.back-button {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+}
+.back-button svg { width: 22px; height: 22px; }
+.back-label { font-size: 13px; color: var(--muted); margin-bottom: 3px; }
+.back-title { font-size: 22px; font-weight: 800; }
+.big-list { display: grid; gap: 12px; }
+.big-choice {
+  min-height: 78px;
+  width: 100%;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 16px;
+  text-align: left;
+  box-shadow: var(--shadow);
+}
+.big-choice:active { border-color: var(--red); background: var(--soft); }
+.big-choice .choice-label { font-size: 17px; font-weight: 750; flex: 1; }
+.big-choice svg { width: 24px; height: 24px; color: var(--red); flex-shrink: 0; }
+.choice-index {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--red);
+  background: rgba(215,25,32,.08);
+  flex-shrink: 0;
+}
+.choice-index svg { width: 22px; height: 22px; }
+
+.filter-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 12px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.chip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: var(--surface);
+  color: var(--text);
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 650;
+}
+.chip.selected { background: var(--red); border-color: var(--red); color: #fff; }
+.search {
+  width: 100%;
+  height: 48px;
+  padding: 0 15px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 13px;
+  margin-bottom: 16px;
+}
+.track-list { display: grid; gap: 10px; }
+.track-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--surface);
+  min-width: 0;
+}
+.track-play {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  background: var(--red);
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+}
+.track-play svg { width: 25px; height: 25px; }
+.track-info { flex: 1; min-width: 0; }
+.track-name { font-size: 15px; font-weight: 750; overflow-wrap: anywhere; line-height: 1.4; }
+.track-meta { font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.track-actions { display: flex; gap: 5px; }
+.track-actions button {
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+  color: var(--text);
+}
+.track-actions svg { width: 18px; height: 18px; }
+.empty {
+  padding: 35px 18px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--soft);
+  border-radius: 16px;
+  line-height: 1.7;
+}
+.primary, .secondary, .danger {
+  min-height: 50px;
+  border-radius: 13px;
+  padding: 13px 17px;
+  font-weight: 750;
+  border: 1px solid transparent;
+}
+.primary { background: var(--red); color: #fff; }
+.primary:active { background: var(--red-dark); }
+.secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+.danger { background: #fff0f0; color: #B51219; border-color: #F2CACA; }
+body.dark .danger { background: #421F21; color: #FFB9BD; border-color: #633235; }
+.button-row { display: flex; gap: 9px; flex-wrap: wrap; }
+.button-row > button { flex: 1; }
+.section-title { font-size: 17px; font-weight: 800; margin: 22px 0 12px; }
+.field { display: grid; gap: 7px; margin-bottom: 15px; }
+.field label { font-size: 13px; font-weight: 750; }
+.field input, .field select {
+  width: 100%;
+  min-height: 49px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+.notice { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 12px 0; }
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.check-row input { width: 20px; height: 20px; accent-color: var(--red); }
+.check-row span { flex: 1; font-size: 14px; overflow-wrap: anywhere; }
+.player-box {
+  margin-top: 20px;
+  padding: 22px 16px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.player-current { text-align: center; margin-bottom: 20px; }
+.player-current .eyebrow { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+.player-current .name { font-size: 18px; font-weight: 800; overflow-wrap: anywhere; }
+.progress { width: 100%; accent-color: var(--red); margin: 8px 0; }
+.time-row { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.player-controls { display: flex; justify-content: center; align-items: center; gap: 22px; margin: 20px 0 8px; }
+.player-controls button {
+  width: 52px; height: 52px;
+  border: 0; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--text); background: var(--surface);
+}
+.player-controls button svg { width: 24px; height: 24px; }
+.player-controls .main-play { width: 76px; height: 76px; background: var(--red); color: #fff; }
+.player-controls .main-play svg { width: 34px; height: 34px; }
+.playlist-card { border: 1px solid var(--border); background: var(--surface); border-radius: 15px; padding: 15px; margin-bottom: 12px; }
+.playlist-head { display: flex; gap: 10px; align-items: center; }
+.playlist-head .name { flex: 1; font-weight: 800; overflow-wrap: anywhere; }
+.playlist-tracks { margin: 12px 0; }
+.playlist-track { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--border); }
+.playlist-track span { flex: 1; font-size: 13px; overflow-wrap: anywhere; }
+.playlist-track button { border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); width: 32px; height: 32px; }
+.small-button { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--text); padding: 9px 11px; font-size: 12px; font-weight: 700; }
+.toast {
+  position: fixed;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 13px 18px;
+  background: #242424;
+  color: white;
+  border-radius: 12px;
+  font-size: 13px;
+  z-index: 20;
+  display: none;
+}
+.toast.show { display: block; }
+dialog {
+  width: min(540px, calc(100vw - 28px));
+  max-height: 88dvh;
+  overflow-y: auto;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text);
+  background: var(--surface);
+}
+dialog::backdrop { background: rgba(0,0,0,.5); }
+dialog h2 { margin: 0 0 20px; font-size: 21px; }
+@media (max-width: 360px) {
+  .app { padding-left: 12px; padding-right: 12px; }
+  .home-grid { gap: 9px; grid-template-rows: repeat(3, minmax(125px, 1fr)); }
+  .home-tile { min-height: 125px; }
+  .home-tile span { font-size: 14px; }
+  .home-tile svg { width: 31px; height: 31px; }
+}
 </style>
 </head>
+
 <body>
-<header>
- <div class="header-inner">
-  <div class="brand-mark" aria-hidden="true">
-   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14.5 21 4l-6.5 17-3.2-6.2L3 14.5Z"/><path d="m11.3 14.8 4.8-5"/></svg>
-  </div>
-  <div class="brand"><h1>Cabin PA Player</h1><p>PERSONAL ANNOUNCEMENT LIBRARY</p></div>
-  <button class="icon-btn" id="themeToggle" aria-label="테마 변경" title="테마 변경">☾</button>
- </div>
-</header>
+<div class="app">
+  <header class="header">
+    <img class="logo" src="./eastar-logo.png" alt="이스타항공 로고"
+         onerror="this.style.display='none'">
+    <div class="brand">
+      <h1>Cabin PA Player</h1>
+      <p>Cabin Announcement Audio</p>
+    </div>
+    <button class="icon-button" id="themeButton" aria-label="다크 모드 전환"></button>
+  </header>
 
-<main>
- <section class="screen active" id="homeScreen">
-  <div class="hero">
-   <p class="eyebrow">Cabin announcement</p>
-   <h2 class="screen-title">Select Announcement Type</h2>
-   <p class="screen-desc">Choose a category to continue.</p>
-  </div>
-  <div class="home-grid">
-   <button class="home-tile" data-category="Boarding"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V8l7-4 7 4v12"/><path d="M9 20v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/></svg></span><span class="tile-label">Boarding <span class="tile-arrow">↗</span></span></button>
-   <button class="home-tile" data-category="Safety"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="tile-label">Safety <span class="tile-arrow">↗</span></span></button>
-   <button class="home-tile" data-category="Service"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16M6 10v9M18 10v9M4 19h16M8 6h8M10 3h4M12 10v9"/></svg></span><span class="tile-label">Service <span class="tile-arrow">↗</span></span></button>
-   <button class="home-tile" data-category="Arrival"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-5 7 5v11"/><path d="M9 13h6M12 10v6"/></svg></span><span class="tile-label">Arrival <span class="tile-arrow">↗</span></span></button>
-   <button class="home-tile" data-category="Other"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></span><span class="tile-label">Other <span class="tile-arrow">↗</span></span></button>
-   <button class="home-tile" id="manageTile"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span><span class="tile-label">Manage Audio <span class="tile-arrow">↗</span></span></button>
-  </div>
-  <footer>Audio is stored locally on this device. Keep a separate backup of original files.</footer>
- </section>
+  <!-- HOME: 이 2×3 첫 화면 구성은 변경하지 않습니다. -->
+  <main>
+    <section class="screen active" id="homeScreen">
+      <h2 class="page-title">Select Announcement Type</h2>
+      <p class="page-subtitle">Choose a category to continue.</p>
 
- <section class="screen" id="languageScreen">
-  <div class="back-row"><button class="ghost" data-back="homeScreen">← Back</button><span>STEP 2 OF 3</span></div>
-  <p class="eyebrow" id="languageCategoryEyebrow">Selected category</p>
-  <h2 class="screen-title">Select Language</h2>
-  <p class="screen-desc">Choose the language for your announcement.</p>
-  <div class="choice-list" id="languageChoices">
-   <button class="choice" data-language="Korean"><span class="choice-icon">가</span><span class="choice-text"><strong>한국어</strong><small>Korean</small></span><span class="chevron">›</span></button>
-   <button class="choice" data-language="English"><span class="choice-icon">A</span><span class="choice-text"><strong>English</strong><small>English announcement</small></span><span class="chevron">›</span></button>
-   <button class="choice" data-language="Japanese"><span class="choice-icon">あ</span><span class="choice-text"><strong>日本語</strong><small>Japanese</small></span><span class="chevron">›</span></button>
-   <button class="choice" data-language="Chinese"><span class="choice-icon">文</span><span class="choice-text"><strong>中文</strong><small>Chinese</small></span><span class="chevron">›</span></button>
-   <button class="choice" data-language="Other"><span class="choice-icon">•••</span><span class="choice-text"><strong>Other</strong><small>Other language</small></span><span class="chevron">›</span></button>
-  </div>
- </section>
+      <div class="home-grid">
+        <button class="home-tile" data-category="탑승">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Boarding</span>
+        </button>
 
- <section class="screen" id="playerScreen">
-  <div class="back-row"><button class="ghost" data-back="languageScreen">← Back</button><span>AUDIO PLAYER</span></div>
-  <div class="hero">
-   <p class="eyebrow">Selected announcement</p>
-   <h2 class="screen-title" id="playerHeading">Boarding</h2>
-   <p class="screen-desc" id="playerDescription">Korean announcements</p>
-  </div>
-  <div class="toolbar">
-   <button class="primary" id="add">＋ Add Audio</button>
-   <button class="ghost" id="openManageFromPlayer">Manage Audio</button>
-  </div>
+        <button class="home-tile" data-category="안전">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>Safety</span>
+        </button>
 
-  <section class="panel" id="addPanel" aria-label="Add audio">
-   <h3 style="margin:0 0 5px;font-size:17px">Add Audio</h3>
-   <p class="screen-desc">Files will be saved under the selected category and language.</p>
-   <div class="field"><label for="newName">Audio name</label><input id="newName" type="text" placeholder="Enter audio name"></div>
-   <div class="field"><label for="newCategory">Category</label><select id="newCategory"><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select></div>
-   <div class="field"><label for="newLanguage">Language</label><select id="newLanguage"><option value="Korean">한국어 · Korean</option><option value="English">English</option><option value="Japanese">日本語 · Japanese</option><option value="Chinese">中文 · Chinese</option><option value="Other">Other</option></select></div>
-   <input id="files" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
-   <button class="ghost" id="chooseFiles">Choose audio files</button>
-   <div id="selectedFiles">No files selected</div>
-   <div class="toolbar"><button class="primary" id="saveSelected">Save audio</button><button id="cancelAdd">Cancel</button></div>
-  </section>
+        <button class="home-tile" data-category="서비스">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5a3.5 3.5 0 0 1-7 0V2M6.5 2v20M21 15V2c-3 1-5 4-5 8v5h5zm-5 0v7"/></svg>
+          <span>Service</span>
+        </button>
 
-  <div class="filters">
-   <select id="category" aria-label="Filter by category"><option value="All">All categories</option><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select>
-   <select id="language" aria-label="Filter by language"><option value="All">All languages</option><option value="Korean">한국어</option><option value="English">English</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">Other</option><option value="legacy">Legacy · Unspecified</option></select>
-  </div>
-  <div class="field"><input id="search" type="search" placeholder="Search audio titles"></div>
-  <div id="list"></div>
+        <button class="home-tile" data-category="도착">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5 22 3l-5.5 19-4-8-10.5-5.5z"/><path d="M12.5 14 22 3"/></svg>
+          <span>Arrival</span>
+        </button>
 
-  <section class="panel" id="now">
-   <div class="now-top">
-    <div class="album-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-    <div class="now-copy"><div class="now-label">NOW PLAYING</div><div id="nowTitle">Select an audio track</div><div id="nowMeta">Ready to play</div></div>
-   </div>
-   <audio id="player" controls playsinline preload="metadata"></audio>
-   <div class="play-controls"><button id="previous">⏮ Previous</button><button class="primary" id="playPause">▶ Play</button><button id="next">Next ⏭</button></div>
-  </section>
- </section>
+        <button class="home-tile" data-category="기타">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          <span>Other</span>
+        </button>
 
- <section class="screen" id="manageScreen">
-  <div class="back-row"><button class="ghost" data-back="homeScreen">← Home</button><span>LIBRARY MANAGEMENT</span></div>
-  <p class="eyebrow">Your audio library</p>
-  <h2 class="screen-title">Manage Audio</h2>
-  <p class="screen-desc">Import, edit, and remove tracks. Create playlists for sequential playback.</p>
-  <div class="toolbar"><button class="primary" id="manageAdd">＋ Import Audio</button><button id="openPlaylists">♫ Playlists</button></div>
-  <div class="filters"><select id="manageCategory"><option value="All">All categories</option><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select><select id="manageLanguage"><option value="All">All languages</option><option value="Korean">한국어</option><option value="English">English</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">Other</option><option value="legacy">Legacy · Unspecified</option></select></div>
-  <div class="field"><input id="manageSearch" type="search" placeholder="Search audio titles"></div>
-  <div id="manageList"></div>
-  <section class="panel" id="manageAddPanel" style="display:none;margin-top:14px">
-   <h3 style="margin:0 0 5px;font-size:17px">Import Audio</h3>
-   <div class="field"><label for="manageNewName">Audio name (used for one file)</label><input id="manageNewName" type="text" placeholder="Enter audio name"></div>
-   <div class="filters"><div class="field"><label for="manageNewCategory">Category</label><select id="manageNewCategory"><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select></div><div class="field"><label for="manageNewLanguage">Language</label><select id="manageNewLanguage"><option value="Korean">한국어</option><option value="English">English</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">Other</option></select></div></div>
-   <input id="manageFiles" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
-   <button id="manageChooseFiles" class="ghost">Choose audio files</button><div id="manageSelectedFiles" class="sub">No files selected</div>
-   <div class="toolbar"><button class="primary" id="manageSaveSelected">Save audio</button><button id="manageCancelAdd">Cancel</button></div>
-  </section>
- </section>
+        <button class="home-tile manage" id="manageHomeButton">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1 0 1.7z"/></svg>
+          <span>Manage Audio</span>
+        </button>
+      </div>
+    </section>
 
- <section class="screen" id="playlistScreen">
-  <div class="back-row"><button class="ghost" data-back="manageScreen">← Manage Audio</button><span>PLAYLISTS</span></div>
-  <p class="eyebrow">Sequential playback</p><h2 class="screen-title">Playlists</h2>
-  <p class="screen-desc">Choose tracks and arrange their playback order.</p>
-  <section class="panel" style="margin-top:18px">
-   <div class="field"><label for="playlistName">Playlist name</label><input id="playlistName" type="text" placeholder="e.g. Boarding sequence"></div>
-   <div class="section-head"><h3>Select tracks</h3><span class="line"></span></div>
-   <div id="playlistTrackChoices"></div>
-   <div class="toolbar"><button class="primary" id="savePlaylist">Save playlist</button><button id="clearPlaylistForm">Clear</button></div>
-  </section>
-  <div class="section-head"><h3>Saved playlists</h3><span class="line"></span></div>
-  <div id="playlistList"></div>
-  <section class="panel" id="playlistOrderPanel" style="display:none;margin-top:14px">
-   <h3 id="playlistOrderTitle" style="font-size:16px;margin:0 0 8px">Edit order</h3>
-   <div id="playlistOrderRows"></div>
-   <div class="toolbar"><button class="primary" id="saveOrder">Save order</button><button id="cancelOrder">Cancel</button></div>
-  </section>
- </section>
+    <section class="screen" id="destinationScreen">
+      <div class="back-row">
+        <button class="back-button" data-back="homeScreen" aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div><div class="back-label" id="destinationStepLabel">STEP 2</div><div class="back-title">Select Destination</div></div>
+      </div>
+      <h2 class="page-title" id="destinationHeading">Choose a destination</h2>
+      <p class="page-subtitle">Select the destination for your announcement.</p>
+      <div class="big-list" id="destinationList"></div>
+    </section>
 
- <div id="status" role="status">Checking local storage…</div>
- <footer>Audio is stored locally in this browser on this device. Keep backups of original files. This app is for personal listening and training and does not replace certified aircraft announcement equipment.</footer>
-</main>
+    <section class="screen" id="languageScreen">
+      <div class="back-row">
+        <button class="back-button" data-back="destinationScreen" aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div><div class="back-label">STEP 3</div><div class="back-title">Select Language</div></div>
+      </div>
+      <h2 class="page-title">Choose a language</h2>
+      <p class="page-subtitle" id="languageSubtitle"></p>
+      <div class="big-list" id="languageList"></div>
+    </section>
+
+    <section class="screen" id="tracksScreen">
+      <div class="back-row">
+        <button class="back-button" data-back="languageScreen" aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div><div class="back-label">STEP 4</div><div class="back-title">Audio Library</div></div>
+      </div>
+      <h2 class="page-title" id="trackHeading">Announcements</h2>
+      <p class="page-subtitle" id="trackSubtitle"></p>
+      <input class="search" id="trackSearch" type="search" placeholder="Search audio" aria-label="음원 검색">
+      <div class="filter-row" id="trackFilterRow"></div>
+      <div class="track-list" id="trackList"></div>
+      <div class="player-box" id="playerBox">
+        <div class="player-current">
+          <div class="eyebrow">NOW PLAYING</div>
+          <div class="name" id="playerName">Select an audio track</div>
+        </div>
+        <input id="progress" class="progress" type="range" min="0" max="1000" value="0" aria-label="재생 위치">
+        <div class="time-row"><span id="currentTime">0:00</span><span id="duration">0:00</span></div>
+        <div class="player-controls">
+          <button id="previousButton" aria-label="이전 음원">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 20 9 12l10-8v16z"/><path d="M5 19V5"/></svg>
+          </button>
+          <button class="main-play" id="playButton" aria-label="재생">
+            <svg id="playIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 5 12 7-12 7z" fill="currentColor"/></svg>
+          </button>
+          <button id="nextButton" aria-label="다음 음원">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 4 10 8-10 8V4z"/><path d="M19 5v14"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="manageScreen">
+      <div class="back-row">
+        <button class="back-button" data-back="homeScreen" aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div><div class="back-label">LIBRARY</div><div class="back-title">Manage Audio</div></div>
+      </div>
+      <h2 class="page-title">Audio Management</h2>
+      <p class="page-subtitle">Import, edit and organize your announcement audio.</p>
+
+      <div class="button-row">
+        <button class="primary" id="importButton">Import Audio</button>
+        <button class="secondary" id="playlistButton">Broadcast Sets</button>
+      </div>
+      <input id="fileInput" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.mp4" multiple hidden>
+
+      <div class="section-title">Audio Library</div>
+      <input class="search" id="manageSearch" type="search" placeholder="Search audio" aria-label="관리 음원 검색">
+      <div class="track-list" id="manageTrackList"></div>
+
+      <div class="section-title">Storage</div>
+      <div class="empty" id="storageInfo">Loading storage information...</div>
+    </section>
+
+    <section class="screen" id="playlistsScreen">
+      <div class="back-row">
+        <button class="back-button" data-back="manageScreen" aria-label="뒤로">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div><div class="back-label">AUDIO MANAGEMENT</div><div class="back-title">Broadcast Sets</div></div>
+      </div>
+      <h2 class="page-title">Broadcast Sets</h2>
+      <p class="page-subtitle">Create a playlist and arrange the announcement order.</p>
+      <button class="primary" id="newPlaylistButton" style="width:100%;margin-bottom:16px">+ Create Broadcast Set</button>
+      <div id="playlistList"></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="trackDialog">
+  <h2 id="trackDialogTitle">Edit Audio</h2>
+  <form id="trackForm">
+    <input type="hidden" id="editTrackId">
+    <div class="field">
+      <label for="editTrackName">Audio name</label>
+      <input id="editTrackName" required maxlength="240">
+    </div>
+    <div class="field">
+      <label for="editCategory">Announcement type</label>
+      <select id="editCategory">
+        <option value="탑승">Boarding</option>
+        <option value="안전">Safety</option>
+        <option value="서비스">Service</option>
+        <option value="도착">Arrival</option>
+        <option value="기타">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="editDestination">Destination</label>
+      <select id="editDestination"></select>
+    </div>
+    <div class="field">
+      <label for="editLanguage">Language</label>
+      <select id="editLanguage"></select>
+    </div>
+    <div class="button-row">
+      <button class="secondary" type="button" id="cancelTrackEdit">Cancel</button>
+      <button class="primary" type="submit">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="importDialog">
+  <h2>Import Audio</h2>
+  <p class="notice" id="importFileSummary"></p>
+  <form id="importForm">
+    <div class="field">
+      <label for="importCategory">Announcement type</label>
+      <select id="importCategory">
+        <option value="탑승">Boarding</option>
+        <option value="안전">Safety</option>
+        <option value="서비스">Service</option>
+        <option value="도착">Arrival</option>
+        <option value="기타">Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="importDestination">Destination</label>
+      <select id="importDestination"></select>
+    </div>
+    <div class="field">
+      <label for="importLanguage">Language</label>
+      <select id="importLanguage"></select>
+    </div>
+    <p class="notice">선택한 파일 전체에 같은 분류가 적용됩니다. 기존 음원은 삭제되지 않습니다.</p>
+    <div class="button-row">
+      <button class="secondary" type="button" id="cancelImport">Cancel</button>
+      <button class="primary" type="submit">Import</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="playlistDialog">
+  <h2 id="playlistDialogTitle">Create Broadcast Set</h2>
+  <form id="playlistForm">
+    <input type="hidden" id="editPlaylistId">
+    <div class="field">
+      <label for="playlistName">Set name</label>
+      <input id="playlistName" required maxlength="120" placeholder="e.g. Tokyo Boarding">
+    </div>
+    <div class="field">
+      <label for="playlistDestination">Destination</label>
+      <select id="playlistDestination"></select>
+    </div>
+    <div class="field">
+      <label>Select audio in playback order</label>
+      <div id="playlistTrackChoices"></div>
+    </div>
+    <p class="notice">선택한 음원의 순서는 아래 화살표로 저장 후 변경할 수 있습니다.</p>
+    <div class="button-row">
+      <button class="secondary" type="button" id="cancelPlaylist">Cancel</button>
+      <button class="primary" type="submit">Save Set</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast"></div>
+<audio id="audioElement" preload="metadata"></audio>
 
 <script>
-const DB_NAME='CabinPAPlayer';
-const STORE='tracks';
-const PLAYLIST_STORE='playlists';
-const CATEGORIES=['Boarding','Safety','Service','Arrival','Other'];
-const LANGUAGES=['Korean','English','Japanese','Chinese','Other'];
-let db,currentId=null,objectUrl=null,selectedCategory='Boarding',selectedLanguage='Korean';
-let queue=[],queueIndex=-1,editingPlaylistId=null,orderDraft=[];
-const $=id=>document.getElementById(id);
-const player=$('player');
+(() => {
+  "use strict";
 
-function showScreen(id){
- document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
- window.scrollTo({top:0,behavior:'smooth'});
- if(id==='manageScreen')renderManage();
- if(id==='playlistScreen')renderPlaylists();
-}
-document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.back)));
+  const DB_NAME = "CabinPAPlayer";
+  const DB_VERSION = 2;
+  const TRACK_STORE = "tracks";
+  const PLAYLIST_STORE = "playlists";
 
-document.querySelectorAll('[data-category]').forEach(b=>b.addEventListener('click',()=>{
- selectedCategory=b.dataset.category;
- $('languageCategoryEyebrow').textContent='CATEGORY · '+selectedCategory.toUpperCase();
- showScreen('languageScreen');
-}));
-document.querySelectorAll('[data-language]').forEach(b=>b.addEventListener('click',()=>{
- selectedLanguage=b.dataset.language;
- $('playerHeading').textContent=selectedCategory;
- $('playerDescription').textContent=languageLabel(selectedLanguage)+' announcements';
- $('category').value=selectedCategory;
- $('language').value=selectedLanguage;
- $('newCategory').value=selectedCategory;
- $('newLanguage').value=selectedLanguage;
- $('search').value='';
- showScreen('playerScreen');
- renderPlayerTracks();
-}));
-$('manageTile').onclick=()=>showScreen('manageScreen');
-$('openManageFromPlayer').onclick=()=>showScreen('manageScreen');
-$('openPlaylists').onclick=()=>showScreen('playlistScreen');
+  const CATEGORIES = [
+    { value: "탑승", label: "Boarding" },
+    { value: "안전", label: "Safety" },
+    { value: "서비스", label: "Service" },
+    { value: "도착", label: "Arrival" },
+    { value: "기타", label: "Other" }
+  ];
 
-$('themeToggle').onclick=()=>{
- const dark=document.body.classList.toggle('dark');
- $('themeToggle').textContent=dark?'☀':'☾';
- $('themeToggle').setAttribute('aria-label',dark?'라이트 모드':'다크 모드');
- document.querySelector('meta[name="theme-color"]').content=dark?'#151d28':'#d71920';
-};
+  const DESTINATIONS = [
+    { value: "도쿄", label: "Tokyo" },
+    { value: "제주", label: "Jeju" },
+    { value: "중국", label: "China" },
+    { value: "대만", label: "Taiwan" },
+    { value: "일본", label: "Japan (Other)" },
+    { value: "동남아", label: "Southeast Asia" },
+    { value: "기타", label: "Other Destination" },
+    { value: "미분류", label: "Unassigned" }
+  ];
 
-function openDB(){
- return new Promise((resolve,reject)=>{
-  const req=indexedDB.open(DB_NAME,2);
-  req.onupgradeneeded=()=>{
-   const d=req.result;
-   if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
-   if(!d.objectStoreNames.contains(PLAYLIST_STORE))d.createObjectStore(PLAYLIST_STORE,{keyPath:'id',autoIncrement:true});
+  const LANGUAGES = [
+    { value: "한국어", label: "한국어 · Korean" },
+    { value: "영어", label: "English" },
+    { value: "일본어", label: "日本語 · Japanese" },
+    { value: "중국어", label: "中文 · Chinese" },
+    { value: "기타", label: "Other" },
+    { value: "legacy", label: "기존 음원 · Legacy" }
+  ];
+
+  const LANGUAGE_ORDER = ["한국어", "영어", "일본어", "중국어", "기타", "legacy"];
+
+  const state = {
+    db: null,
+    category: "",
+    destination: "",
+    language: "",
+    tracks: [],
+    playlists: [],
+    visibleTracks: [],
+    queue: [],
+    currentTrackId: null,
+    pendingFiles: [],
+    editPlaylistOrder: [],
+    toastTimer: null
   };
-  req.onsuccess=()=>resolve(req.result);
-  req.onerror=()=>reject(req.error);
- });
-}
-function getAll(store){
- return new Promise((resolve,reject)=>{
-  const req=db.transaction(store,'readonly').objectStore(store).getAll();
-  req.onsuccess=()=>resolve(req.result);
-  req.onerror=()=>reject(req.error);
- });
-}
-function addRecord(store,record){
- return new Promise((resolve,reject)=>{
-  const tx=db.transaction(store,'readwrite');
-  const req=tx.objectStore(store).add(record);
-  let id;
-  req.onsuccess=()=>id=req.result;
-  tx.oncomplete=()=>resolve(id);
-  tx.onerror=()=>reject(tx.error);
-  tx.onabort=()=>reject(tx.error||new Error('Save failed'));
- });
-}
-function putRecord(store,record){
- return new Promise((resolve,reject)=>{
-  const tx=db.transaction(store,'readwrite');
-  tx.objectStore(store).put(record);
-  tx.oncomplete=()=>resolve();
-  tx.onerror=()=>reject(tx.error);
-  tx.onabort=()=>reject(tx.error||new Error('Update failed'));
- });
-}
-function deleteRecord(store,id){
- return new Promise((resolve,reject)=>{
-  const tx=db.transaction(store,'readwrite');
-  tx.objectStore(store).delete(id);
-  tx.oncomplete=()=>resolve();
-  tx.onerror=()=>reject(tx.error);
-  tx.onabort=()=>reject(tx.error||new Error('Delete failed'));
- });
-}
-const allTracks=()=>getAll(STORE);
-const allPlaylists=()=>getAll(PLAYLIST_STORE);
-const saveTrack=t=>addRecord(STORE,t);
-const updateTrack=t=>putRecord(STORE,t);
-const removeTrack=id=>deleteRecord(STORE,id);
-const savePlaylist=p=>addRecord(PLAYLIST_STORE,p);
-const updatePlaylist=p=>putRecord(PLAYLIST_STORE,p);
-const removePlaylist=id=>deleteRecord(PLAYLIST_STORE,id);
 
-function say(msg){$('status').textContent=msg}
-function languageLabel(v){
- return ({Korean:'한국어',English:'English',Japanese:'日本語',Chinese:'中文',Other:'Other',legacy:'Legacy · Unspecified'})[v]||'Legacy · Unspecified';
-}
-function isLegacy(t){return !t.language||!LANGUAGES.includes(t.language)}
-function filteredTracks(tracks,cat,lang,q){
- q=(q||'').trim().toLowerCase();
- return tracks.filter(t=>(cat==='All'||t.category===cat)&&(lang==='All'||(lang==='legacy'?isLegacy(t):t.language===lang))&&String(t.name||'').toLowerCase().includes(q));
-}
-function makeEmpty(text){
- const e=document.createElement('div');e.className='empty';e.textContent=text;return e;
-}
-function stopPlayback(){
- player.pause();player.removeAttribute('src');player.load();currentId=null;
- if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null}
- $('nowTitle').textContent='Select an audio track';
- $('nowMeta').textContent='Ready to play';
- $('playPause').textContent='▶ Play';
-}
-function playTrack(t){
- if(!t)return;
- if(objectUrl)URL.revokeObjectURL(objectUrl);
- objectUrl=URL.createObjectURL(t.blob);
- currentId=t.id;player.src=objectUrl;
- $('nowTitle').textContent=t.name||'Untitled audio';
- $('nowMeta').textContent=(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
- $('playPause').textContent='Ⅱ Pause';
- player.play().then(()=>say('Playing: '+(t.name||'Untitled audio'))).catch(()=>say('Tap Play on the audio controls to start playback.'));
-}
-async function playRelative(direction){
- if(!queue.length){say('Select a track first.');return}
- const tracks=await allTracks();
- let i=queueIndex+direction;
- while(i>=0&&i<queue.length){
-  const t=tracks.find(x=>x.id===queue[i]);
-  if(t){queueIndex=i;playTrack(t);return}
-  i+=direction;
- }
- say(direction>0?'End of playback queue.':'Beginning of playback queue.');
-}
-function makeTrackCard(t,manage=false,filteredQueue=null){
- const card=document.createElement('article');card.className='track';
- const top=document.createElement('div');top.className='tracktop';
- const name=document.createElement('div');name.className='trackname';name.textContent=t.name||'Untitled audio';
- top.append(name);
- const badge=document.createElement('span');badge.className='trackbadge';badge.textContent=t.category||'Other';
- card.append(top,badge);
- const sub=document.createElement('div');sub.className='sub';sub.textContent=languageLabel(isLegacy(t)?'legacy':t.language);
- card.append(sub);
- const actions=document.createElement('div');actions.className='actions';
- const play=document.createElement('button');play.className='primary';play.textContent='▶ Play';
- play.onclick=()=>{
-  if(filteredQueue){queue=filteredQueue.map(x=>x.id);queueIndex=queue.indexOf(t.id)}
-  else{queue=[t.id];queueIndex=0}
-  playTrack(t);
- };
- const edit=document.createElement('button');edit.textContent='Edit';
- edit.onclick=async()=>{
-  const nameVal=prompt('Audio name:',t.name||'');
-  if(nameVal===null)return;
-  const cat=prompt('Category: '+CATEGORIES.join(', '),CATEGORIES.includes(t.category)?t.category:'Other');
-  if(cat===null)return;
-  if(!CATEGORIES.includes(cat)){say('Choose a listed category.');return}
-  const lang=prompt('Language: '+LANGUAGES.join(', '),LANGUAGES.includes(t.language)?t.language:'Korean');
-  if(lang===null)return;
-  if(!LANGUAGES.includes(lang)){say('Choose a listed language.');return}
-  t.name=nameVal.trim()||t.name;t.category=cat;t.language=lang;
-  await updateTrack(t);await renderAll();say('Audio details updated.');
- };
- const del=document.createElement('button');del.textContent='Delete';
- del.onclick=async()=>{
-  if(!confirm('Delete this audio from the app library?'))return;
-  if(currentId===t.id)stopPlayback();
-  await removeTrack(t.id);
-  queue=queue.filter(id=>id!==t.id);
-  await renderAll();say('Audio deleted.');
- };
- actions.append(play,edit,del);
- card.append(actions);
- return card;
-}
-async function renderPlayerTracks(){
- if(!db)return;
- const tracks=await allTracks();
- const filtered=filteredTracks(tracks,$('category').value,$('language').value,$('search').value);
- $('list').replaceChildren();
- if(!filtered.length)$('list').append(makeEmpty(tracks.length?'No audio matches these filters.':'Tap Add Audio to import your first track.'));
- filtered.forEach(t=>$('list').append(makeTrackCard(t,false,filtered)));
-}
-async function renderManage(){
- if(!db)return;
- const tracks=await allTracks();
- const filtered=filteredTracks(tracks,$('manageCategory').value,$('manageLanguage').value,$('manageSearch').value);
- $('manageList').replaceChildren();
- if(!filtered.length)$('manageList').append(makeEmpty(tracks.length?'No audio matches these filters.':'No audio has been imported yet.'));
- filtered.forEach(t=>$('manageList').append(makeTrackCard(t,true,filtered)));
-}
-async function renderAll(){
- await renderPlayerTracks();
- if($('manageScreen').classList.contains('active'))await renderManage();
- if($('playlistScreen').classList.contains('active'))await renderPlaylists();
-}
-$('previous').onclick=()=>playRelative(-1);
-$('next').onclick=()=>playRelative(1);
-$('playPause').onclick=()=>{
- if(!player.src){say('Select an audio track first.');return}
- if(player.paused)player.play().then(()=>$('playPause').textContent='Ⅱ Pause').catch(()=>say('Playback could not start.'));
- else{player.pause();$('playPause').textContent='▶ Play'}
-};
-player.addEventListener('play',()=>$('playPause').textContent='Ⅱ Pause');
-player.addEventListener('pause',()=>$('playPause').textContent='▶ Play');
-player.addEventListener('ended',()=>playRelative(1));
-player.addEventListener('error',()=>{if(player.currentSrc)say('This file could not be played. Check its audio format.')});
+  const $ = id => document.getElementById(id);
+  const audio = $("audioElement");
 
-function setupImport(manage=false){
- const ids=manage?{
-  panel:'manageAddPanel',name:'manageNewName',cat:'manageNewCategory',lang:'manageNewLanguage',
-  files:'manageFiles',choose:'manageChooseFiles',selected:'manageSelectedFiles',
-  save:'manageSaveSelected',cancel:'manageCancelAdd'
- }:{
-  panel:'addPanel',name:'newName',cat:'newCategory',lang:'newLanguage',
-  files:'files',choose:'chooseFiles',selected:'selectedFiles',
-  save:'saveSelected',cancel:'cancelAdd'
- };
- let chosen=[];
- const updateChosen=()=>$(ids.selected).textContent=chosen.length?chosen.map(f=>f.name).join(', '):'No files selected';
- const open=()=>{
-  $(ids.panel).style.display='block';
-  $(ids.cat).value=manage?($('manageCategory').value==='All'?'Other':$('manageCategory').value):selectedCategory;
-  $(ids.lang).value=manage?($('manageLanguage').value==='All'?'Korean':$('manageLanguage').value):selectedLanguage;
-  $(ids.name).value='';chosen=[];$(ids.files).value='';updateChosen();
-  $(ids.panel).scrollIntoView({behavior:'smooth',block:'nearest'});
- };
- $(ids.choose).onclick=()=>$(ids.files).click();
- $(ids.files).onchange=e=>{
-  chosen=[...e.target.files];updateChosen();
-  $(ids.name).value=chosen.length===1?chosen[0].name.replace(/\.[^.]+$/,''):'';
- };
- $(ids.cancel).onclick=()=>{$(ids.panel).style.display='none';chosen=[];$(ids.files).value='';updateChosen()};
- $(ids.save).onclick=async()=>{
-  if(!chosen.length){say('Choose one or more audio files first.');return}
-  const category=$(ids.cat).value,language=$(ids.lang).value,custom=$(ids.name).value.trim();
-  $(ids.save).disabled=true;say('Saving audio…');let count=0,skipped=0;
-  try{
-   for(let i=0;i<chosen.length;i++){
-    const f=chosen[i];
-    if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|ogg|flac|aiff|wma)$/i.test(f.name)){skipped++;continue}
-    await saveTrack({name:chosen.length===1&&custom?custom:f.name.replace(/\.[^.]+$/,''),category,language,blob:f,addedAt:Date.now()});
-    count++;
-   }
-   $(ids.panel).style.display='none';chosen=[];$(ids.files).value='';updateChosen();
-   if(!manage){selectedCategory=category;selectedLanguage=language;$('category').value=category;$('language').value=language}
-   await renderAll();
-   say(count+' audio file(s) saved.'+(skipped?' '+skipped+' unsupported file(s) skipped.':''));
-  }catch(err){say('Save failed. Check available browser storage and keep your original files.')}
-  finally{$(ids.save).disabled=false}
- };
- return open;
-}
-const openPlayerImport=setupImport(false);
-const openManageImport=setupImport(true);
-$('add').onclick=openPlayerImport;
-$('manageAdd').onclick=openManageImport;
-$('category').onchange=renderPlayerTracks;
-$('language').onchange=renderPlayerTracks;
-$('search').oninput=renderPlayerTracks;
-$('manageCategory').onchange=renderManage;
-$('manageLanguage').onchange=renderManage;
-$('manageSearch').oninput=renderManage;
-
-async function renderPlaylists(){
- if(!db)return;
- const tracks=await allTracks(),playlists=await allPlaylists();
- const choiceBox=$('playlistTrackChoices');choiceBox.replaceChildren();
- if(!tracks.length)choiceBox.append(makeEmpty('Import audio before creating a playlist.'));
- else tracks.forEach(t=>{
-  const label=document.createElement('label');label.className='track-check';
-  const cb=document.createElement('input');cb.type='checkbox';cb.value=String(t.id);cb.className='playlist-choice';
-  const span=document.createElement('span');span.textContent=(t.name||'Untitled audio')+' · '+(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
-  label.append(cb,span);choiceBox.append(label);
- });
- const list=$('playlistList');list.replaceChildren();
- if(!playlists.length)list.append(makeEmpty('No playlists yet. Create one above.'));
- playlists.forEach(p=>{
-  const card=document.createElement('article');card.className='playlist-card';
-  const title=document.createElement('div');title.className='playlist-title';title.textContent=p.name||'Untitled playlist';
-  const desc=document.createElement('div');desc.className='sub';desc.textContent=(p.trackIds||[]).length+' tracks · sequential playback';
-  const actions=document.createElement('div');actions.className='playlist-actions';
-  const play=document.createElement('button');play.className='primary';play.textContent='▶ Play playlist';
-  play.onclick=async()=>{
-   const fresh=await allTracks(),valid=(p.trackIds||[]).filter(id=>fresh.some(t=>t.id===id));
-   if(!valid.length){say('This playlist has no available tracks.');return}
-   queue=valid;queueIndex=0;
-   const t=fresh.find(x=>x.id===queue[0]);showScreen('playerScreen');playTrack(t);
+  const ICONS = {
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>',
+    moon: '<path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/>',
+    chevron: '<path d="m9 18 6-6-6-6"/>',
+    play: '<path d="m8 5 12 7-12 7z" fill="currentColor"/>',
+    pause: '<path d="M8 5h3v14H8zM15 5h3v14h-3z" fill="currentColor"/>',
+    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
+    trash: '<path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/>',
+    music: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'
   };
-  const edit=document.createElement('button');edit.textContent='Edit order';
-  edit.onclick=()=>openOrderEditor(p);
-  const rename=document.createElement('button');rename.textContent='Rename';
-  rename.onclick=async()=>{
-   const name=prompt('Playlist name:',p.name||'');
-   if(name===null)return;
-   p.name=name.trim()||p.name;p.updatedAt=Date.now();await updatePlaylist(p);await renderPlaylists();say('Playlist updated.');
-  };
-  const del=document.createElement('button');del.textContent='Delete';
-  del.onclick=async()=>{if(confirm('Delete this playlist?')){await removePlaylist(p.id);await renderPlaylists();say('Playlist deleted.')}};
-  actions.append(play,edit,rename,del);card.append(title,desc,actions);list.append(card);
- });
-}
-$('savePlaylist').onclick=async()=>{
- const name=$('playlistName').value.trim();
- const trackIds=[...document.querySelectorAll('.playlist-choice:checked')].map(cb=>Number(cb.value));
- if(!name){say('Enter a playlist name.');return}
- if(!trackIds.length){say('Select at least one track.');return}
- const now=Date.now();
- try{
-  await savePlaylist({name,trackIds,createdAt:now,updatedAt:now});
-  $('playlistName').value='';await renderPlaylists();say('Playlist saved.');
- }catch(e){say('Could not save playlist.')}
-};
-$('clearPlaylistForm').onclick=()=>{
- $('playlistName').value='';
- document.querySelectorAll('.playlist-choice').forEach(cb=>cb.checked=false);
-};
-let editingOrderId=null,orderDraft=[];
-function openOrderEditor(p){
- editingOrderId=p.id;orderDraft=[...(p.trackIds||[])];
- $('playlistOrderTitle').textContent='Playback order · '+(p.name||'Playlist');
- $('playlistOrderPanel').style.display='block';renderOrderRows();
- $('playlistOrderPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-async function renderOrderRows(){
- const tracks=await allTracks(),box=$('playlistOrderRows');box.replaceChildren();
- const available=orderDraft.map((id,index)=>({id,index,t:tracks.find(x=>x.id===id)})).filter(x=>x.t);
- if(!available.length)box.append(makeEmpty('This playlist has no available tracks.'));
- available.forEach(({id,index,t})=>{
-  const row=document.createElement('div');row.className='order-row';
-  const name=document.createElement('div');name.className='order-name';name.textContent=(index+1)+'. '+(t.name||'Untitled audio');
-  const up=document.createElement('button');up.textContent='↑';up.disabled=index===0;up.setAttribute('aria-label','Move up');
-  up.onclick=()=>{[orderDraft[index-1],orderDraft[index]]=[orderDraft[index],orderDraft[index-1]];renderOrderRows()};
-  const down=document.createElement('button');down.textContent='↓';down.disabled=index===orderDraft.length-1;down.setAttribute('aria-label','Move down');
-  down.onclick=()=>{[orderDraft[index+1],orderDraft[index]]=[orderDraft[index],orderDraft[index+1]];renderOrderRows()};
-  const remove=document.createElement('button');remove.textContent='×';remove.setAttribute('aria-label','Remove from playlist');
-  remove.onclick=()=>{orderDraft.splice(index,1);renderOrderRows()};
-  row.append(name,up,down,remove);box.append(row);
- });
-}
-$('saveOrder').onclick=async()=>{
- const playlists=await allPlaylists(),p=playlists.find(x=>x.id===editingOrderId);
- if(!p)return;
- p.trackIds=orderDraft.filter(id=>id!==undefined);p.updatedAt=Date.now();
- await updatePlaylist(p);$('playlistOrderPanel').style.display='none';await renderPlaylists();say('Playlist order saved.');
-};
-$('cancelOrder').onclick=()=>{$('playlistOrderPanel').style.display='none';editingOrderId=null;orderDraft=[]};
 
-(async()=>{
- try{
-  if(!('indexedDB' in window))throw Error('IndexedDB unavailable');
-  db=await openDB();
-  if(navigator.storage&&navigator.storage.persist){try{await navigator.storage.persist()}catch{}}
-  await renderAll();
-  say('Ready · audio is stored locally on this device.');
- }catch(e){say('Could not open local storage. Reopen this app in Safari and try again.')}
- if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
-  navigator.serviceWorker.register('./sw.js').catch(()=>{});
- }
+  function icon(name) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+  }
+
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(state.toastTimer);
+    state.toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+  }
+
+  function openDatabase() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = event => {
+        const db = event.target.result;
+
+        // Keep the existing tracks store intact.
+        if (!db.objectStoreNames.contains(TRACK_STORE)) {
+          db.createObjectStore(TRACK_STORE, { keyPath: "id", autoIncrement: true });
+        }
+
+        if (!db.objectStoreNames.contains(PLAYLIST_STORE)) {
+          db.createObjectStore(PLAYLIST_STORE, { keyPath: "id", autoIncrement: true });
+        }
+      };
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+      request.onblocked = () => toast("다른 탭의 앱을 닫고 다시 시도해 주세요.");
+    });
+  }
+
+  function getAll(storeName) {
+    return new Promise((resolve, reject) => {
+      const tx = state.db.transaction(storeName, "readonly");
+      const request = tx.objectStore(storeName).getAll();
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function putItem(storeName, item) {
+    return new Promise((resolve, reject) => {
+      const tx = state.db.transaction(storeName, "readwrite");
+      const request = tx.objectStore(storeName).put(item);
+      request.onsuccess = () => {
+        if (item.id == null) item.id = request.result;
+      };
+      tx.oncomplete = () => resolve(item);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error("Save failed"));
+    });
+  }
+
+  function addItem(storeName, item) {
+    return new Promise((resolve, reject) => {
+      const tx = state.db.transaction(storeName, "readwrite");
+      const request = tx.objectStore(storeName).add(item);
+      request.onsuccess = () => { item.id = request.result; };
+      tx.oncomplete = () => resolve(item);
+      tx.onerror = () => reject(tx.error);
+      tx.onabort = () => reject(tx.error || new Error("Add failed"));
+    });
+  }
+
+  function deleteItem(storeName, id) {
+    return new Promise((resolve, reject) => {
+      const tx = state.db.transaction(storeName, "readwrite");
+      tx.objectStore(storeName).delete(id);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  async function reloadData() {
+    state.tracks = await getAll(TRACK_STORE);
+    state.playlists = await getAll(PLAYLIST_STORE);
+    state.tracks.sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "ko"));
+    renderManageTracks();
+    renderPlaylists();
+    renderStorageInfo();
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(screen => {
+      screen.classList.toggle("active", screen.id === id);
+    });
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  function fillSelect(select, options, includeAll = false) {
+    select.innerHTML = "";
+    if (includeAll) {
+      const all = document.createElement("option");
+      all.value = "";
+      all.textContent = "All destinations";
+      select.appendChild(all);
+    }
+    options.forEach(item => {
+      const option = document.createElement("option");
+      option.value = item.value;
+      option.textContent = item.label;
+      select.appendChild(option);
+    });
+  }
+
+  function languageLabel(value) {
+    return LANGUAGES.find(item => item.value === value)?.label || value || "기존 음원";
+  }
+
+  function destinationLabel(value) {
+    return DESTINATIONS.find(item => item.value === value)?.label || value || "Unassigned";
+  }
+
+  function categoryLabel(value) {
+    return CATEGORIES.find(item => item.value === value)?.label || value || "Other";
+  }
+
+  function getTrackLanguage(track) {
+    return track.language || "legacy";
+  }
+
+  function getTrackDestination(track) {
+    return track.destination || "미분류";
+  }
+
+  function renderDestinations() {
+    const matching = state.tracks.filter(track => track.category === state.category);
+    const found = new Set(matching.map(getTrackDestination));
+    const list = $("destinationList");
+    list.innerHTML = "";
+
+    const destinationOptions = DESTINATIONS.filter(item =>
+      found.has(item.value) || item.value === "미분류"
+    );
+
+    destinationOptions.forEach(destination => {
+      const count = matching.filter(track => getTrackDestination(track) === destination.value).length;
+      const button = document.createElement("button");
+      button.className = "big-choice";
+      button.innerHTML = `
+        <span class="choice-index">${icon("music")}</span>
+        <span class="choice-label">${escapeHtml(destination.label)}</span>
+        <span style="color:var(--muted);font-size:12px">${count}</span>
+        ${icon("chevron")}`;
+      button.addEventListener("click", () => {
+        state.destination = destination.value;
+        renderLanguages();
+        showScreen("languageScreen");
+      });
+      list.appendChild(button);
+    });
+
+    if (!destinationOptions.length) {
+      list.innerHTML = '<div class="empty">이 상황에 등록된 음원이 없습니다.<br>Manage Audio에서 음원을 가져와 주세요.</div>';
+    }
+  }
+
+  function renderLanguages() {
+    const matching = state.tracks.filter(track =>
+      track.category === state.category &&
+      getTrackDestination(track) === state.destination
+    );
+    const found = new Set(matching.map(getTrackLanguage));
+    const list = $("languageList");
+    list.innerHTML = "";
+    $("languageSubtitle").textContent =
+      `${categoryLabel(state.category)} · ${destinationLabel(state.destination)}`;
+
+    const languageOptions = LANGUAGES.filter(item =>
+      found.has(item.value) || item.value === "legacy"
+    );
+
+    languageOptions.forEach(language => {
+      const count = matching.filter(track => getTrackLanguage(track) === language.value).length;
+      const button = document.createElement("button");
+      button.className = "big-choice";
+      button.innerHTML = `
+        <span class="choice-index">${icon("music")}</span>
+        <span class="choice-label">${escapeHtml(language.label)}</span>
+        <span style="color:var(--muted);font-size:12px">${count}</span>
+        ${icon("chevron")}`;
+      button.addEventListener("click", () => {
+        state.language = language.value;
+        $("trackSearch").value = "";
+        renderTrackScreen();
+        showScreen("tracksScreen");
+      });
+      list.appendChild(button);
+    });
+
+    if (!languageOptions.length) {
+      list.innerHTML = '<div class="empty">등록된 언어가 없습니다.</div>';
+    }
+  }
+
+  function renderTrackScreen() {
+    $("trackHeading").textContent = `${categoryLabel(state.category)} · ${destinationLabel(state.destination)}`;
+    $("trackSubtitle").textContent = languageLabel(state.language);
+
+    const matching = state.tracks.filter(track =>
+      track.category === state.category &&
+      getTrackDestination(track) === state.destination &&
+      getTrackLanguage(track) === state.language
+    );
+
+    const search = $("trackSearch").value.trim().toLowerCase();
+    state.visibleTracks = matching.filter(track =>
+      String(track.name || "").toLowerCase().includes(search)
+    );
+
+    renderTrackFilters();
+    renderTrackList();
+  }
+
+  function renderTrackFilters() {
+    const row = $("trackFilterRow");
+    row.innerHTML = "";
+    const filters = [
+      { label: "All", value: "all" },
+      { label: "Boarding", value: "탑승" },
+      { label: "Safety", value: "안전" },
+      { label: "Service", value: "서비스" },
+      { label: "Arrival", value: "도착" },
+      { label: "Other", value: "기타" }
+    ];
+    filters.forEach(filter => {
+      const button = document.createElement("button");
+      button.className = "chip" + ((filter.value === "all" || filter.value === state.category) ? " selected" : "");
+      button.textContent = filter.label;
+      button.addEventListener("click", () => {
+        if (filter.value !== "all") {
+          state.category = filter.value;
+          renderDestinations();
+          showScreen("destinationScreen");
+          return;
+        }
+        renderTrackScreen();
+      });
+      row.appendChild(button);
+    });
+  }
+
+  function createTrackCard(track, manage = false) {
+    const card = document.createElement("article");
+    card.className = "track-card";
+
+    const play = document.createElement("button");
+    play.className = "track-play";
+    play.setAttribute("aria-label", "음원 재생");
+    play.innerHTML = icon("play");
+    play.addEventListener("click", () => startQueue(
+      manage ? state.tracks : state.visibleTracks, track.id
+    ));
+
+    const info = document.createElement("div");
+    info.className = "track-info";
+    const name = document.createElement("div");
+    name.className = "track-name";
+    name.textContent = track.name || "Unnamed audio";
+    const meta = document.createElement("div");
+    meta.className = "track-meta";
+    meta.textContent = `${categoryLabel(track.category)} · ${destinationLabel(getTrackDestination(track))} · ${languageLabel(getTrackLanguage(track))}`;
+    info.append(name, meta);
+    card.append(play, info);
+
+    if (manage) {
+      const actions = document.createElement("div");
+      actions.className = "track-actions";
+
+      const edit = document.createElement("button");
+      edit.setAttribute("aria-label", "음원 수정");
+      edit.innerHTML = icon("edit");
+      edit.addEventListener("click", () => openTrackEdit(track));
+
+      const remove = document.createElement("button");
+      remove.setAttribute("aria-label", "음원 삭제");
+      remove.innerHTML = icon("trash");
+      remove.addEventListener("click", () => removeTrack(track));
+
+      actions.append(edit, remove);
+      card.appendChild(actions);
+    }
+
+    return card;
+  }
+
+  function renderTrackList() {
+    const list = $("trackList");
+    list.innerHTML = "";
+    if (!state.visibleTracks.length) {
+      list.innerHTML = '<div class="empty">No audio found.<br>다른 언어를 선택하거나 음원을 추가해 주세요.</div>';
+      return;
+    }
+    state.visibleTracks.forEach(track => list.appendChild(createTrackCard(track)));
+  }
+
+  function renderManageTracks() {
+    const list = $("manageTrackList");
+    if (!list) return;
+    list.innerHTML = "";
+    const search = ($("manageSearch")?.value || "").trim().toLowerCase();
+    const tracks = state.tracks.filter(track =>
+      String(track.name || "").toLowerCase().includes(search)
+    );
+    if (!tracks.length) {
+      list.innerHTML = '<div class="empty">저장된 음원이 없습니다.<br>Import Audio로 파일을 추가해 주세요.</div>';
+      return;
+    }
+    tracks.forEach(track => list.appendChild(createTrackCard(track, true)));
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[char]));
+  }
+
+  function startQueue(tracks, trackId) {
+    const playable = tracks.filter(track => track && track.blob);
+    if (!playable.length) {
+      toast("재생할 수 있는 음원이 없습니다.");
+      return;
+    }
+    state.queue = playable.map(track => track.id);
+    const index = state.queue.indexOf(trackId);
+    playQueueIndex(index >= 0 ? index : 0);
+    $("playerBox").scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  function playQueueIndex(index) {
+    if (index < 0 || index >= state.queue.length) {
+      audio.pause();
+      return;
+    }
+    const trackId = state.queue[index];
+    const track = state.tracks.find(item => item.id === trackId);
+    if (!track || !track.blob) {
+      toast("음원 파일을 찾을 수 없습니다.");
+      return;
+    }
+    state.currentTrackId = trackId;
+
+    if (audio.dataset.objectUrl) URL.revokeObjectURL(audio.dataset.objectUrl);
+    const url = URL.createObjectURL(track.blob);
+    audio.dataset.objectUrl = url;
+    audio.src = url;
+    $("playerName").textContent = track.name || "Unnamed audio";
+    audio.play().then(updatePlayButton).catch(() => {
+      updatePlayButton();
+      toast("재생할 수 없습니다. 파일 형식을 확인해 주세요.");
+    });
+    renderTrackList();
+  }
+
+  function currentQueueIndex() {
+    return state.queue.indexOf(state.currentTrackId);
+  }
+
+  function updatePlayButton() {
+    $("playIcon").innerHTML = audio.paused ? ICONS.play : ICONS.pause;
+    $("playButton").setAttribute("aria-label", audio.paused ? "재생" : "일시정지");
+  }
+
+  function formatTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${mins}:${secs}`;
+  }
+
+  function renderStorageInfo() {
+    const bytes = state.tracks.reduce((sum, track) => {
+      return sum + (track.blob && Number(track.blob.size) ? track.blob.size : 0);
+    }, 0);
+    const mb = (bytes / (1024 * 1024)).toFixed(1);
+    $("storageInfo").textContent =
+      `저장된 음원 ${state.tracks.length}개 · 약 ${mb} MB · 브라우저 내부 저장소`;
+  }
+
+  async function removeTrack(track) {
+    if (!confirm(`"${track.name}" 음원을 삭제할까요?\n삭제 후에는 복구할 수 없습니다.`)) return;
+    if (state.currentTrackId === track.id) {
+      audio.pause();
+      state.currentTrackId = null;
+      $("playerName").textContent = "Select an audio track";
+    }
+    await deleteItem(TRACK_STORE, track.id);
+    state.playlists = state.playlists.map(playlist => ({
+      ...playlist,
+      trackIds: (playlist.trackIds || []).filter(id => id !== track.id)
+    }));
+    for (const playlist of state.playlists) {
+      await putItem(PLAYLIST_STORE, playlist);
+    }
+    await reloadData();
+    renderTrackScreen();
+    toast("음원을 삭제했습니다.");
+  }
+
+  function openTrackEdit(track) {
+    $("trackDialogTitle").textContent = "Edit Audio";
+    $("editTrackId").value = track.id;
+    $("editTrackName").value = track.name || "";
+    $("editCategory").value = track.category || "기타";
+    $("editDestination").value = getTrackDestination(track);
+    $("editLanguage").value = getTrackLanguage(track);
+    $("trackDialog").showModal();
+  }
+
+  async function saveTrackEdit(event) {
+    event.preventDefault();
+    const id = Number($("editTrackId").value);
+    const track = state.tracks.find(item => item.id === id);
+    if (!track) return;
+
+    track.name = $("editTrackName").value.trim();
+    track.category = $("editCategory").value;
+    track.destination = $("editDestination").value;
+    track.language = $("editLanguage").value === "legacy" ? undefined : $("editLanguage").value;
+
+    await putItem(TRACK_STORE, track);
+    $("trackDialog").close();
+    await reloadData();
+    renderTrackScreen();
+    toast("음원 정보를 저장했습니다.");
+  }
+
+  function openImportDialog(files) {
+    state.pendingFiles = Array.from(files || []);
+    if (!state.pendingFiles.length) return;
+    $("importFileSummary").textContent =
+      `${state.pendingFiles.length}개 파일 선택됨: ${state.pendingFiles.slice(0, 4).map(file => file.name).join(", ")}${state.pendingFiles.length > 4 ? " ..." : ""}`;
+    $("importDialog").showModal();
+  }
+
+  async function importFiles(event) {
+    event.preventDefault();
+    if (!state.pendingFiles.length) return;
+    const category = $("importCategory").value;
+    const destination = $("importDestination").value;
+    const language = $("importLanguage").value;
+
+    let added = 0;
+    for (const file of state.pendingFiles) {
+      if (!file.type.startsWith("audio/") &&
+          !/\.(mp3|m4a|wav|aac|ogg|mp4|caf|aiff?)$/i.test(file.name)) {
+        continue;
+      }
+      await addItem(TRACK_STORE, {
+        name: file.name.replace(/\.[^.]+$/, ""),
+        category,
+        destination,
+        language: language === "legacy" ? undefined : language,
+        blob: file,
+        addedAt: Date.now()
+      });
+      added++;
+    }
+
+    state.pendingFiles = [];
+    $("fileInput").value = "";
+    $("importDialog").close();
+    await reloadData();
+    toast(`${added}개 음원을 추가했습니다.`);
+  }
+
+  function openPlaylistEditor(playlist = null) {
+    $("playlistDialogTitle").textContent = playlist ? "Edit Broadcast Set" : "Create Broadcast Set";
+    $("editPlaylistId").value = playlist?.id ?? "";
+    $("playlistName").value = playlist?.name || "";
+    $("playlistDestination").value = playlist?.destination || "미분류";
+    state.editPlaylistOrder = [...(playlist?.trackIds || [])];
+    renderPlaylistTrackChoices();
+    $("playlistDialog").showModal();
+  }
+
+  function renderPlaylistTrackChoices() {
+    const container = $("playlistTrackChoices");
+    container.innerHTML = "";
+    const chosen = new Set(state.editPlaylistOrder);
+
+    state.tracks.forEach(track => {
+      const row = document.createElement("label");
+      row.className = "check-row";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = chosen.has(track.id);
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) {
+          if (!state.editPlaylistOrder.includes(track.id)) state.editPlaylistOrder.push(track.id);
+        } else {
+          state.editPlaylistOrder = state.editPlaylistOrder.filter(id => id !== track.id);
+        }
+        renderPlaylistTrackChoices();
+      });
+      const text = document.createElement("span");
+      text.textContent = `${track.name} · ${categoryLabel(track.category)} · ${languageLabel(getTrackLanguage(track))}`;
+      row.append(checkbox, text);
+      container.appendChild(row);
+    });
+
+    if (!state.tracks.length) {
+      container.innerHTML = '<div class="empty">먼저 음원을 추가해 주세요.</div>';
+    }
+
+    if (state.editPlaylistOrder.length) {
+      const orderHeading = document.createElement("div");
+      orderHeading.className = "section-title";
+      orderHeading.textContent = "Playback Order";
+      container.appendChild(orderHeading);
+
+      state.editPlaylistOrder.forEach((id, index) => {
+        const track = state.tracks.find(item => item.id === id);
+        if (!track) return;
+        const row = document.createElement("div");
+        row.className = "playlist-track";
+        const number = document.createElement("b");
+        number.textContent = String(index + 1);
+        const name = document.createElement("span");
+        name.textContent = track.name;
+        const up = document.createElement("button");
+        up.textContent = "↑";
+        up.disabled = index === 0;
+        up.setAttribute("aria-label", "순서 위로");
+        up.addEventListener("click", () => {
+          const temp = state.editPlaylistOrder[index - 1];
+          state.editPlaylistOrder[index - 1] = state.editPlaylistOrder[index];
+          state.editPlaylistOrder[index] = temp;
+          renderPlaylistTrackChoices();
+        });
+        const down = document.createElement("button");
+        down.textContent = "↓";
+        down.disabled = index === state.editPlaylistOrder.length - 1;
+        down.setAttribute("aria-label", "순서 아래로");
+        down.addEventListener("click", () => {
+          const temp = state.editPlaylistOrder[index + 1];
+          state.editPlaylistOrder[index + 1] = state.editPlaylistOrder[index];
+          state.editPlaylistOrder[index] = temp;
+          renderPlaylistTrackChoices();
+        });
+        row.append(number, name, up, down);
+        container.appendChild(row);
+      });
+    }
+  }
+
+  async function savePlaylist(event) {
+    event.preventDefault();
+    const name = $("playlistName").value.trim();
+    if (!name) return;
+    const idValue = $("editPlaylistId").value;
+    const existing = idValue ? state.playlists.find(item => item.id === Number(idValue)) : null;
+    const playlist = {
+      ...(existing || {}),
+      name,
+      destination: $("playlistDestination").value,
+      trackIds: [...state.editPlaylistOrder],
+      updatedAt: Date.now()
+    };
+    if (existing) await putItem(PLAYLIST_STORE, playlist);
+    else {
+      playlist.createdAt = Date.now();
+      await addItem(PLAYLIST_STORE, playlist);
+    }
+    $("playlistDialog").close();
+    await reloadData();
+    toast("방송 세트를 저장했습니다.");
+  }
+
+  function renderPlaylists() {
+    const container = $("playlistList");
+    if (!container) return;
+    container.innerHTML = "";
+    if (!state.playlists.length) {
+      container.innerHTML = '<div class="empty">저장된 방송 세트가 없습니다.<br>Create Broadcast Set을 눌러 만들어 주세요.</div>';
+      return;
+    }
+
+    state.playlists.forEach(playlist => {
+      const card = document.createElement("div");
+      card.className = "playlist-card";
+      const head = document.createElement("div");
+      head.className = "playlist-head";
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = playlist.name;
+      const play = document.createElement("button");
+      play.className = "primary small-button";
+      play.textContent = "Play";
+      play.addEventListener("click", () => {
+        const ids = (playlist.trackIds || []).filter(id =>
+          state.tracks.some(track => track.id === id && track.blob)
+        );
+        if (!ids.length) {
+          toast("이 세트에 재생 가능한 음원이 없습니다.");
+          return;
+        }
+        state.queue = ids;
+        playQueueIndex(0);
+        showScreen("tracksScreen");
+      });
+      head.append(name, play);
+      card.appendChild(head);
+
+      const meta = document.createElement("div");
+      meta.className = "track-meta";
+      meta.textContent = `${destinationLabel(playlist.destination)} · ${(playlist.trackIds || []).length} tracks`;
+      card.appendChild(meta);
+
+      const order = document.createElement("div");
+      order.className = "playlist-tracks";
+      (playlist.trackIds || []).forEach((id, index) => {
+        const track = state.tracks.find(item => item.id === id);
+        if (!track) return;
+        const row = document.createElement("div");
+        row.className = "playlist-track";
+        const number = document.createElement("b");
+        number.textContent = `${index + 1}.`;
+        const text = document.createElement("span");
+        text.textContent = track.name;
+        row.append(number, text);
+        card.appendChild(order);
+        order.appendChild(row);
+      });
+
+      const actions = document.createElement("div");
+      actions.className = "button-row";
+      const edit = document.createElement("button");
+      edit.className = "secondary";
+      edit.textContent = "Edit";
+      edit.addEventListener("click", () => openPlaylistEditor(playlist));
+      const remove = document.createElement("button");
+      remove.className = "secondary";
+      remove.textContent = "Delete";
+      remove.addEventListener("click", async () => {
+        if (!confirm(`"${playlist.name}" 방송 세트를 삭제할까요?`)) return;
+        await deleteItem(PLAYLIST_STORE, playlist.id);
+        await reloadData();
+        toast("방송 세트를 삭제했습니다.");
+      });
+      actions.append(edit, remove);
+      card.appendChild(actions);
+      container.appendChild(card);
+    });
+  }
+
+  function applyTheme(dark) {
+    document.body.classList.toggle("dark", dark);
+    $("themeButton").innerHTML = icon(dark ? "sun" : "moon");
+    $("themeButton").setAttribute("aria-label", dark ? "라이트 모드로 전환" : "다크 모드로 전환");
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", dark ? "#151515" : "#D71920");
+  }
+
+  function loadTheme() {
+    try { return localStorage.getItem("CabinPAPlayerTheme") === "dark"; }
+    catch (_) { return false; }
+  }
+
+  function saveTheme(dark) {
+    try { localStorage.setItem("CabinPAPlayerTheme", dark ? "dark" : "light"); }
+    catch (_) {}
+  }
+
+  function wireEvents() {
+    document.querySelectorAll(".home-tile[data-category]").forEach(button => {
+      button.addEventListener("click", () => {
+        state.category = button.dataset.category;
+        renderDestinations();
+        showScreen("destinationScreen");
+      });
+    });
+
+    $("manageHomeButton").addEventListener("click", () => {
+      reloadData().then(() => showScreen("manageScreen"));
+    });
+
+    document.querySelectorAll("[data-back]").forEach(button => {
+      button.addEventListener("click", () => showScreen(button.dataset.back));
+    });
+
+    $("themeButton").addEventListener("click", () => {
+      const dark = !document.body.classList.contains("dark");
+      applyTheme(dark);
+      saveTheme(dark);
+    });
+
+    $("trackSearch").addEventListener("input", renderTrackScreen);
+    $("manageSearch").addEventListener("input", renderManageTracks);
+
+    $("importButton").addEventListener("click", () => $("fileInput").click());
+    $("fileInput").addEventListener("change", event => openImportDialog(event.target.files));
+    $("cancelImport").addEventListener("click", () => {
+      state.pendingFiles = [];
+      $("fileInput").value = "";
+      $("importDialog").close();
+    });
+    $("importForm").addEventListener("submit", event => {
+      importFiles(event).catch(error => {
+        console.error(error);
+        toast("가져오기에 실패했습니다. 저장 공간을 확인해 주세요.");
+      });
+    });
+
+    $("trackForm").addEventListener("submit", event => {
+      saveTrackEdit(event).catch(error => {
+        console.error(error);
+        toast("저장에 실패했습니다.");
+      });
+    });
+    $("cancelTrackEdit").addEventListener("click", () => $("trackDialog").close());
+
+    $("playlistButton").addEventListener("click", () => {
+      renderPlaylists();
+      showScreen("playlistsScreen");
+    });
+    $("newPlaylistButton").addEventListener("click", () => openPlaylistEditor());
+    $("playlistForm").addEventListener("submit", event => {
+      savePlaylist(event).catch(error => {
+        console.error(error);
+        toast("방송 세트를 저장하지 못했습니다.");
+      });
+    });
+    $("cancelPlaylist").addEventListener("click", () => $("playlistDialog").close());
+
+    $("playButton").addEventListener("click", () => {
+      if (!state.currentTrackId) {
+        toast("먼저 음원을 선택해 주세요.");
+        return;
+      }
+      if (audio.paused) {
+        audio.play().then(updatePlayButton).catch(() => toast("음원을 재생할 수 없습니다."));
+      } else {
+        audio.pause();
+      }
+      updatePlayButton();
+    });
+
+    $("previousButton").addEventListener("click", () => {
+      const index = currentQueueIndex();
+      if (index > 0) playQueueIndex(index - 1);
+      else toast("첫 번째 음원입니다.");
+    });
+
+    $("nextButton").addEventListener("click", () => {
+      const index = currentQueueIndex();
+      if (index >= 0 && index < state.queue.length - 1) playQueueIndex(index + 1);
+      else toast("마지막 음원입니다.");
+    });
+
+    audio.addEventListener("play", updatePlayButton);
+    audio.addEventListener("pause", updatePlayButton);
+    audio.addEventListener("ended", () => {
+      const index = currentQueueIndex();
+      if (index >= 0 && index < state.queue.length - 1) playQueueIndex(index + 1);
+      else updatePlayButton();
+    });
+    audio.addEventListener("loadedmetadata", () => {
+      $("duration").textContent = formatTime(audio.duration);
+    });
+    audio.addEventListener("timeupdate", () => {
+      $("currentTime").textContent = formatTime(audio.currentTime);
+      $("duration").textContent = formatTime(audio.duration);
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        $("progress").value = Math.round(audio.currentTime / audio.duration * 1000);
+      }
+    });
+    $("progress").addEventListener("input", () => {
+      if (Number.isFinite(audio.duration) && audio.duration > 0) {
+        audio.currentTime = Number($("progress").value) / 1000 * audio.duration;
+      }
+    });
+
+    // Closing a dialog by tapping outside does not lose saved audio.
+    ["trackDialog", "importDialog", "playlistDialog"].forEach(id => {
+      $(id).addEventListener("click", event => {
+        if (event.target === $(id)) $(id).close();
+      });
+    });
+  }
+
+  async function init() {
+    fillSelect($("editDestination"), DESTINATIONS);
+    fillSelect($("importDestination"), DESTINATIONS);
+    fillSelect($("playlistDestination"), DESTINATIONS);
+    fillSelect($("editLanguage"), LANGUAGES);
+    fillSelect($("importLanguage"), LANGUAGES);
+
+    applyTheme(loadTheme());
+    wireEvents();
+
+    try {
+      state.db = await openDatabase();
+      await reloadData();
+    } catch (error) {
+      console.error(error);
+      toast("저장소를 열 수 없습니다. 브라우저 설정을 확인해 주세요.");
+    }
+
+    // Optional PWA service worker registration; sw.js remains unchanged.
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      navigator.serviceWorker.register("./sw.js").catch(error => {
+        console.warn("Service worker registration failed:", error);
+      });
+    }
+  }
+
+  init();
 })();
 </script>
 </body>
