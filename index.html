@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10243a">
+<link rel="manifest" href="./manifest.json">
+<title>Cabin PA Player</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1726;--panel:#17283c;--blue:#2684ff;--muted:#a9bbce}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+header{padding:24px 18px 16px;background:#10243a}
+h1{font-size:24px;margin:0 0 6px}
+p{margin:0;color:var(--muted);font-size:13px}
+main{padding:16px;max-width:600px;margin:auto}
+button,select,input{font:inherit}
+button{border:0;border-radius:12px;padding:12px;background:#253b53;color:white;cursor:pointer}
+.primary{background:var(--blue);font-weight:700}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+.tools button{min-height:48px}
+input[type=search],select{width:100%;padding:13px;border:1px solid #34475d;border-radius:12px;background:var(--panel);color:white}
+#list{margin-top:14px;display:grid;gap:10px}
+.track{background:var(--panel);border-radius:14px;padding:14px}
+.tracktop{display:flex;align-items:center;gap:10px}
+.trackname{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:600}
+.sub{color:var(--muted);font-size:12px;margin-top:5px}
+.actions{display:flex;gap:6px;margin-top:12px}
+.actions button{flex:1}
+#now{margin-top:18px;padding:16px;border-radius:16px;background:#1a3048}
+#nowTitle{font-weight:600;margin-bottom:12px;overflow-wrap:anywhere}
+audio{width:100%;height:42px}
+#status{font-size:13px;color:#a9bbce;margin-top:12px;line-height:1.5}
+footer{color:#7f94aa;font-size:12px;line-height:1.5;padding:22px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>✈ Cabin PA Player</h1>
+  <p>PERSONAL ANNOUNCEMENT LIBRARY</p>
+</header>
+<main>
+  <div class="tools">
+    <button class="primary" id="add">＋ 음원 가져오기</button>
+    <button id="favorites">♡ 즐겨찾기만</button>
+  </div>
+  <input id="files" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav" multiple hidden>
+  <select id="category" aria-label="카테고리">
+    <option value="All">모든 음원</option>
+    <option>Boarding</option>
+    <option>Safety</option>
+    <option>Service</option>
+    <option>Arrival</option>
+    <option>Other</option>
+  </select>
+  <div style="height:10px"></div>
+  <input id="search" type="search" placeholder="음원 제목 검색">
+  <div id="list"></div>
+  <section id="now">
+    <div class="sub">NOW PLAYING</div>
+    <div id="nowTitle" style="margin-top:8px">재생할 음원을 선택하세요</div>
+    <audio id="player" controls playsinline preload="metadata"></audio>
+  </section>
+  <div id="status" role="status">저장소를 확인하고 있습니다.</div>
+  <footer>음원은 이 기기의 브라우저 저장소에 보관됩니다. 원본 파일은 별도로 보관하세요. 개인 청취 및 교육용이며 실제 기내 방송 장비를 대체하지 않습니다.</footer>
+</main>
+<script>
+const DB_NAME='CabinPAPlayer';
+const STORE='tracks';
+let db, currentId=null, showFav=false, objectUrl=null;
+const $=id=>document.getElementById(id);
+const player=$('player');
+
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(DB_NAME,1);
+  req.onupgradeneeded=()=>{
+   const d=req.result;
+   d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
+  };
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+}
+function allTracks(){
+ return new Promise((resolve,reject)=>{
+  const req=db.transaction(STORE,'readonly').objectStore(STORE).getAll();
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+}
+function saveTrack(track){
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(STORE,'readwrite');
+  tx.objectStore(STORE).add(track);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+ });
+}
+function updateTrack(track){
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(STORE,'readwrite');
+  tx.objectStore(STORE).put(track);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+ });
+}
+function removeTrack(id){
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(STORE,'readwrite');
+  tx.objectStore(STORE).delete(id);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+ });
+}
+function say(msg){$('status').textContent=msg}
+
+async function render(){
+ const tracks=await allTracks();
+ const q=$('search').value.trim().toLowerCase();
+ const cat=$('category').value;
+ const filtered=tracks.filter(t=>
+  (cat==='All'||t.category===cat)&&
+  (!showFav||t.favorite)&&
+  t.name.toLowerCase().includes(q)
+ );
+ $('list').replaceChildren();
+ if(!filtered.length){
+  const empty=document.createElement('p');
+  empty.textContent=tracks.length?'조건에 맞는 음원이 없습니다.':'음원을 가져와 시작하세요.';
+  $('list').append(empty);
+ }
+ for(const t of filtered){
+  const card=document.createElement('article');
+  card.className='track';
+  const top=document.createElement('div');top.className='tracktop';
+  const name=document.createElement('div');name.className='trackname';name.textContent=t.name;
+  const star=document.createElement('button');star.textContent=t.favorite?'★':'☆';star.setAttribute('aria-label','즐겨찾기');
+  star.onclick=async()=>{t.favorite=!t.favorite;await updateTrack(t);render()};
+  top.append(name,star);
+  const sub=document.createElement('div');sub.className='sub';sub.textContent=t.category;
+  const actions=document.createElement('div');actions.className='actions';
+  const play=document.createElement('button');play.className='primary';play.textContent='▶ 재생';
+  play.onclick=()=>playTrack(t);
+  const change=document.createElement('button');change.textContent='분류 변경';
+  change.onclick=async()=>{
+   const choices=['Boarding','Safety','Service','Arrival','Other'];
+   const picked=prompt('카테고리: '+choices.join(', '),t.category);
+   if(picked&&choices.includes(picked)){t.category=picked;await updateTrack(t);render()}
+   else if(picked)say('카테고리는 제공된 이름 중에서 선택해 주세요.');
+  };
+  const del=document.createElement('button');del.textContent='삭제';
+  del.onclick=async()=>{
+   if(confirm('이 음원을 앱 목록에서 삭제할까요?')){
+    if(currentId===t.id){player.pause();player.removeAttribute('src');player.load();currentId=null}
+    await removeTrack(t.id);render();say('음원을 삭제했습니다.')
+   }
+  };
+  actions.append(play,change,del);
+  card.append(top,sub,actions);$('list').append(card);
+ }
+}
+function playTrack(t){
+ if(objectUrl)URL.revokeObjectURL(objectUrl);
+ objectUrl=URL.createObjectURL(t.blob);
+ currentId=t.id;
+ player.src=objectUrl;
+ $('nowTitle').textContent=t.name;
+ player.play().catch(()=>say('재생 버튼을 눌러 다시 시작해 주세요.'));
+}
+$('add').onclick=()=>$('files').click();
+$('files').onchange=async e=>{
+ const files=[...e.target.files];
+ if(!files.length)return;
+ say('음원을 저장하고 있습니다…');
+ let count=0;
+ try{
+  for(const f of files){
+   if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|ogg|flac)$/i.test(f.name))continue;
+   await saveTrack({name:f.name.replace(/\.[^.]+$/,''),category:'Other',favorite:false,blob:f,addedAt:Date.now()});
+   count++;
+  }
+  say(count+'개 음원을 이 기기에 저장했습니다.');
+  await render();
+ }catch(err){
+  say('저장 실패: 저장 공간이 부족하거나 브라우저가 저장을 허용하지 않을 수 있습니다. 원본 파일은 삭제하지 마세요.');
+ }
+ e.target.value='';
+};
+$('favorites').onclick=()=>{
+ showFav=!showFav;
+ $('favorites').textContent=showFav?'♡ 전체 음원 보기':'♡ 즐겨찾기만';
+ render();
+};
+$('category').onchange=render;
+$('search').oninput=render;
+player.addEventListener('error',()=>say('이 파일을 재생할 수 없습니다. 다른 형식의 파일인지 확인해 주세요.'));
+(async()=>{
+ try{
+  if(!('indexedDB' in window))throw Error('IndexedDB unavailable');
+  db=await openDB();
+  if(navigator.storage?.persist){
+   try{await navigator.storage.persist()}catch{}
+  }
+  await render();
+  say('준비 완료 · 음원은 이 기기에 로컬 저장됩니다.');
+ }catch(e){say('저장소를 열 수 없습니다. 사파리에서 다시 시도해 주세요.')}
+ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ }
+})();
+</script>
+</body>
+</html>
