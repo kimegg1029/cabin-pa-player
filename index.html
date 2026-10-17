@@ -7,124 +7,320 @@
 <link rel="manifest" href="./manifest.json">
 <title>Cabin PA Player</title>
 <style>
-:root{
+:root {
  color-scheme:light;
- --bg:#f6f7f9;--surface:#fff;--surface2:#fff3f3;--text:#17212f;--muted:#758092;
- --accent:#d71920;--accent2:#b90f18;--border:#e6e9ee;--shadow:0 8px 24px rgba(20,32,50,.07);
+ --bg:#f6f7f9;--surface:#fff;--surface2:#fff3f3;--text:#17212f;
+ --muted:#758092;--accent:#d71920;--accent2:#b90f18;
+ --border:#e6e9ee;--shadow:0 8px 24px rgba(20,32,50,.07);
  --header:#fff;--soft:#f0f2f5;--success:#16805d;
 }
-body.dark{
- color-scheme:dark;--bg:#10151d;--surface:#1a2330;--surface2:#321f25;--text:#f4f6f9;--muted:#aab5c4;
- --accent:#ff454c;--accent2:#ff656a;--border:#303b4a;--shadow:0 8px 24px rgba(0,0,0,.2);
+body.dark {
+ color-scheme:dark;
+ --bg:#10151d;--surface:#1a2330;--surface2:#321f25;--text:#f4f6f9;
+ --muted:#aab5c4;--accent:#ff454c;--accent2:#ff656a;
+ --border:#303b4a;--shadow:0 8px 24px rgba(0,0,0,.2);
  --header:#151d28;--soft:#222d3b;--success:#55cba0;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s,color .2s}
+body {
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ transition:background .2s,color .2s
+}
 button,input,select{font:inherit}
-button{border:0;border-radius:14px;padding:12px 14px;background:var(--soft);color:var(--text);font-weight:650;cursor:pointer;transition:transform .12s,background .15s}
+button {
+ border:0;border-radius:14px;padding:12px 14px;
+ background:var(--soft);color:var(--text);font-weight:650;
+ cursor:pointer;transition:transform .12s,background .15s
+}
 button:active{transform:scale(.98)}
 button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:var(--accent);color:white}
 .primary:hover{background:var(--accent2)}
 .ghost{background:transparent;border:1px solid var(--border)}
-header{background:var(--header);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
-.header-inner{max-width:760px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:12px}
-.brand-logo{width:92px;height:36px;object-fit:contain;object-position:left center;flex-shrink:0;display:block}
+header {
+ background:var(--header);border-bottom:1px solid var(--border);
+ position:sticky;top:0;z-index:10
+}
+.header-inner {
+ max-width:760px;margin:auto;padding:14px 18px;
+ display:flex;align-items:center;gap:12px
+}
+
+/* 빨간색 마름모 로고 */
+.brand-mark {
+ width:42px;height:42px;
+ display:grid;place-items:center;
+ flex-shrink:0;
+ background:transparent;
+ border-radius:0;
+}
+.brand-mark::before {
+ content:"";
+ display:block;
+ width:25px;height:25px;
+ background:#d71920;
+ transform:rotate(45deg);
+ border-radius:2px;
+}
+.brand-mark svg{display:none}
+
 .brand{flex:1;min-width:0}
-.brand h1{font-size:17px;line-height:1.2;margin:0 0 4px;font-weight:850;letter-spacing:-.35px}
-.brand p{font-size:10px;letter-spacing:1.35px;color:var(--muted);margin:0;font-weight:750}
-.icon-btn{width:42px;height:42px;padding:0;border:1px solid var(--border);border-radius:14px;background:var(--surface);display:grid;place-items:center;font-size:18px}
-main{max-width:760px;margin:0 auto;padding:24px 18px 40px;min-height:calc(100dvh - 72px)}
+.brand h1 {
+ font-size:17px;line-height:1.2;margin:0 0 4px;
+ font-weight:850;letter-spacing:-.35px
+}
+.brand p {
+ font-size:10px;letter-spacing:1.35px;color:var(--muted);
+ margin:0;font-weight:750
+}
+.icon-btn {
+ width:42px;height:42px;padding:0;border:1px solid var(--border);
+ border-radius:14px;background:var(--surface);
+ display:grid;place-items:center;font-size:18px
+}
+main {
+ max-width:760px;margin:0 auto;padding:24px 18px 40px;
+ min-height:calc(100dvh - 72px)
+}
 .screen{display:none}
 .screen.active{display:block;animation:enter .18s ease-out}
-@keyframes enter{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:none}}
-.eyebrow{font-size:11px;color:var(--accent);letter-spacing:1.4px;font-weight:850;text-transform:uppercase;margin:0 0 9px}
-.screen-title{font-size:28px;line-height:1.15;letter-spacing:-.9px;margin:0 0 9px;font-weight:850}
-.screen-desc{font-size:14px;line-height:1.5;color:var(--muted);margin:0}
-.hero{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:24px 20px;margin-bottom:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-.hero:after{content:"";position:absolute;width:125px;height:125px;border-radius:50%;background:var(--surface2);right:-40px;top:-44px;pointer-events:none}
+@keyframes enter {
+ from{opacity:.55;transform:translateY(5px)}
+ to{opacity:1;transform:none}
+}
+.eyebrow {
+ font-size:11px;color:var(--accent);letter-spacing:1.4px;
+ font-weight:850;text-transform:uppercase;margin:0 0 9px
+}
+.screen-title {
+ font-size:23px;line-height:1.2;letter-spacing:-.5px;
+ margin:0 0 6px;font-weight:850
+}
+.screen-desc {
+ font-size:14px;line-height:1.5;color:var(--muted);margin:0
+}
+.hero {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:24px;padding:16px 18px;margin-bottom:16px;
+ box-shadow:var(--shadow);position:relative;overflow:hidden
+}
+.hero:after {
+ content:"";position:absolute;width:125px;height:125px;
+ border-radius:50%;background:var(--surface2);
+ right:-40px;top:-44px;pointer-events:none
+}
 .hero>*{position:relative;z-index:1}
-.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.home-tile{background:var(--surface);border:1px solid var(--border);border-radius:22px;min-height:142px;padding:18px 16px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;box-shadow:var(--shadow)}
+.hero .eyebrow{margin-bottom:6px}
+.home-grid {
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px
+}
+.home-tile {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:22px;min-height:142px;padding:18px 16px;
+ text-align:left;display:flex;flex-direction:column;
+ align-items:flex-start;justify-content:space-between;box-shadow:var(--shadow)
+}
 .home-tile:hover{border-color:var(--accent)}
-.tile-icon{width:43px;height:43px;display:grid;place-items:center;background:var(--surface2);color:var(--accent);border-radius:15px}
+.tile-icon {
+ width:43px;height:43px;display:grid;place-items:center;
+ background:var(--surface2);color:var(--accent);border-radius:15px
+}
 .tile-icon svg{width:23px;height:23px}
 .tile-label{font-size:15px;font-weight:800;letter-spacing:-.2px}
 .tile-arrow{font-size:12px;color:var(--muted);margin-left:7px}
-.section-head{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+.section-head {
+ display:flex;align-items:center;gap:10px;margin:22px 0 12px
+}
 .section-head h3{font-size:14px;margin:0;font-weight:800}
 .section-head .line{height:1px;background:var(--border);flex:1}
 .back-row{display:flex;align-items:center;gap:9px;margin-bottom:20px}
 .back-row button{padding:9px 12px}
 .back-row span{font-size:12px;color:var(--muted);font-weight:650}
 .choice-list{display:grid;gap:10px;margin-top:22px}
-.choice{display:flex;align-items:center;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--border);padding:15px;border-radius:17px;min-height:72px}
-.choice .choice-icon{width:42px;height:42px;border-radius:13px;background:var(--surface2);color:var(--accent);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.choice {
+ display:flex;align-items:center;gap:14px;text-align:left;
+ background:var(--surface);border:1px solid var(--border);
+ padding:15px;border-radius:17px;min-height:72px
+}
+.choice .choice-icon {
+ width:42px;height:42px;border-radius:13px;background:var(--surface2);
+ color:var(--accent);display:grid;place-items:center;font-size:18px;flex-shrink:0
+}
 .choice .choice-text{flex:1}
 .choice strong{display:block;font-size:15px}
-.choice small{display:block;color:var(--muted);font-size:12px;margin-top:4px;font-weight:500}
+.choice small {
+ display:block;color:var(--muted);font-size:12px;margin-top:4px;font-weight:500
+}
 .choice .chevron{color:var(--muted);font-size:20px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
-.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}
+.panel {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:20px;padding:16px;box-shadow:var(--shadow)
+}
+.toolbar {
+ display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0
+}
 .toolbar button{min-height:46px}
 .field{margin:13px 0}
-.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:7px}
-input[type=search],input[type=text],select{width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);outline:none}
+.field label {
+ display:block;font-size:12px;color:var(--muted);
+ font-weight:750;margin-bottom:7px
+}
+input[type=search],input[type=text],select {
+ width:100%;padding:13px 14px;border:1px solid var(--border);
+ border-radius:13px;background:var(--surface);color:var(--text);outline:none
+}
 input:focus,select:focus{border-color:var(--accent)}
 #addPanel{display:none;margin:14px 0}
-#addPanel.open{display:block}
-#selectedFiles{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;overflow-wrap:anywhere}
-.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+#selectedFiles {
+ font-size:12px;color:var(--muted);margin-top:8px;
+ line-height:1.5;overflow-wrap:anywhere
+}
+.filters {
+ display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px
+}
+
+/* 재생 화면의 미니멀 툴바 */
+.player-toolbar {
+ display:flex;align-items:center;justify-content:flex-end;
+ gap:8px;margin:8px 0 14px;position:relative
+}
+.player-icon-btn {
+ width:36px;height:36px;padding:0;border:1px solid var(--border);
+ border-radius:11px;background:var(--surface);color:var(--muted);
+ display:grid;place-items:center;font-size:20px;font-weight:500
+}
+.player-icon-btn.add-icon {
+ background:var(--accent);color:#fff;border-color:var(--accent);
+ font-size:26px;font-weight:400
+}
+.player-menu-wrap{position:relative}
+.player-menu {
+ display:none;position:absolute;top:43px;right:0;z-index:20;
+ min-width:150px;padding:5px;border:1px solid var(--border);
+ border-radius:12px;background:var(--surface);box-shadow:var(--shadow)
+}
+.player-menu.open{display:block}
+.player-menu button {
+ display:block;width:100%;padding:11px 12px;border-radius:8px;
+ text-align:left;background:transparent;font-size:13px;font-weight:600
+}
+.player-menu button:hover{background:var(--soft)}
+#searchField{display:none;margin:0 0 12px}
+#searchField.open{display:block}
+#searchField input{padding:11px 13px;border-radius:11px}
+#playerFilters{display:none}
 #list{display:grid;gap:10px;margin-top:14px}
-.track{background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:15px}
+.track {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:17px;padding:15px
+}
 .tracktop{display:flex;align-items:center;gap:10px}
-.trackname{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:800}
-.trackbadge{display:inline-flex;background:var(--surface2);color:var(--accent);border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;margin-top:8px}
+.trackname {
+ flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:800
+}
+.track-select {
+ display:block;width:100%;padding:0;border:0;border-radius:5px;
+ text-align:left;background:transparent;color:var(--text);
+ font-weight:800;font-size:14px;overflow-wrap:anywhere
+}
+.track-select:hover{color:var(--accent);background:transparent}
+.trackbadge {
+ display:inline-flex;background:var(--surface2);color:var(--accent);
+ border-radius:8px;padding:5px 8px;font-size:10px;
+ font-weight:800;margin-top:8px
+}
 .sub{color:var(--muted);font-size:12px;margin-top:7px}
+
+/* 음원 등록일: 작고 은은하게 표시 */
+.track-date {
+ color:var(--muted);font-size:10px;line-height:1.4;
+ margin-top:5px;opacity:.85
+}
+
 .actions{display:flex;gap:7px;margin-top:13px}
 .actions button{flex:1;padding:10px 8px;font-size:12px}
-#now{margin-top:16px}
+#now{display:none;margin-top:16px}
+#now.visible{display:block}
 .now-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
-.album-art{width:54px;height:54px;border-radius:17px;background:var(--accent);display:grid;place-items:center;color:white;flex-shrink:0}
+.album-art {
+ width:54px;height:54px;border-radius:17px;background:var(--accent);
+ display:grid;place-items:center;color:white;flex-shrink:0
+}
 .album-art svg{width:27px;height:27px}
 .now-copy{flex:1;min-width:0}
-.now-label{font-size:10px;letter-spacing:1.2px;color:var(--accent);font-weight:850;margin-bottom:5px}
+.now-label {
+ font-size:10px;letter-spacing:1.2px;color:var(--accent);
+ font-weight:850;margin-bottom:5px
+}
 #nowTitle{font-weight:800;font-size:15px;overflow-wrap:anywhere}
 #nowMeta{font-size:12px;color:var(--muted);margin-top:4px}
 audio{width:100%;height:42px;display:block}
-.play-controls{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:9px;margin-top:12px}
+.play-controls {
+ display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:9px;margin-top:12px
+}
 .play-controls button{min-height:46px}
 .play-controls .primary{font-size:14px}
-#status{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;min-height:18px}
-.empty{padding:24px 15px;text-align:center;border:1px dashed var(--border);border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6}
-.track-check{display:flex;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
+#status {
+ font-size:12px;color:var(--muted);margin-top:14px;
+ line-height:1.5;min-height:18px
+}
+.empty {
+ padding:24px 15px;text-align:center;border:1px dashed var(--border);
+ border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6
+}
+.track-check {
+ display:flex;gap:10px;align-items:center;padding:11px 0;
+ border-bottom:1px solid var(--border);font-size:13px
+}
 .track-check input{accent-color:var(--accent);width:18px;height:18px}
 .track-check span{flex:1;overflow-wrap:anywhere}
-.playlist-card{padding:15px;border:1px solid var(--border);background:var(--surface);border-radius:17px;margin-top:10px}
+.playlist-card {
+ padding:15px;border:1px solid var(--border);
+ background:var(--surface);border-radius:17px;margin-top:10px
+}
 .playlist-title{font-weight:800;overflow-wrap:anywhere}
 .playlist-actions{display:flex;gap:7px;margin-top:12px}
 .playlist-actions button{flex:1;font-size:12px;padding:10px 8px}
-.order-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
-.order-row .order-name{flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere}
+.order-row {
+ display:flex;align-items:center;gap:8px;padding:10px 0;
+ border-bottom:1px solid var(--border)
+}
+.order-row .order-name {
+ flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere
+}
 .order-row button{padding:8px 10px}
-footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
-@media(min-width:560px){main{padding-top:30px}.home-tile{min-height:158px;padding:21px}.hero{padding:28px}.screen-title{font-size:31px}}
-@media(max-width:370px){.brand-logo{width:66px;height:28px}.header-inner{gap:8px;padding-left:12px;padding-right:12px}.brand h1{font-size:15px}.screen-title{font-size:25px}.home-tile{min-height:128px;padding:14px}.tile-label{font-size:13px}.filters{grid-template-columns:1fr}.actions{gap:5px}}
-.category-tools-tile{cursor:default}
-.category-tools-tile:hover{border-color:var(--border)}
-.category-tools-heading{display:flex;align-items:center;gap:10px}
-.category-tools-row{display:flex;gap:7px;width:100%;margin-top:14px}
-.category-tool-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 3px;border-radius:12px;background:var(--soft);font-size:10px;line-height:1.2;font-weight:750}
-.category-tool-btn:hover{background:var(--surface2)}
-.category-tool-btn svg{width:19px;height:19px;color:var(--accent)}
+footer {
+ font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0
+}
+@media(min-width:560px) {
+ main{padding-top:30px}
+ .home-tile{min-height:158px;padding:21px}
+ .hero{padding:16px 20px}
+ .screen-title{font-size:23px}
+}
+@media(max-width:370px) {
+ .screen-title{font-size:22px}
+ .home-tile{min-height:128px;padding:14px}
+ .tile-label{font-size:13px}
+ .filters{grid-template-columns:1fr}
+ .actions{gap:5px}
+ .player-icon-btn{width:34px;height:34px}
+}
 </style>
 </head>
+
+<!-- 나이트 모드가 기본으로 켜진 상태 -->
 <body class="dark">
 <header>
  <div class="header-inner">
-  <img class="brand-logo" src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Eastar_Jet_Logo.svg" alt="이스타항공 로고" referrerpolicy="no-referrer">
-  <div class="brand"><h1>Cabin PA Player</h1><p>PERSONAL ANNOUNCEMENT LIBRARY</p></div>
-  <button class="icon-btn" id="themeToggle" aria-label="라이트 모드" title="라이트 모드">☀</button>
+  <!-- 빨간색 마름모 로고 -->
+  <div class="brand-mark" aria-label="빨간색 마름모 로고" role="img"></div>
+  <div class="brand">
+   <h1>Cabin PA Player</h1>
+   <p>PERSONAL ANNOUNCEMENT LIBRARY</p>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="라이트 모드로 변경" title="라이트 모드로 변경">☀</button>
  </div>
 </header>
 
@@ -135,12 +331,64 @@ footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
    <h2 class="screen-title">Select Announcement Type</h2>
    <p class="screen-desc">Choose a category to continue.</p>
   </div>
-  <div class="home-grid" id="homeGrid" aria-label="안내 방송 카테고리"></div>
+  <div class="home-grid">
+   <button class="home-tile" data-category="Boarding">
+    <span class="tile-icon">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 20h18M5 20V8l7-4 7 4v12"/><path d="M9 20v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/>
+     </svg>
+    </span>
+    <span class="tile-label">Boarding <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile" data-category="Safety">
+    <span class="tile-icon">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>
+     </svg>
+    </span>
+    <span class="tile-label">Safety <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile" data-category="Service">
+    <span class="tile-icon">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 10h16M6 10v9M18 10v9M4 19h16M8 6h8M10 3h4M12 10v9"/>
+     </svg>
+    </span>
+    <span class="tile-label">Service <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile" data-category="Arrival">
+    <span class="tile-icon">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 20h18M5 20V9l7-5 7 5v11"/><path d="M9 13h6M12 10v6"/>
+     </svg>
+    </span>
+    <span class="tile-label">Arrival <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile" data-category="Other">
+    <span class="tile-icon">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+      <circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>
+     </svg>
+    </span>
+    <span class="tile-label">Other <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile" id="manageTile">
+    <span class="tile-icon">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/>
+     </svg>
+    </span>
+    <span class="tile-label">Manage Audio <span class="tile-arrow">↗</span></span>
+   </button>
+  </div>
   <footer>Audio is stored locally on this device. Keep a separate backup of original files.</footer>
  </section>
 
  <section class="screen" id="languageScreen">
-  <div class="back-row"><button class="ghost" data-back="homeScreen">← 홈</button><span id="languageStep">3단계 중 2단계</span></div>
+  <div class="back-row">
+   <button class="ghost" data-back="homeScreen">← 홈</button>
+   <span id="languageStep">3단계 중 2단계</span>
+  </div>
   <p class="eyebrow" id="languageCategoryEyebrow">선택한 카테고리</p>
   <h2 class="screen-title">언어 선택</h2>
   <p class="screen-desc">안내 방송에 사용할 언어를 선택하세요.</p>
@@ -154,43 +402,98 @@ footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
  </section>
 
  <section class="screen" id="playerScreen">
-  <div class="back-row"><button class="ghost" data-back="languageScreen">← 이전</button><span>오디오 플레이어</span></div>
+  <div class="back-row">
+   <button class="ghost" data-back="languageScreen">← 이전</button>
+   <span>오디오 플레이어</span>
+  </div>
   <div class="hero">
    <p class="eyebrow">선택한 안내 방송</p>
-   <h2 class="screen-title" id="playerHeading">Boarding</h2>
+   <h2 class="screen-title" id="playerHeading">탑승</h2>
    <p class="screen-desc" id="playerDescription">한국어 안내 방송</p>
   </div>
-  <div class="toolbar">
-   <button class="primary" id="add">＋ 오디오 추가</button>
-   <button class="ghost" id="openManageFromPlayer">오디오 관리</button>
+
+  <div class="player-toolbar" id="playerToolbar">
+   <button class="player-icon-btn add-icon" id="add" aria-label="오디오 추가" title="오디오 추가">＋</button>
+   <button class="player-icon-btn" id="searchToggle" aria-label="오디오 제목 검색" title="검색">⌕</button>
+   <div class="player-menu-wrap">
+    <button class="player-icon-btn" id="menuToggle" aria-label="메뉴" title="메뉴">☰</button>
+    <div class="player-menu" id="playerMenu">
+     <button id="openManageFromPlayer">오디오 관리</button>
+    </div>
+   </div>
+  </div>
+
+  <div id="searchField">
+   <input id="search" type="search" placeholder="오디오 제목 검색" aria-label="오디오 제목 검색">
   </div>
 
   <section class="panel" id="addPanel" aria-label="오디오 추가">
    <h3 style="margin:0 0 5px;font-size:17px">오디오 추가</h3>
    <p class="screen-desc">파일은 선택한 카테고리와 언어로 저장됩니다.</p>
-   <div class="field"><label for="newName">오디오 이름</label><input id="newName" type="text" placeholder="오디오 이름 입력"></div>
-   <div class="field"><label for="newCategory">카테고리</label><select id="newCategory"></select></div>
-   <div class="field"><label for="newLanguage">언어</label><select id="newLanguage"><option value="Korean">한국어</option><option value="English">영어</option><option value="Japanese">일본어</option><option value="Chinese">중국어</option><option value="Other">기타</option></select></div>
+   <div class="field">
+    <label for="newName">오디오 이름</label>
+    <input id="newName" type="text" placeholder="오디오 이름 입력">
+   </div>
+   <div class="field">
+    <label for="newCategory">카테고리</label>
+    <select id="newCategory">
+     <option value="Boarding">탑승</option><option value="Safety">안전</option>
+     <option value="Service">서비스</option><option value="Arrival">도착</option>
+     <option value="Other">기타</option>
+    </select>
+   </div>
+   <div class="field">
+    <label for="newLanguage">언어</label>
+    <select id="newLanguage">
+     <option value="Korean">한국어</option><option value="English">영어</option>
+     <option value="Japanese">일본어</option><option value="Chinese">중국어</option>
+     <option value="Other">기타</option>
+    </select>
+   </div>
    <input id="files" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
    <button class="ghost" id="chooseFiles">오디오 파일 선택</button>
    <div id="selectedFiles">선택된 파일 없음</div>
-   <div class="toolbar"><button class="primary" id="saveSelected">오디오 저장</button><button id="cancelAdd">취소</button></div>
+   <div class="toolbar">
+    <button class="primary" id="saveSelected">오디오 저장</button>
+    <button id="cancelAdd">취소</button>
+   </div>
   </section>
 
-  <div class="filters">
-   <select id="category" aria-label="카테고리별 필터"></select>
-   <select id="language" aria-label="언어별 필터"><option value="All">전체 언어</option><option value="Korean">한국어</option><option value="English">영어</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">기타</option><option value="legacy">기존 파일 · 미지정</option></select>
+  <div class="filters" id="playerFilters">
+   <select id="category" aria-label="카테고리별 필터">
+    <option value="All">전체 카테고리</option><option value="Boarding">탑승</option>
+    <option value="Safety">안전</option><option value="Service">서비스</option>
+    <option value="Arrival">도착</option><option value="Other">기타</option>
+   </select>
+   <select id="language" aria-label="언어별 필터">
+    <option value="All">전체 언어</option><option value="Korean">한국어</option>
+    <option value="English">영어</option><option value="Japanese">일본어</option>
+    <option value="Chinese">중국어</option><option value="Other">기타</option>
+    <option value="legacy">기존 파일 · 미지정</option>
+   </select>
   </div>
-  <div class="field"><input id="search" type="search" placeholder="오디오 제목 검색"></div>
+
   <div id="list"></div>
 
   <section class="panel" id="now">
    <div class="now-top">
-    <div class="album-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-    <div class="now-copy"><div class="now-label">현재 재생 중</div><div id="nowTitle">오디오를 선택하세요</div><div id="nowMeta">재생 준비 완료</div></div>
+    <div class="album-art">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+     </svg>
+    </div>
+    <div class="now-copy">
+     <div class="now-label">선택한 오디오</div>
+     <div id="nowTitle">오디오를 선택하세요</div>
+     <div id="nowMeta">재생할 오디오를 선택하세요.</div>
+    </div>
    </div>
    <audio id="player" controls playsinline preload="metadata"></audio>
-   <div class="play-controls"><button id="previous">⏮ 이전</button><button class="primary" id="playPause">▶ 재생</button><button id="next">다음 ⏭</button></div>
+   <div class="play-controls">
+    <button id="previous">⏮ 이전</button>
+    <button class="primary" id="playPause">▶ 재생</button>
+    <button id="next">다음 ⏭</button>
+   </div>
   </section>
  </section>
 
@@ -198,37 +501,87 @@ footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
   <div class="back-row"><button class="ghost" data-back="homeScreen">← 홈</button><span>라이브러리 관리</span></div>
   <p class="eyebrow">내 오디오 라이브러리</p>
   <h2 class="screen-title">오디오 관리</h2>
-  <p class="screen-desc">오디오를 가져오고 수정하거나 삭제하세요. 순차 재생을 위한 재생목록도 만들 수 있습니다.</p>
-  <div class="toolbar"><button class="primary" id="manageAdd">＋ 오디오 가져오기</button><button id="openPlaylists">♫ 재생목록</button></div>
-  <div class="filters"><select id="manageCategory"></select><select id="manageLanguage"><option value="All">전체 언어</option><option value="Korean">한국어</option><option value="English">영어</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">기타</option><option value="legacy">기존 파일 · 미지정</option></select></div>
+  <p class="screen-desc">오디오를 가져오고 수정하거나 삭제하세요. 순차 재생용 재생목록도 만들 수 있습니다.</p>
+  <div class="toolbar">
+   <button class="primary" id="manageAdd">＋ 오디오 가져오기</button>
+   <button id="openPlaylists">♫ 재생목록</button>
+  </div>
+  <div class="filters">
+   <select id="manageCategory">
+    <option value="All">전체 카테고리</option><option value="Boarding">탑승</option>
+    <option value="Safety">안전</option><option value="Service">서비스</option>
+    <option value="Arrival">도착</option><option value="Other">기타</option>
+   </select>
+   <select id="manageLanguage">
+    <option value="All">전체 언어</option><option value="Korean">한국어</option>
+    <option value="English">영어</option><option value="Japanese">일본어</option>
+    <option value="Chinese">중국어</option><option value="Other">기타</option>
+    <option value="legacy">기존 파일 · 미지정</option>
+   </select>
+  </div>
   <div class="field"><input id="manageSearch" type="search" placeholder="오디오 제목 검색"></div>
   <div id="manageList"></div>
+
   <section class="panel" id="manageAddPanel" style="display:none;margin-top:14px">
    <h3 style="margin:0 0 5px;font-size:17px">오디오 가져오기</h3>
-   <div class="field"><label for="manageNewName">오디오 이름 (파일 1개에 적용)</label><input id="manageNewName" type="text" placeholder="오디오 이름 입력"></div>
-   <div class="filters"><div class="field"><label for="manageNewCategory">카테고리</label><select id="manageNewCategory"></select></div><div class="field"><label for="manageNewLanguage">언어</label><select id="manageNewLanguage"><option value="Korean">한국어</option><option value="English">영어</option><option value="Japanese">일본어</option><option value="Chinese">중국어</option><option value="Other">기타</option></select></div></div>
+   <div class="field">
+    <label for="manageNewName">오디오 이름 (파일 1개에 적용)</label>
+    <input id="manageNewName" type="text" placeholder="오디오 이름 입력">
+   </div>
+   <div class="filters">
+    <div class="field">
+     <label for="manageNewCategory">카테고리</label>
+     <select id="manageNewCategory">
+      <option value="Boarding">탑승</option><option value="Safety">안전</option>
+      <option value="Service">서비스</option><option value="Arrival">도착</option>
+      <option value="Other">기타</option>
+     </select>
+    </div>
+    <div class="field">
+     <label for="manageNewLanguage">언어</label>
+     <select id="manageNewLanguage">
+      <option value="Korean">한국어</option><option value="English">영어</option>
+      <option value="Japanese">일본어</option><option value="Chinese">중국어</option>
+      <option value="Other">기타</option>
+     </select>
+    </div>
+   </div>
    <input id="manageFiles" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
-   <button id="manageChooseFiles" class="ghost">오디오 파일 선택</button><div id="manageSelectedFiles" class="sub">선택된 파일 없음</div>
-   <div class="toolbar"><button class="primary" id="manageSaveSelected">오디오 저장</button><button id="manageCancelAdd">취소</button></div>
+   <button id="manageChooseFiles" class="ghost">오디오 파일 선택</button>
+   <div id="manageSelectedFiles" class="sub">선택된 파일 없음</div>
+   <div class="toolbar">
+    <button class="primary" id="manageSaveSelected">오디오 저장</button>
+    <button id="manageCancelAdd">취소</button>
+   </div>
   </section>
  </section>
 
  <section class="screen" id="playlistScreen">
   <div class="back-row"><button class="ghost" data-back="manageScreen">← 오디오 관리</button><span>재생목록</span></div>
-  <p class="eyebrow">순차 재생</p><h2 class="screen-title">재생목록</h2>
+  <p class="eyebrow">순차 재생</p>
+  <h2 class="screen-title">재생목록</h2>
   <p class="screen-desc">오디오를 선택하고 재생 순서를 정하세요.</p>
   <section class="panel" style="margin-top:18px">
-   <div class="field"><label for="playlistName">재생목록 이름</label><input id="playlistName" type="text" placeholder="예: 탑승 안내 순서"></div>
+   <div class="field">
+    <label for="playlistName">재생목록 이름</label>
+    <input id="playlistName" type="text" placeholder="예: 탑승 안내 순서">
+   </div>
    <div class="section-head"><h3>오디오 선택</h3><span class="line"></span></div>
    <div id="playlistTrackChoices"></div>
-   <div class="toolbar"><button class="primary" id="savePlaylist">재생목록 저장</button><button id="clearPlaylistForm">초기화</button></div>
+   <div class="toolbar">
+    <button class="primary" id="savePlaylist">재생목록 저장</button>
+    <button id="clearPlaylistForm">초기화</button>
+   </div>
   </section>
   <div class="section-head"><h3>저장된 재생목록</h3><span class="line"></span></div>
   <div id="playlistList"></div>
   <section class="panel" id="playlistOrderPanel" style="display:none;margin-top:14px">
    <h3 id="playlistOrderTitle" style="font-size:16px;margin:0 0 8px">재생 순서 편집</h3>
    <div id="playlistOrderRows"></div>
-   <div class="toolbar"><button class="primary" id="saveOrder">순서 저장</button><button id="cancelOrder">취소</button></div>
+   <div class="toolbar">
+    <button class="primary" id="saveOrder">순서 저장</button>
+    <button id="cancelOrder">취소</button>
+   </div>
   </section>
  </section>
 
@@ -240,46 +593,35 @@ footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
 const DB_NAME='CabinPAPlayer';
 const STORE='tracks';
 const PLAYLIST_STORE='playlists';
-const CATEGORY_STORAGE_KEY='CabinPAPlayerCategories';
-const DEFAULT_CATEGORIES=[
- {id:'Boarding',label:'탑승'},
- {id:'Safety',label:'안전'},
- {id:'Service',label:'서비스'},
- {id:'Arrival',label:'도착'},
- {id:'Other',label:'기타'}
-];
-const HOME_CATEGORY_LABELS={Boarding:'Boarding',Safety:'Safety',Service:'Service',Arrival:'Arrival',Other:'Other'};
-let categories=DEFAULT_CATEGORIES.map(c=>({...c}));
+const CATEGORIES=['Boarding','Safety','Service','Arrival','Other'];
 const LANGUAGES=['Korean','English','Japanese','Chinese','Other'];
-let db,currentId=null,objectUrl=null,selectedCategory='Boarding',selectedLanguage='Korean';
-let queue=[],queueIndex=-1,selectedFiles=[],manageSelectedFiles=[],editingPlaylistId=null,orderDraft=[];
+let db,currentId=null,objectUrl=null;
+let selectedCategory='Boarding',selectedLanguage='Korean';
+let queue=[],queueIndex=-1;
 const $=id=>document.getElementById(id);
 const player=$('player');
 
-function showScreen(id){
+function categoryLabel(v) {
+ return ({Boarding:'탑승',Safety:'안전',Service:'서비스',Arrival:'도착',Other:'기타'})[v]||v||'기타';
+}
+function languageLabel(v) {
+ return ({Korean:'한국어',English:'영어',Japanese:'일본어',Chinese:'중국어',Other:'기타',legacy:'기존 파일 · 미지정'})[v]||'기존 파일 · 미지정';
+}
+function isLegacy(t){return !t.language||!LANGUAGES.includes(t.language)}
+function say(msg){$('status').textContent=msg}
+function showScreen(id) {
  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
  window.scrollTo({top:0,behavior:'smooth'});
  if(id==='manageScreen')renderManage();
  if(id==='playlistScreen')renderPlaylists();
+ if(id!=='playerScreen')closePlayerMenu();
 }
 document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.back)));
-
-$('homeGrid').addEventListener('click',event=>{
- const tool=event.target.closest('[data-category-action]');
- if(tool){
-  event.preventDefault();
-  const action=tool.dataset.categoryAction;
-  if(action==='add')addCategory();
-  else if(action==='delete')deleteCategory();
-  else if(action==='rename')renameCategory();
-  return;
- }
- const tile=event.target.closest('[data-category]');
- if(!tile)return;
- selectedCategory=tile.dataset.category;
+document.querySelectorAll('[data-category]').forEach(b=>b.addEventListener('click',()=>{
+ selectedCategory=b.dataset.category;
  $('languageCategoryEyebrow').textContent='카테고리 · '+categoryLabel(selectedCategory);
  showScreen('languageScreen');
-});
+}));
 document.querySelectorAll('[data-language]').forEach(b=>b.addEventListener('click',()=>{
  selectedLanguage=b.dataset.language;
  $('playerHeading').textContent=categoryLabel(selectedCategory);
@@ -289,43 +631,67 @@ document.querySelectorAll('[data-language]').forEach(b=>b.addEventListener('clic
  $('newCategory').value=selectedCategory;
  $('newLanguage').value=selectedLanguage;
  $('search').value='';
+ $('searchField').classList.remove('open');
+ $('now').classList.remove('visible');
  showScreen('playerScreen');
  renderPlayerTracks();
 }));
-$('openManageFromPlayer').onclick=()=>showScreen('manageScreen');
+$('manageTile').onclick=()=>showScreen('manageScreen');
+$('openManageFromPlayer').onclick=()=>{
+ closePlayerMenu();
+ showScreen('manageScreen');
+};
 $('openPlaylists').onclick=()=>showScreen('playlistScreen');
 
+/* 나이트 모드 기본값이며, 버튼으로 라이트/나이트 전환 */
 $('themeToggle').onclick=()=>{
  const dark=document.body.classList.toggle('dark');
  $('themeToggle').textContent=dark?'☀':'☾';
- $('themeToggle').setAttribute('aria-label',dark?'라이트 모드':'다크 모드');
+ $('themeToggle').setAttribute('aria-label',dark?'라이트 모드로 변경':'나이트 모드로 변경');
+ $('themeToggle').title=dark?'라이트 모드로 변경':'나이트 모드로 변경';
  document.querySelector('meta[name="theme-color"]').content=dark?'#151d28':'#d71920';
 };
 
-function openDB(){
+function closePlayerMenu(){$('playerMenu').classList.remove('open')}
+$('menuToggle').onclick=e=>{
+ e.stopPropagation();
+ $('playerMenu').classList.toggle('open');
+};
+document.addEventListener('click',e=>{
+ if(!$('playerToolbar').contains(e.target))closePlayerMenu();
+});
+$('searchToggle').onclick=()=>{
+ const field=$('searchField');
+ const opening=!field.classList.contains('open');
+ field.classList.toggle('open',opening);
+ if(opening) {
+  $('search').focus();
+ } else {
+  $('search').value='';
+  renderPlayerTracks();
+ }
+};
+
+function openDB() {
  return new Promise((resolve,reject)=>{
   const req=indexedDB.open(DB_NAME,2);
   req.onupgradeneeded=()=>{
    const d=req.result;
-   if(!d.objectStoreNames.contains(STORE)){
-    d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
-   }
-   if(!d.objectStoreNames.contains(PLAYLIST_STORE)){
-    d.createObjectStore(PLAYLIST_STORE,{keyPath:'id',autoIncrement:true});
-   }
+   if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
+   if(!d.objectStoreNames.contains(PLAYLIST_STORE))d.createObjectStore(PLAYLIST_STORE,{keyPath:'id',autoIncrement:true});
   };
   req.onsuccess=()=>resolve(req.result);
   req.onerror=()=>reject(req.error);
  });
 }
-function getAll(store){
+function getAll(store) {
  return new Promise((resolve,reject)=>{
   const req=db.transaction(store,'readonly').objectStore(store).getAll();
   req.onsuccess=()=>resolve(req.result);
   req.onerror=()=>reject(req.error);
  });
 }
-function addRecord(store,record){
+function addRecord(store,record) {
  return new Promise((resolve,reject)=>{
   const tx=db.transaction(store,'readwrite');
   const req=tx.objectStore(store).add(record);
@@ -333,25 +699,25 @@ function addRecord(store,record){
   req.onsuccess=()=>id=req.result;
   tx.oncomplete=()=>resolve(id);
   tx.onerror=()=>reject(tx.error);
-  tx.onabort=()=>reject(tx.error||new Error('Save failed'));
+  tx.onabort=()=>reject(tx.error||new Error('저장 실패'));
  });
 }
-function putRecord(store,record){
+function putRecord(store,record) {
  return new Promise((resolve,reject)=>{
   const tx=db.transaction(store,'readwrite');
   tx.objectStore(store).put(record);
   tx.oncomplete=()=>resolve();
   tx.onerror=()=>reject(tx.error);
-  tx.onabort=()=>reject(tx.error||new Error('Update failed'));
+  tx.onabort=()=>reject(tx.error||new Error('수정 실패'));
  });
 }
-function deleteRecord(store,id){
+function deleteRecord(store,id) {
  return new Promise((resolve,reject)=>{
   const tx=db.transaction(store,'readwrite');
   tx.objectStore(store).delete(id);
   tx.oncomplete=()=>resolve();
   tx.onerror=()=>reject(tx.error);
-  tx.onabort=()=>reject(tx.error||new Error('Delete failed'));
+  tx.onabort=()=>reject(tx.error||new Error('삭제 실패'));
  });
 }
 const allTracks=()=>getAll(STORE);
@@ -362,118 +728,19 @@ const removeTrack=id=>deleteRecord(STORE,id);
 const savePlaylist=p=>addRecord(PLAYLIST_STORE,p);
 const updatePlaylist=p=>putRecord(PLAYLIST_STORE,p);
 const removePlaylist=id=>deleteRecord(PLAYLIST_STORE,id);
-function say(msg){$('status').textContent=msg}
-function categoryLabel(v){
- const category=categories.find(c=>c.id===v);
- if(category)return category.label;
- return ({Boarding:'탑승',Safety:'안전',Service:'서비스',Arrival:'도착',Other:'기타'})[v]||v||'기타';
+
+/* 등록일을 YYYY.MM.DD 형식으로 표시 */
+function formatAddedDate(t) {
+ if(!t.addedAt) return '등록일 정보 없음';
+ const date=new Date(t.addedAt);
+ if(Number.isNaN(date.getTime())) return '등록일 정보 없음';
+ const year=date.getFullYear();
+ const month=String(date.getMonth()+1).padStart(2,'0');
+ const day=String(date.getDate()).padStart(2,'0');
+ return `등록일 ${year}.${month}.${day}`;
 }
-function loadCategories(){
- try{
-  const saved=JSON.parse(localStorage.getItem(CATEGORY_STORAGE_KEY)||'null');
-  if(Array.isArray(saved)){
-   const seenIds=new Set(),seenNames=new Set(),clean=[];
-   saved.forEach(item=>{
-    if(!item||typeof item.id!=='string'||typeof item.label!=='string')return;
-    const id=item.id.trim(),label=item.label.trim();
-    if(!id||!label||seenIds.has(id)||seenNames.has(label.toLocaleLowerCase()))return;
-    seenIds.add(id);seenNames.add(label.toLocaleLowerCase());clean.push({id,label});
-   });
-   categories=clean.length?clean:DEFAULT_CATEGORIES.map(c=>({...c}));
-  }
- }catch{categories=DEFAULT_CATEGORIES.map(c=>({...c}));}
- if(!categories.some(c=>c.id==='Other'))categories.push({id:'Other',label:'기타'});
-}
-function persistCategories(){
- try{localStorage.setItem(CATEGORY_STORAGE_KEY,JSON.stringify(categories));}
- catch{say('카테고리 설정을 저장하지 못했습니다. 브라우저 저장 공간을 확인하세요.');}
-}
-function renderCategorySelects(){
- const build=(id,includeAll=false)=>{
-  const el=$(id);if(!el)return;
-  const previous=el.value;
-  el.replaceChildren();
-  if(includeAll){const all=document.createElement('option');all.value='All';all.textContent='전체 카테고리';el.append(all);}
-  categories.forEach(c=>{const option=document.createElement('option');option.value=c.id;option.textContent=c.label;el.append(option);});
-  if(previous&&(previous==='All'&&includeAll||categories.some(c=>c.id===previous)))el.value=previous;
-  else el.value=includeAll?'All':(categories.some(c=>c.id==='Other')?'Other':categories[0]?.id||'');
- };
- build('newCategory');build('manageNewCategory');build('category',true);build('manageCategory',true);
-}
-const CATEGORY_ICON_SVGS={
- Boarding:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V8l7-4 7 4v12"/><path d="M9 20v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/></svg>',
- Safety:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>',
- Service:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16M6 10v9M18 10v9M4 19h16M8 6h8M10 3h4M12 10v9"/></svg>',
- Arrival:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-5 7 5v11"/><path d="M9 13h6M12 10v6"/></svg>',
- Other:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>',
- custom:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H10l2 2h7.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><path d="M3 10h18"/></svg>'
-};
-function renderCategoryUI(){
- const grid=$('homeGrid');if(!grid)return;grid.replaceChildren();
- categories.forEach(category=>{
-  const button=document.createElement('button');button.type='button';button.className='home-tile';button.dataset.category=category.id;
-  const icon=document.createElement('span');icon.className='tile-icon';icon.innerHTML=CATEGORY_ICON_SVGS[category.id]||CATEGORY_ICON_SVGS.custom;
-  const label=document.createElement('span');label.className='tile-label';
-  const defaultCategory=DEFAULT_CATEGORIES.find(c=>c.id===category.id);
-  const shownName=defaultCategory&&category.label===defaultCategory.label?(HOME_CATEGORY_LABELS[category.id]||category.label):category.label;
-  label.textContent=shownName;
-  const arrow=document.createElement('span');arrow.className='tile-arrow';arrow.textContent=' ↗';label.append(arrow);
-  button.append(icon,label);grid.append(button);
- });
- const tools=document.createElement('div');tools.className='home-tile category-tools-tile';
- tools.innerHTML='<div class="category-tools-heading"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.08-.03a1.7 1.7 0 0 0-1.79.32l-.07.06h-3.4l-.04-.09a1.7 1.7 0 0 0-1.46-1.05l-.1-.01-2.4-2.4.03-.08a1.7 1.7 0 0 0-.32-1.79l-.06-.07v-3.4l.09-.04a1.7 1.7 0 0 0 1.05-1.46l.01-.1 2.4-2.4.08.03a1.7 1.7 0 0 0 1.79-.32l.07-.06h3.4l.04.09a1.7 1.7 0 0 0 1.46 1.05l.1.01 2.4 2.4-.03.08a1.7 1.7 0 0 0 .32 1.79l.06.07V15z" transform="translate(-2 -2) scale(.95)"/></svg></span><span class="tile-label">카테고리 관리</span></div><div class="category-tools-row"><button type="button" class="category-tool-btn" data-category-action="add" aria-label="카테고리 추가" title="카테고리 추가"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>추가</span></button><button type="button" class="category-tool-btn" data-category-action="delete" aria-label="카테고리 삭제" title="카테고리 삭제"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg><span>삭제</span></button><button type="button" class="category-tool-btn" data-category-action="rename" aria-label="카테고리 이름 변경" title="카테고리 이름 변경"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14 5 5 5M4 20l4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="M13 6l5 5"/></svg><span>변경</span></button></div>';
- grid.append(tools);
-}
-function chooseCategoryByNumber(options,promptTitle,defaultId){
- if(!options.length){say('선택할 카테고리가 없습니다.');return null;}
- const current=Math.max(0,options.findIndex(c=>c.id===defaultId));
- const listing=options.map((c,i)=>`${i+1}. ${c.label}`).join('\n');
- const answer=prompt(promptTitle+'\n'+listing+'\n번호를 입력하세요.',String(current+1));
- if(answer===null)return null;
- const index=Number(answer.trim())-1;
- if(!Number.isInteger(index)||index<0||index>=options.length){say('올바른 번호를 입력하세요.');return null;}
- return options[index];
-}
-async function addCategory(){
- if(categories.length>=20){say('카테고리는 최대 20개까지 만들 수 있습니다.');return;}
- const answer=prompt('추가할 카테고리 이름을 입력하세요.');
- if(answer===null)return;
- const label=answer.trim();
- if(!label){say('카테고리 이름을 입력하세요.');return;}
- if(categories.some(c=>c.label.toLocaleLowerCase()===label.toLocaleLowerCase())){say('같은 이름의 카테고리가 이미 있습니다.');return;}
- let id='Custom_'+Date.now().toString(36);let suffix=1;
- while(categories.some(c=>c.id===id)){id='Custom_'+Date.now().toString(36)+'_'+suffix++;}
- categories.push({id,label});persistCategories();renderCategoryUI();renderCategorySelects();await renderAll();say('카테고리 "'+label+'"를 추가했습니다.');
-}
-async function renameCategory(){
- const category=chooseCategoryByNumber(categories,'이름을 변경할 카테고리를 선택하세요.',selectedCategory);
- if(!category)return;
- const answer=prompt('새 카테고리 이름을 입력하세요.',category.label);
- if(answer===null)return;
- const label=answer.trim();
- if(!label){say('카테고리 이름을 입력하세요.');return;}
- if(categories.some(c=>c.id!==category.id&&c.label.toLocaleLowerCase()===label.toLocaleLowerCase())){say('같은 이름의 카테고리가 이미 있습니다.');return;}
- category.label=label;persistCategories();renderCategoryUI();renderCategorySelects();await renderAll();say('카테고리 이름을 변경했습니다.');
-}
-async function deleteCategory(){
- const options=categories.filter(c=>c.id!=='Other');
- const fallbackLabel=categoryLabel('Other');
- const category=chooseCategoryByNumber(options,'삭제할 카테고리를 선택하세요.\n'+fallbackLabel+' 카테고리는 기본 보관 위치이므로 삭제할 수 없습니다.',selectedCategory);
- if(!category)return;
- if(!confirm('"'+category.label+'" 카테고리를 삭제할까요?\n이 카테고리의 오디오는 "'+fallbackLabel+'"로 이동합니다.'))return;
- try{
-  const tracks=await allTracks();
-  for(const track of tracks){if(track.category===category.id){track.category='Other';await updateTrack(track);}}
-  categories=categories.filter(c=>c.id!==category.id);
-  if(selectedCategory===category.id)selectedCategory='Other';
-  persistCategories();renderCategoryUI();renderCategorySelects();await renderAll();say('카테고리를 삭제하고 관련 오디오를 기타로 이동했습니다.');
- }catch(error){say('카테고리를 삭제하지 못했습니다. 다시 시도하세요.');}
-}
-function languageLabel(v){
- return ({Korean:'한국어',English:'영어',Japanese:'일본어',Chinese:'중국어',Other:'기타',legacy:'기존 파일 · 미지정'})[v]||'기존 파일 · 미지정';
-}
-function isLegacy(t){return !t.language||!LANGUAGES.includes(t.language)}
-function filteredTracks(tracks,cat,lang,q){
+
+function filteredTracks(tracks,cat,lang,q) {
  q=(q||'').trim().toLowerCase();
  return tracks.filter(t=>
   (cat==='All'||t.category===cat)&&
@@ -481,101 +748,159 @@ function filteredTracks(tracks,cat,lang,q){
   String(t.name||'').toLowerCase().includes(q)
  );
 }
-function makeEmpty(text){
- const e=document.createElement('div');e.className='empty';e.textContent=text;return e;
+function makeEmpty(message) {
+ const e=document.createElement('div');
+ e.className='empty';e.textContent=message;
+ return e;
 }
-function makeTrackCard(t,manage=false,filteredQueue=null){
- const card=document.createElement('article');card.className='track';
- const top=document.createElement('div');top.className='tracktop';
- const name=document.createElement('div');name.className='trackname';name.textContent=t.name||'제목 없는 오디오';
- top.append(name);
- const badge=document.createElement('span');badge.className='trackbadge';badge.textContent=categoryLabel(t.category||'Other');
- card.append(top,badge);
- const sub=document.createElement('div');sub.className='sub';
- const addedDate=t.addedAt?new Date(t.addedAt).toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}):'등록일 미상';
- sub.textContent=languageLabel(isLegacy(t)?'legacy':t.language)+' · 등록일 '+addedDate;
- card.append(sub);
- const actions=document.createElement('div');actions.className='actions';
- const play=document.createElement('button');play.className='primary';play.textContent='▶ 재생';
- play.onclick=()=>{
-  if(filteredQueue){queue=filteredQueue.map(x=>x.id);queueIndex=queue.indexOf(t.id)}
-  else{queue=[t.id];queueIndex=0}
-  playTrack(t);
-  if(manage){selectedCategory=t.category||'Other';selectedLanguage=LANGUAGES.includes(t.language)?t.language:'Korean'}
+function makeTrackCard(t,manage=false,filteredQueue=null) {
+ const card=document.createElement('article');
+ card.className='track';
+ const top=document.createElement('div');
+ top.className='tracktop';
+ const name=document.createElement('button');
+ name.className='track-select trackname';
+ name.textContent=t.name||'제목 없는 오디오';
+ name.setAttribute('aria-label','오디오 선택: '+(t.name||'제목 없는 오디오'));
+ name.onclick=()=>{
+  if(filteredQueue) {
+   queue=filteredQueue.map(x=>x.id);
+   queueIndex=queue.indexOf(t.id);
+  } else {
+   queue=[t.id];queueIndex=0;
+  }
+  selectTrack(t);
  };
- const edit=document.createElement('button');edit.textContent='수정';
+ top.append(name);
+ const badge=document.createElement('span');
+ badge.className='trackbadge';
+ badge.textContent=categoryLabel(t.category||'Other');
+ card.append(top,badge);
+ const sub=document.createElement('div');
+ sub.className='sub';
+ sub.textContent=languageLabel(isLegacy(t)?'legacy':t.language);
+ card.append(sub);
+
+ /* 언어 아래에 등록일 표시 */
+ const dateLine=document.createElement('div');
+ dateLine.className='track-date';
+ dateLine.textContent=formatAddedDate(t);
+ card.append(dateLine);
+
+ const actions=document.createElement('div');
+ actions.className='actions';
+ const play=document.createElement('button');
+ play.className='primary';play.textContent='▶ 재생';
+ play.onclick=()=>{
+  if(filteredQueue) {
+   queue=filteredQueue.map(x=>x.id);
+   queueIndex=queue.indexOf(t.id);
+  } else {
+   queue=[t.id];queueIndex=0;
+  }
+  playTrack(t);
+ };
+ const edit=document.createElement('button');
+ edit.textContent='수정';
  edit.onclick=async()=>{
   const nameVal=prompt('오디오 이름:',t.name||'');
   if(nameVal===null)return;
-  const catInput=prompt('카테고리 이름 또는 ID를 입력하세요:\n'+categories.map(c=>c.label).join(', '),categoryLabel(t.category||'Other'));
-  if(catInput===null)return;
-  const cat=categories.find(c=>c.id===catInput.trim()||c.label.toLocaleLowerCase()===catInput.trim().toLocaleLowerCase());
-  if(!cat){say('목록에 있는 카테고리 이름을 입력하세요.');return}
-  const lang=prompt('언어: '+LANGUAGES.map(languageLabel).join(', '),LANGUAGES.includes(t.language)?t.language:'Korean');
+  const cat=prompt('카테고리 입력 (탑승, 안전, 서비스, 도착, 기타)',categoryLabel(t.category));
+  if(cat===null)return;
+  const categoryMap={'탑승':'Boarding','안전':'Safety','서비스':'Service','도착':'Arrival','기타':'Other','Boarding':'Boarding','Safety':'Safety','Service':'Service','Arrival':'Arrival','Other':'Other'};
+  if(!categoryMap[cat]){say('목록에 있는 카테고리를 입력하세요.');return}
+  const lang=prompt('언어 입력 (한국어, 영어, 일본어, 중국어, 기타)',languageLabel(t.language));
   if(lang===null)return;
-  if(!LANGUAGES.includes(lang)){say('목록에 있는 언어를 선택하세요.');return}
-  t.name=nameVal.trim()||t.name;t.category=cat.id;t.language=lang;
-  await updateTrack(t);await renderAll();say('오디오 정보가 수정되었습니다.');
+  const languageMap={'한국어':'Korean','영어':'English','일본어':'Japanese','중국어':'Chinese','기타':'Other','Korean':'Korean','English':'English','Japanese':'Japanese','Chinese':'Chinese','Other':'Other'};
+  if(!languageMap[lang]){say('목록에 있는 언어를 입력하세요.');return}
+  t.name=nameVal.trim()||t.name;
+  t.category=categoryMap[cat];
+  t.language=languageMap[lang];
+  /* addedAt은 수정하지 않아 최초 등록일을 유지 */
+  await updateTrack(t);
+  await renderAll();
+  say('오디오 정보가 수정되었습니다.');
  };
- const del=document.createElement('button');del.textContent='삭제';
+ const del=document.createElement('button');
+ del.textContent='삭제';
  del.onclick=async()=>{
   if(!confirm('앱 라이브러리에서 이 오디오를 삭제할까요?'))return;
   if(currentId===t.id)stopPlayback();
   await removeTrack(t.id);
   queue=queue.filter(id=>id!==t.id);
-  await renderAll();say('오디오가 삭제되었습니다.');
+  await renderAll();
+  say('오디오가 삭제되었습니다.');
  };
  actions.append(play);
- if(manage)actions.append(edit,del);
- else{
-  const editBtn=document.createElement('button');editBtn.textContent='수정';
-  editBtn.onclick=edit.onclick;
-  const delBtn=document.createElement('button');delBtn.textContent='삭제';
-  delBtn.onclick=del.onclick;
-  actions.append(editBtn,delBtn);
- }
- card.append(actions);return card;
+ actions.append(edit,del);
+ card.append(actions);
+ return card;
 }
-async function renderPlayerTracks(){
+
+async function renderPlayerTracks() {
  if(!db)return;
  const tracks=await allTracks();
  const filtered=filteredTracks(tracks,$('category').value,$('language').value,$('search').value);
  $('list').replaceChildren();
- if(!filtered.length)$('list').append(makeEmpty(tracks.length?'필터 조건에 맞는 오디오가 없습니다.':'오디오 추가를 눌러 첫 파일을 가져오세요.'));
+ if(!filtered.length) {
+  $('list').append(makeEmpty(tracks.length?'필터 조건에 맞는 오디오가 없습니다.':'＋ 버튼을 눌러 첫 오디오를 추가하세요.'));
+ }
  filtered.forEach(t=>$('list').append(makeTrackCard(t,false,filtered)));
 }
-async function renderManage(){
+async function renderManage() {
  if(!db)return;
  const tracks=await allTracks();
  const filtered=filteredTracks(tracks,$('manageCategory').value,$('manageLanguage').value,$('manageSearch').value);
  $('manageList').replaceChildren();
- if(!filtered.length)$('manageList').append(makeEmpty(tracks.length?'필터 조건에 맞는 오디오가 없습니다.':'아직 가져온 오디오가 없습니다.'));
+ if(!filtered.length) {
+  $('manageList').append(makeEmpty(tracks.length?'필터 조건에 맞는 오디오가 없습니다.':'아직 가져온 오디오가 없습니다.'));
+ }
  filtered.forEach(t=>$('manageList').append(makeTrackCard(t,true,filtered)));
 }
-async function renderAll(){
+async function renderAll() {
  await renderPlayerTracks();
  if($('manageScreen').classList.contains('active'))await renderManage();
  if($('playlistScreen').classList.contains('active'))await renderPlaylists();
 }
-function stopPlayback(){
- player.pause();player.removeAttribute('src');player.load();currentId=null;
- if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null}
- $('nowTitle').textContent='오디오를 선택하세요';$('nowMeta').textContent='재생 준비 완료';$('playPause').textContent='▶ 재생';
-}
-function playTrack(t){
+
+/* 제목을 눌렀을 때는 선택만 하고, 재생은 누르지 않음 */
+function selectTrack(t) {
  if(!t)return;
  if(objectUrl)URL.revokeObjectURL(objectUrl);
- objectUrl=URL.createObjectURL(t.blob);currentId=t.id;player.src=objectUrl;
+ objectUrl=URL.createObjectURL(t.blob);
+ currentId=t.id;
+ player.pause();
+ player.src=objectUrl;
+ player.load();
  $('nowTitle').textContent=t.name||'제목 없는 오디오';
  $('nowMeta').textContent=categoryLabel(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
- $('playPause').textContent='Ⅱ 일시정지';
- player.play().then(()=>say('재생 중: '+(t.name||'제목 없는 오디오'))).catch(()=>say('오디오 조작부의 재생 버튼을 눌러 재생하세요.'));
+ $('playPause').textContent='▶ 재생';
+ $('now').classList.add('visible');
+ say('오디오 선택 완료 · 재생 버튼을 눌러 재생하세요.');
 }
-async function playRelative(direction){
+function stopPlayback() {
+ player.pause();
+ player.removeAttribute('src');
+ player.load();
+ currentId=null;
+ if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null}
+ $('nowTitle').textContent='오디오를 선택하세요';
+ $('nowMeta').textContent='재생할 오디오를 선택하세요.';
+ $('playPause').textContent='▶ 재생';
+ $('now').classList.remove('visible');
+}
+function playTrack(t) {
+ if(!t)return;
+ selectTrack(t);
+ player.play()
+  .then(()=>say('재생 중: '+(t.name||'제목 없는 오디오')))
+  .catch(()=>say('오디오 조작부의 재생 버튼을 눌러 재생하세요.'));
+}
+async function playRelative(direction) {
  if(!queue.length){say('먼저 오디오를 선택하세요.');return}
  const tracks=await allTracks();
  let i=queueIndex+direction;
- while(i>=0&&i<queue.length){
+ while(i>=0&&i<queue.length) {
   const t=tracks.find(x=>x.id===queue[i]);
   if(t){queueIndex=i;playTrack(t);return}
   i+=direction;
@@ -586,61 +911,101 @@ $('previous').onclick=()=>playRelative(-1);
 $('next').onclick=()=>playRelative(1);
 $('playPause').onclick=()=>{
  if(!player.src){say('먼저 오디오를 선택하세요.');return}
- if(player.paused)player.play().then(()=>$('playPause').textContent='Ⅱ 일시정지').catch(()=>say('재생을 시작할 수 없습니다.'));
- else{player.pause();$('playPause').textContent='▶ 재생'}
+ if(player.paused) {
+  player.play().then(()=>$('playPause').textContent='Ⅱ 일시정지').catch(()=>say('재생을 시작할 수 없습니다.'));
+ } else {
+  player.pause();
+  $('playPause').textContent='▶ 재생';
+ }
 };
 player.addEventListener('play',()=>$('playPause').textContent='Ⅱ 일시정지');
 player.addEventListener('pause',()=>$('playPause').textContent='▶ 재생');
 player.addEventListener('ended',()=>playRelative(1));
-player.addEventListener('error',()=>{if(player.currentSrc)say('이 파일을 재생할 수 없습니다. 오디오 형식을 확인하세요.')});
+player.addEventListener('error',()=>{
+ if(player.currentSrc)say('이 파일을 재생할 수 없습니다. 오디오 형식을 확인하세요.');
+});
 
-function setupImport(prefix,manage=false){
+function setupImport(manage=false) {
  const ids=manage?{
-  panel:'manageAddPanel',name:'manageNewName',cat:'manageNewCategory',lang:'manageNewLanguage',
-  files:'manageFiles',choose:'manageChooseFiles',selected:'manageSelectedFiles',
-  save:'manageSaveSelected',cancel:'manageCancelAdd'
+  panel:'manageAddPanel',name:'manageNewName',cat:'manageNewCategory',
+  lang:'manageNewLanguage',files:'manageFiles',choose:'manageChooseFiles',
+  selected:'manageSelectedFiles',save:'manageSaveSelected',cancel:'manageCancelAdd'
  }:{
   panel:'addPanel',name:'newName',cat:'newCategory',lang:'newLanguage',
-  files:'files',choose:'chooseFiles',selected:'selectedFiles',save:'saveSelected',cancel:'cancelAdd'
+  files:'files',choose:'chooseFiles',selected:'selectedFiles',
+  save:'saveSelected',cancel:'cancelAdd'
  };
  let chosen=[];
- const updateChosen=()=>$(ids.selected).textContent=chosen.length?chosen.map(f=>f.name).join(', '):'선택된 파일 없음';
+ const updateChosen=()=>{
+  $(ids.selected).textContent=chosen.length?chosen.map(f=>f.name).join(', '):'선택된 파일 없음';
+ };
  const open=()=>{
   $(ids.panel).style.display='block';
   $(ids.cat).value=manage?($('manageCategory').value==='All'?'Other':$('manageCategory').value):selectedCategory;
   $(ids.lang).value=manage?($('manageLanguage').value==='All'?'Korean':$('manageLanguage').value):selectedLanguage;
-  $(ids.name).value='';chosen=[];$(ids.files).value='';updateChosen();
+  $(ids.name).value='';
+  chosen=[];
+  $(ids.files).value='';
+  updateChosen();
   $(ids.panel).scrollIntoView({behavior:'smooth',block:'nearest'});
  };
  $(ids.choose).onclick=()=>$(ids.files).click();
  $(ids.files).onchange=e=>{
-  chosen=[...e.target.files];updateChosen();
+  chosen=[...e.target.files];
+  updateChosen();
   $(ids.name).value=chosen.length===1?chosen[0].name.replace(/\.[^.]+$/,''):'';
  };
- $(ids.cancel).onclick=()=>{$(ids.panel).style.display='none';chosen=[];$(ids.files).value='';updateChosen()};
+ $(ids.cancel).onclick=()=>{
+  $(ids.panel).style.display='none';
+  chosen=[];
+  $(ids.files).value='';
+  updateChosen();
+ };
  $(ids.save).onclick=async()=>{
   if(!chosen.length){say('먼저 오디오 파일을 하나 이상 선택하세요.');return}
-  const category=$(ids.cat).value,language=$(ids.lang).value,custom=$(ids.name).value.trim();
-  $(ids.save).disabled=true;say('오디오 저장 중…');let count=0,skipped=0;
-  try{
-   for(let i=0;i<chosen.length;i++){
-    const f=chosen[i];
+  const category=$(ids.cat).value;
+  const language=$(ids.lang).value;
+  const custom=$(ids.name).value.trim();
+  $(ids.save).disabled=true;
+  say('오디오 저장 중…');
+  let count=0,skipped=0;
+  try {
+   for(const f of chosen) {
     if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|ogg|flac|aiff|wma)$/i.test(f.name)){skipped++;continue}
-    await saveTrack({name:chosen.length===1&&custom?custom:f.name.replace(/\.[^.]+$/,''),category,language,blob:f,addedAt:Date.now()});
+    await saveTrack({
+     name:chosen.length===1&&custom?custom:f.name.replace(/\.[^.]+$/,''),
+     category,language,blob:f,addedAt:Date.now()
+    });
     count++;
    }
-   $(ids.panel).style.display='none';chosen=[];$(ids.files).value='';updateChosen();
-   if(!manage){selectedCategory=category;selectedLanguage=language;$('category').value=category;$('language').value=language}
+   $(ids.panel).style.display='none';
+   chosen=[];
+   $(ids.files).value='';
+   updateChosen();
+   if(!manage) {
+    selectedCategory=category;
+    selectedLanguage=language;
+    $('category').value=category;
+    $('language').value=language;
+    $('playerHeading').textContent=categoryLabel(category);
+    $('playerDescription').textContent=languageLabel(language)+' 안내 방송';
+   }
    await renderAll();
    say(count+'개 오디오 파일을 저장했습니다.'+(skipped?' '+skipped+'개 지원하지 않는 파일은 건너뛰었습니다.':''));
-  }catch(err){say('저장에 실패했습니다. 브라우저 저장 공간을 확인하고 원본 파일을 보관하세요.')}
-  finally{$(ids.save).disabled=false}
+  } catch(err) {
+   say('저장에 실패했습니다. 브라우저 저장 공간을 확인하고 원본 파일을 보관하세요.');
+  } finally {
+   $(ids.save).disabled=false;
+  }
  };
  return open;
 }
-const openPlayerImport=setupImport('player',false);
-const openManageImport=setupImport('manage',true);
-$('add').onclick=openPlayerImport;
+const openPlayerImport=setupImport(false);
+const openManageImport=setupImport(true);
+$('add').onclick=()=>{
+ closePlayerMenu();
+ openPlayerImport();
+};
 $('manageAdd').onclick=openManageImport;
 $('category').onchange=renderPlayerTracks;
 $('language').onchange=renderPlayerTracks;
@@ -650,102 +1015,158 @@ $('manageLanguage').onchange=renderManage;
 $('manageSearch').oninput=renderManage;
 
 let editingOrderId=null;
-async function renderPlaylists(){
+let orderDraft=[];
+
+async function renderPlaylists() {
  if(!db)return;
- const tracks=await allTracks(),playlists=await allPlaylists();
- const choiceBox=$('playlistTrackChoices');choiceBox.replaceChildren();
- if(!tracks.length)choiceBox.append(makeEmpty('재생목록을 만들기 전에 오디오를 먼저 가져오세요.'));
- else tracks.forEach(t=>{
-  const label=document.createElement('label');label.className='track-check';
-  const cb=document.createElement('input');cb.type='checkbox';cb.value=String(t.id);cb.className='playlist-choice';
-  const span=document.createElement('span');span.textContent=(t.name||'제목 없는 오디오')+' · '+categoryLabel(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
-  label.append(cb,span);choiceBox.append(label);
- });
- const list=$('playlistList');list.replaceChildren();
- if(!playlists.length)list.append(makeEmpty('저장된 재생목록이 없습니다. 위에서 새 재생목록을 만들어 보세요.'));
+ const tracks=await allTracks();
+ const playlists=await allPlaylists();
+ const choiceBox=$('playlistTrackChoices');
+ choiceBox.replaceChildren();
+ if(!tracks.length) {
+  choiceBox.append(makeEmpty('재생목록을 만들기 전에 오디오를 가져오세요.'));
+ } else {
+  tracks.forEach(t=>{
+   const label=document.createElement('label');
+   label.className='track-check';
+   const cb=document.createElement('input');
+   cb.type='checkbox';cb.value=String(t.id);cb.className='playlist-choice';
+   const span=document.createElement('span');
+   span.textContent=(t.name||'제목 없는 오디오')+' · '+categoryLabel(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
+   label.append(cb,span);
+   choiceBox.append(label);
+  });
+ }
+ const list=$('playlistList');
+ list.replaceChildren();
+ if(!playlists.length)list.append(makeEmpty('저장된 재생목록이 없습니다. 위에서 새로 만들어 보세요.'));
  playlists.forEach(p=>{
-  const card=document.createElement('article');card.className='playlist-card';
-  const title=document.createElement('div');title.className='playlist-title';title.textContent=p.name||'이름 없는 재생목록';
-  const desc=document.createElement('div');desc.className='sub';desc.textContent=(p.trackIds||[]).length+'개 오디오 · 순차 재생';
-  const actions=document.createElement('div');actions.className='playlist-actions';
-  const play=document.createElement('button');play.className='primary';play.textContent='▶ 재생목록 재생';
+  const card=document.createElement('article');
+  card.className='playlist-card';
+  const title=document.createElement('div');
+  title.className='playlist-title';title.textContent=p.name||'이름 없는 재생목록';
+  const desc=document.createElement('div');
+  desc.className='sub';desc.textContent=(p.trackIds||[]).length+'개 오디오 · 순차 재생';
+  const actions=document.createElement('div');
+  actions.className='playlist-actions';
+  const play=document.createElement('button');
+  play.className='primary';play.textContent='▶ 재생';
   play.onclick=async()=>{
-   const fresh=await allTracks(),valid=(p.trackIds||[]).filter(id=>fresh.some(t=>t.id===id));
-   if(!valid.length){say('재생할 수 있는 오디오가 재생목록에 없습니다.');return}
+   const fresh=await allTracks();
+   const valid=(p.trackIds||[]).filter(id=>fresh.some(t=>t.id===id));
+   if(!valid.length){say('재생할 수 있는 오디오가 없습니다.');return}
    queue=valid;queueIndex=0;
-   const t=fresh.find(x=>x.id===queue[0]);showScreen('playerScreen');playTrack(t);
+   const t=fresh.find(x=>x.id===queue[0]);
+   showScreen('playerScreen');
+   playTrack(t);
   };
-  const edit=document.createElement('button');edit.textContent='재생 순서 편집';
-  edit.onclick=()=>openOrderEditor(p);
-  const rename=document.createElement('button');rename.textContent='이름 변경';
+  const edit=document.createElement('button');
+  edit.textContent='재생 순서 편집';edit.onclick=()=>openOrderEditor(p);
+  const rename=document.createElement('button');
+  rename.textContent='이름 변경';
   rename.onclick=async()=>{
    const name=prompt('재생목록 이름:',p.name||'');
    if(name===null)return;
-   p.name=name.trim()||p.name;p.updatedAt=Date.now();await updatePlaylist(p);await renderPlaylists();say('재생목록을 수정했습니다.');
+   p.name=name.trim()||p.name;p.updatedAt=Date.now();
+   await updatePlaylist(p);await renderPlaylists();say('재생목록 이름을 변경했습니다.');
   };
-  const del=document.createElement('button');del.textContent='삭제';
-  del.onclick=async()=>{if(confirm('이 재생목록을 삭제할까요?')){await removePlaylist(p.id);await renderPlaylists();say('재생목록을 삭제했습니다.')}};
-  actions.append(play,edit,rename,del);card.append(title,desc,actions);list.append(card);
+  const del=document.createElement('button');
+  del.textContent='삭제';
+  del.onclick=async()=>{
+   if(confirm('이 재생목록을 삭제할까요?')) {
+    await removePlaylist(p.id);await renderPlaylists();say('재생목록을 삭제했습니다.');
+   }
+  };
+  actions.append(play,edit,rename,del);
+  card.append(title,desc,actions);
+  list.append(card);
  });
 }
+
 $('savePlaylist').onclick=async()=>{
  const name=$('playlistName').value.trim();
  const trackIds=[...document.querySelectorAll('.playlist-choice:checked')].map(cb=>Number(cb.value));
  if(!name){say('재생목록 이름을 입력하세요.');return}
  if(!trackIds.length){say('오디오를 하나 이상 선택하세요.');return}
  const now=Date.now();
- try{
+ try {
   await savePlaylist({name,trackIds,createdAt:now,updatedAt:now});
-  $('playlistName').value='';await renderPlaylists();say('재생목록을 저장했습니다.');
- }catch(e){say('재생목록을 저장하지 못했습니다.')}
+  $('playlistName').value='';
+  await renderPlaylists();
+  say('재생목록을 저장했습니다.');
+ } catch(e){say('재생목록을 저장하지 못했습니다.')}
 };
 $('clearPlaylistForm').onclick=()=>{
  $('playlistName').value='';
  document.querySelectorAll('.playlist-choice').forEach(cb=>cb.checked=false);
 };
-function openOrderEditor(p){
- editingOrderId=p.id;orderDraft=[...(p.trackIds||[])];
- $('playlistOrderTitle').textContent='재생 순서 편집 · '+(p.name||'재생목록');
- $('playlistOrderPanel').style.display='block';renderOrderRows();
+function openOrderEditor(p) {
+ editingOrderId=p.id;
+ orderDraft=[...(p.trackIds||[])];
+ $('playlistOrderTitle').textContent='재생 순서 · '+(p.name||'재생목록');
+ $('playlistOrderPanel').style.display='block';
+ renderOrderRows();
  $('playlistOrderPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-async function renderOrderRows(){
- const tracks=await allTracks(),box=$('playlistOrderRows');box.replaceChildren();
+async function renderOrderRows() {
+ const tracks=await allTracks();
+ const box=$('playlistOrderRows');
+ box.replaceChildren();
  const available=orderDraft.map((id,index)=>({id,index,t:tracks.find(x=>x.id===id)})).filter(x=>x.t);
  if(!available.length)box.append(makeEmpty('재생할 수 있는 오디오가 없습니다.'));
- available.forEach(({id,index,t})=>{
-  const row=document.createElement('div');row.className='order-row';
-  const name=document.createElement('div');name.className='order-name';name.textContent=(index+1)+'. '+(t.name||'제목 없는 오디오');
-  const up=document.createElement('button');up.textContent='↑';up.disabled=index===0;up.setAttribute('aria-label','위로 이동');
-  up.onclick=()=>{[orderDraft[index-1],orderDraft[index]]=[orderDraft[index],orderDraft[index-1]];renderOrderRows()};
-  const down=document.createElement('button');down.textContent='↓';down.disabled=index===orderDraft.length-1;down.setAttribute('aria-label','아래로 이동');
-  down.onclick=()=>{[orderDraft[index+1],orderDraft[index]]=[orderDraft[index],orderDraft[index+1]];renderOrderRows()};
-  const remove=document.createElement('button');remove.textContent='×';remove.setAttribute('aria-label','재생목록에서 제거');
+ available.forEach(({index,t})=>{
+  const row=document.createElement('div');
+  row.className='order-row';
+  const name=document.createElement('div');
+  name.className='order-name';name.textContent=(index+1)+'. '+(t.name||'제목 없는 오디오');
+  const up=document.createElement('button');
+  up.textContent='↑';up.disabled=index===0;up.setAttribute('aria-label','위로 이동');
+  up.onclick=()=>{
+   [orderDraft[index-1],orderDraft[index]]=[orderDraft[index],orderDraft[index-1]];
+   renderOrderRows();
+  };
+  const down=document.createElement('button');
+  down.textContent='↓';down.disabled=index===orderDraft.length-1;down.setAttribute('aria-label','아래로 이동');
+  down.onclick=()=>{
+   [orderDraft[index+1],orderDraft[index]]=[orderDraft[index],orderDraft[index+1]];
+   renderOrderRows();
+  };
+  const remove=document.createElement('button');
+  remove.textContent='×';remove.setAttribute('aria-label','재생목록에서 제거');
   remove.onclick=()=>{orderDraft.splice(index,1);renderOrderRows()};
-  row.append(name,up,down,remove);box.append(row);
+  row.append(name,up,down,remove);
+  box.append(row);
  });
 }
 $('saveOrder').onclick=async()=>{
- const playlists=await allPlaylists(),p=playlists.find(x=>x.id===editingOrderId);
+ const playlists=await allPlaylists();
+ const p=playlists.find(x=>x.id===editingOrderId);
  if(!p)return;
- p.trackIds=orderDraft.filter(id=>id!==undefined);p.updatedAt=Date.now();
- await updatePlaylist(p);$('playlistOrderPanel').style.display='none';await renderPlaylists();say('재생 순서를 저장했습니다.');
+ p.trackIds=orderDraft.filter(id=>id!==undefined);
+ p.updatedAt=Date.now();
+ await updatePlaylist(p);
+ $('playlistOrderPanel').style.display='none';
+ await renderPlaylists();
+ say('재생 순서를 저장했습니다.');
 };
-$('cancelOrder').onclick=()=>{$('playlistOrderPanel').style.display='none';editingOrderId=null;orderDraft=[]};
-
-loadCategories();
-renderCategorySelects();
-renderCategoryUI();
+$('cancelOrder').onclick=()=>{
+ $('playlistOrderPanel').style.display='none';
+ editingOrderId=null;orderDraft=[];
+};
 
 (async()=>{
- try{
-  if(!('indexedDB' in window))throw Error('IndexedDB unavailable');
+ try {
+  if(!('indexedDB' in window))throw Error('IndexedDB 사용 불가');
   db=await openDB();
-  if(navigator.storage&&navigator.storage.persist){try{await navigator.storage.persist()}catch{}}
+  if(navigator.storage&&navigator.storage.persist) {
+   try{await navigator.storage.persist()}catch{}
+  }
   await renderAll();
   say('준비 완료 · 오디오는 이 기기에 저장됩니다.');
- }catch(e){say('로컬 저장소를 열 수 없습니다. Safari에서 앱을 다시 열고 시도하세요.')}
- if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+ } catch(e) {
+  say('로컬 저장소를 열 수 없습니다. Safari에서 앱을 다시 열고 시도하세요.');
+ }
+ if('serviceWorker' in navigator&&location.protocol.startsWith('http')) {
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
  }
 })();
