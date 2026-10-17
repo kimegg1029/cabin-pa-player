@@ -1,22 +1,605 @@
 
-Cabin PA Player
-PERSONAL ANNOUNCEMENT LIBRARY
-☾
-CABIN ANNOUNCEMENT
-Select Announcement Type
-Choose a category to continue.
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d71920">
+<link rel="manifest" href="./manifest.json">
+<title>Cabin PA Player</title>
+<style>
+:root{color-scheme:light;--bg:#f6f7f9;--surface:#fff;--surface2:#fff3f3;--text:#17212f;--muted:#758092;--accent:#d71920;--accent2:#b90f18;--border:#e6e9ee;--shadow:0 8px 24px rgba(20,32,50,.07);--header:#fff;--soft:#f0f2f5}
+body.dark{color-scheme:dark;--bg:#10151d;--surface:#1a2330;--surface2:#321f25;--text:#f4f6f9;--muted:#aab5c4;--accent:#ff454c;--accent2:#ff656a;--border:#303b4a;--shadow:0 8px 24px rgba(0,0,0,.2);--header:#151d28;--soft:#222d3b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .2s,color .2s}
+button,input,select{font:inherit}
+button{border:0;border-radius:14px;padding:12px 14px;background:var(--soft);color:var(--text);font-weight:650;cursor:pointer;transition:transform .12s,background .15s}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--accent);color:white}
+.primary:hover{background:var(--accent2)}
+.ghost{background:transparent;border:1px solid var(--border)}
+header{background:var(--header);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.header-inner{max-width:760px;margin:auto;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.brand-mark{width:42px;height:42px;border-radius:14px;background:var(--accent);display:grid;place-items:center;color:white;flex-shrink:0}
+.brand-mark svg{width:25px;height:25px}
+.brand{flex:1;min-width:0}
+.brand h1{font-size:17px;line-height:1.2;margin:0 0 4px;font-weight:850;letter-spacing:-.35px}
+.brand p{font-size:10px;letter-spacing:1.35px;color:var(--muted);margin:0;font-weight:750}
+.icon-btn{width:42px;height:42px;padding:0;border:1px solid var(--border);border-radius:14px;background:var(--surface);display:grid;place-items:center;font-size:18px}
+main{max-width:760px;margin:0 auto;padding:24px 18px 40px;min-height:calc(100dvh - 72px)}
+.screen{display:none}
+.screen.active{display:block;animation:enter .18s ease-out}
+@keyframes enter{from{opacity:.55;transform:translateY(5px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:11px;color:var(--accent);letter-spacing:1.4px;font-weight:850;text-transform:uppercase;margin:0 0 9px}
+.screen-title{font-size:28px;line-height:1.15;letter-spacing:-.9px;margin:0 0 9px;font-weight:850}
+.screen-desc{font-size:14px;line-height:1.5;color:var(--muted);margin:0}
+.hero{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:24px 20px;margin-bottom:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:125px;height:125px;border-radius:50%;background:var(--surface2);right:-40px;top:-44px;pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.home-tile{background:var(--surface);border:1px solid var(--border);border-radius:22px;min-height:142px;padding:18px 16px;text-align:left;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;box-shadow:var(--shadow)}
+.home-tile:hover{border-color:var(--accent)}
+.tile-icon{width:43px;height:43px;display:grid;place-items:center;background:var(--surface2);color:var(--accent);border-radius:15px}
+.tile-icon svg{width:23px;height:23px}
+.tile-label{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.tile-arrow{font-size:12px;color:var(--muted);margin-left:7px}
+.section-head{display:flex;align-items:center;gap:10px;margin:22px 0 12px}
+.section-head h3{font-size:14px;margin:0;font-weight:800}
+.section-head .line{height:1px;background:var(--border);flex:1}
+.back-row{display:flex;align-items:center;gap:9px;margin-bottom:20px}
+.back-row button{padding:9px 12px}
+.back-row span{font-size:12px;color:var(--muted);font-weight:650}
+.choice-list{display:grid;gap:10px;margin-top:22px}
+.choice{display:flex;align-items:center;gap:14px;text-align:left;background:var(--surface);border:1px solid var(--border);padding:15px;border-radius:17px;min-height:72px}
+.choice .choice-icon{width:42px;height:42px;border-radius:13px;background:var(--surface2);color:var(--accent);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.choice .choice-text{flex:1}
+.choice strong{display:block;font-size:15px}
+.choice small{display:block;color:var(--muted);font-size:12px;margin-top:4px;font-weight:500}
+.choice .chevron{color:var(--muted);font-size:20px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.toolbar{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}
+.toolbar button{min-height:46px}
+.field{margin:13px 0}
+.field label{display:block;font-size:12px;color:var(--muted);font-weight:750;margin-bottom:7px}
+input[type=search],input[type=text],select{width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+#addPanel{display:none;margin:14px 0}
+#selectedFiles{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;overflow-wrap:anywhere}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+#list{display:grid;gap:10px;margin-top:14px}
+.track{background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:15px}
+.tracktop{display:flex;align-items:center;gap:10px}
+.trackname{flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:800}
+.trackbadge{display:inline-flex;background:var(--surface2);color:var(--accent);border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800;margin-top:8px}
+.sub{color:var(--muted);font-size:12px;margin-top:7px}
+.actions{display:flex;gap:7px;margin-top:13px}
+.actions button{flex:1;padding:10px 8px;font-size:12px}
+#now{margin-top:16px}
+.now-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.album-art{width:54px;height:54px;border-radius:17px;background:var(--accent);display:grid;place-items:center;color:white;flex-shrink:0}
+.album-art svg{width:27px;height:27px}
+.now-copy{flex:1;min-width:0}
+.now-label{font-size:10px;letter-spacing:1.2px;color:var(--accent);font-weight:850;margin-bottom:5px}
+#nowTitle{font-weight:800;font-size:15px;overflow-wrap:anywhere}
+#nowMeta{font-size:12px;color:var(--muted);margin-top:4px}
+audio{width:100%;height:42px;display:block}
+.play-controls{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:9px;margin-top:12px}
+.play-controls button{min-height:46px}
+.play-controls .primary{font-size:14px}
+#status{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5;min-height:18px}
+.empty{padding:24px 15px;text-align:center;border:1px dashed var(--border);border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6}
+.track-check{display:flex;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px}
+.track-check input{accent-color:var(--accent);width:18px;height:18px}
+.track-check span{flex:1;overflow-wrap:anywhere}
+.playlist-card{padding:15px;border:1px solid var(--border);background:var(--surface);border-radius:17px;margin-top:10px}
+.playlist-title{font-weight:800;overflow-wrap:anywhere}
+.playlist-actions{display:flex;gap:7px;margin-top:12px}
+.playlist-actions button{flex:1;font-size:12px;padding:10px 8px}
+.order-row{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--border)}
+.order-row .order-name{flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere}
+.order-row button{padding:8px 10px}
+footer{font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0}
+@media(min-width:560px){main{padding-top:30px}.home-tile{min-height:158px;padding:21px}.hero{padding:28px}.screen-title{font-size:31px}}
+@media(max-width:370px){.screen-title{font-size:25px}.home-tile{min-height:128px;padding:14px}.tile-label{font-size:13px}.filters{grid-template-columns:1fr}.actions{gap:5px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="header-inner">
+  <div class="brand-mark" aria-hidden="true">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14.5 21 4l-6.5 17-3.2-6.2L3 14.5Z"/><path d="m11.3 14.8 4.8-5"/></svg>
+  </div>
+  <div class="brand"><h1>Cabin PA Player</h1><p>PERSONAL ANNOUNCEMENT LIBRARY</p></div>
+  <button class="icon-btn" id="themeToggle" aria-label="테마 변경" title="테마 변경">☾</button>
+ </div>
+</header>
 
-Boarding ↗
+<main>
+ <section class="screen active" id="homeScreen">
+  <div class="hero">
+   <p class="eyebrow">Cabin announcement</p>
+   <h2 class="screen-title">Select Announcement Type</h2>
+   <p class="screen-desc">Choose a category to continue.</p>
+  </div>
+  <div class="home-grid">
+   <button class="home-tile" data-category="Boarding"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V8l7-4 7 4v12"/><path d="M9 20v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/></svg></span><span class="tile-label">Boarding <span class="tile-arrow">↗</span></span></button>
+   <button class="home-tile" data-category="Safety"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="tile-label">Safety <span class="tile-arrow">↗</span></span></button>
+   <button class="home-tile" data-category="Service"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h16M6 10v9M18 10v9M4 19h16M8 6h8M10 3h4M12 10v9"/></svg></span><span class="tile-label">Service <span class="tile-arrow">↗</span></span></button>
+   <button class="home-tile" data-category="Arrival"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18M5 20V9l7-5 7 5v11"/><path d="M9 13h6M12 10v6"/></svg></span><span class="tile-label">Arrival <span class="tile-arrow">↗</span></span></button>
+   <button class="home-tile" data-category="Other"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg></span><span class="tile-label">Other <span class="tile-arrow">↗</span></span></button>
+   <button class="home-tile" id="manageTile"><span class="tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span><span class="tile-label">Manage Audio <span class="tile-arrow">↗</span></span></button>
+  </div>
+  <footer>Audio is stored locally on this device. Keep a separate backup of original files.</footer>
+ </section>
 
-Safety ↗
+ <section class="screen" id="languageScreen">
+  <div class="back-row"><button class="ghost" data-back="homeScreen">← Back</button><span>STEP 2 OF 3</span></div>
+  <p class="eyebrow" id="languageCategoryEyebrow">Selected category</p>
+  <h2 class="screen-title">Select Language</h2>
+  <p class="screen-desc">Choose the language for your announcement.</p>
+  <div class="choice-list" id="languageChoices">
+   <button class="choice" data-language="Korean"><span class="choice-icon">가</span><span class="choice-text"><strong>한국어</strong><small>Korean</small></span><span class="chevron">›</span></button>
+   <button class="choice" data-language="English"><span class="choice-icon">A</span><span class="choice-text"><strong>English</strong><small>English announcement</small></span><span class="chevron">›</span></button>
+   <button class="choice" data-language="Japanese"><span class="choice-icon">あ</span><span class="choice-text"><strong>日本語</strong><small>Japanese</small></span><span class="chevron">›</span></button>
+   <button class="choice" data-language="Chinese"><span class="choice-icon">文</span><span class="choice-text"><strong>中文</strong><small>Chinese</small></span><span class="chevron">›</span></button>
+   <button class="choice" data-language="Other"><span class="choice-icon">•••</span><span class="choice-text"><strong>Other</strong><small>Other language</small></span><span class="chevron">›</span></button>
+  </div>
+ </section>
 
-Service ↗
+ <section class="screen" id="playerScreen">
+  <div class="back-row"><button class="ghost" data-back="languageScreen">← Back</button><span>AUDIO PLAYER</span></div>
+  <div class="hero">
+   <p class="eyebrow">Selected announcement</p>
+   <h2 class="screen-title" id="playerHeading">Boarding</h2>
+   <p class="screen-desc" id="playerDescription">Korean announcements</p>
+  </div>
+  <div class="toolbar">
+   <button class="primary" id="add">＋ Add Audio</button>
+   <button class="ghost" id="openManageFromPlayer">Manage Audio</button>
+  </div>
 
-Arrival ↗
+  <section class="panel" id="addPanel" aria-label="Add audio">
+   <h3 style="margin:0 0 5px;font-size:17px">Add Audio</h3>
+   <p class="screen-desc">Files will be saved under the selected category and language.</p>
+   <div class="field"><label for="newName">Audio name</label><input id="newName" type="text" placeholder="Enter audio name"></div>
+   <div class="field"><label for="newCategory">Category</label><select id="newCategory"><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select></div>
+   <div class="field"><label for="newLanguage">Language</label><select id="newLanguage"><option value="Korean">한국어 · Korean</option><option value="English">English</option><option value="Japanese">日本語 · Japanese</option><option value="Chinese">中文 · Chinese</option><option value="Other">Other</option></select></div>
+   <input id="files" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
+   <button class="ghost" id="chooseFiles">Choose audio files</button>
+   <div id="selectedFiles">No files selected</div>
+   <div class="toolbar"><button class="primary" id="saveSelected">Save audio</button><button id="cancelAdd">Cancel</button></div>
+  </section>
 
-Other ↗
+  <div class="filters">
+   <select id="category" aria-label="Filter by category"><option value="All">All categories</option><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select>
+   <select id="language" aria-label="Filter by language"><option value="All">All languages</option><option value="Korean">한국어</option><option value="English">English</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">Other</option><option value="legacy">Legacy · Unspecified</option></select>
+  </div>
+  <div class="field"><input id="search" type="search" placeholder="Search audio titles"></div>
+  <div id="list"></div>
 
-Manage Audio ↗
-Audio is stored locally on this device. Keep a separate backup of original files.
-Checking local storage…
-Audio is stored locally in this browser on this device. Keep backups of original files. This app is for personal listening and training and does not replace certified aircraft announcement equipment.
+  <section class="panel" id="now">
+   <div class="now-top">
+    <div class="album-art"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
+    <div class="now-copy"><div class="now-label">NOW PLAYING</div><div id="nowTitle">Select an audio track</div><div id="nowMeta">Ready to play</div></div>
+   </div>
+   <audio id="player" controls playsinline preload="metadata"></audio>
+   <div class="play-controls"><button id="previous">⏮ Previous</button><button class="primary" id="playPause">▶ Play</button><button id="next">Next ⏭</button></div>
+  </section>
+ </section>
+
+ <section class="screen" id="manageScreen">
+  <div class="back-row"><button class="ghost" data-back="homeScreen">← Home</button><span>LIBRARY MANAGEMENT</span></div>
+  <p class="eyebrow">Your audio library</p>
+  <h2 class="screen-title">Manage Audio</h2>
+  <p class="screen-desc">Import, edit, and remove tracks. Create playlists for sequential playback.</p>
+  <div class="toolbar"><button class="primary" id="manageAdd">＋ Import Audio</button><button id="openPlaylists">♫ Playlists</button></div>
+  <div class="filters"><select id="manageCategory"><option value="All">All categories</option><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select><select id="manageLanguage"><option value="All">All languages</option><option value="Korean">한국어</option><option value="English">English</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">Other</option><option value="legacy">Legacy · Unspecified</option></select></div>
+  <div class="field"><input id="manageSearch" type="search" placeholder="Search audio titles"></div>
+  <div id="manageList"></div>
+  <section class="panel" id="manageAddPanel" style="display:none;margin-top:14px">
+   <h3 style="margin:0 0 5px;font-size:17px">Import Audio</h3>
+   <div class="field"><label for="manageNewName">Audio name (used for one file)</label><input id="manageNewName" type="text" placeholder="Enter audio name"></div>
+   <div class="filters"><div class="field"><label for="manageNewCategory">Category</label><select id="manageNewCategory"><option>Boarding</option><option>Safety</option><option>Service</option><option>Arrival</option><option>Other</option></select></div><div class="field"><label for="manageNewLanguage">Language</label><select id="manageNewLanguage"><option value="Korean">한국어</option><option value="English">English</option><option value="Japanese">日本語</option><option value="Chinese">中文</option><option value="Other">Other</option></select></div></div>
+   <input id="manageFiles" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
+   <button id="manageChooseFiles" class="ghost">Choose audio files</button><div id="manageSelectedFiles" class="sub">No files selected</div>
+   <div class="toolbar"><button class="primary" id="manageSaveSelected">Save audio</button><button id="manageCancelAdd">Cancel</button></div>
+  </section>
+ </section>
+
+ <section class="screen" id="playlistScreen">
+  <div class="back-row"><button class="ghost" data-back="manageScreen">← Manage Audio</button><span>PLAYLISTS</span></div>
+  <p class="eyebrow">Sequential playback</p><h2 class="screen-title">Playlists</h2>
+  <p class="screen-desc">Choose tracks and arrange their playback order.</p>
+  <section class="panel" style="margin-top:18px">
+   <div class="field"><label for="playlistName">Playlist name</label><input id="playlistName" type="text" placeholder="e.g. Boarding sequence"></div>
+   <div class="section-head"><h3>Select tracks</h3><span class="line"></span></div>
+   <div id="playlistTrackChoices"></div>
+   <div class="toolbar"><button class="primary" id="savePlaylist">Save playlist</button><button id="clearPlaylistForm">Clear</button></div>
+  </section>
+  <div class="section-head"><h3>Saved playlists</h3><span class="line"></span></div>
+  <div id="playlistList"></div>
+  <section class="panel" id="playlistOrderPanel" style="display:none;margin-top:14px">
+   <h3 id="playlistOrderTitle" style="font-size:16px;margin:0 0 8px">Edit order</h3>
+   <div id="playlistOrderRows"></div>
+   <div class="toolbar"><button class="primary" id="saveOrder">Save order</button><button id="cancelOrder">Cancel</button></div>
+  </section>
+ </section>
+
+ <div id="status" role="status">Checking local storage…</div>
+ <footer>Audio is stored locally in this browser on this device. Keep backups of original files. This app is for personal listening and training and does not replace certified aircraft announcement equipment.</footer>
+</main>
+
+<script>
+const DB_NAME='CabinPAPlayer';
+const STORE='tracks';
+const PLAYLIST_STORE='playlists';
+const CATEGORIES=['Boarding','Safety','Service','Arrival','Other'];
+const LANGUAGES=['Korean','English','Japanese','Chinese','Other'];
+let db,currentId=null,objectUrl=null,selectedCategory='Boarding',selectedLanguage='Korean';
+let queue=[],queueIndex=-1,editingPlaylistId=null,orderDraft=[];
+const $=id=>document.getElementById(id);
+const player=$('player');
+
+function showScreen(id){
+ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active',s.id===id));
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(id==='manageScreen')renderManage();
+ if(id==='playlistScreen')renderPlaylists();
+}
+document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>showScreen(b.dataset.back)));
+
+document.querySelectorAll('[data-category]').forEach(b=>b.addEventListener('click',()=>{
+ selectedCategory=b.dataset.category;
+ $('languageCategoryEyebrow').textContent='CATEGORY · '+selectedCategory.toUpperCase();
+ showScreen('languageScreen');
+}));
+document.querySelectorAll('[data-language]').forEach(b=>b.addEventListener('click',()=>{
+ selectedLanguage=b.dataset.language;
+ $('playerHeading').textContent=selectedCategory;
+ $('playerDescription').textContent=languageLabel(selectedLanguage)+' announcements';
+ $('category').value=selectedCategory;
+ $('language').value=selectedLanguage;
+ $('newCategory').value=selectedCategory;
+ $('newLanguage').value=selectedLanguage;
+ $('search').value='';
+ showScreen('playerScreen');
+ renderPlayerTracks();
+}));
+$('manageTile').onclick=()=>showScreen('manageScreen');
+$('openManageFromPlayer').onclick=()=>showScreen('manageScreen');
+$('openPlaylists').onclick=()=>showScreen('playlistScreen');
+
+$('themeToggle').onclick=()=>{
+ const dark=document.body.classList.toggle('dark');
+ $('themeToggle').textContent=dark?'☀':'☾';
+ $('themeToggle').setAttribute('aria-label',dark?'라이트 모드':'다크 모드');
+ document.querySelector('meta[name="theme-color"]').content=dark?'#151d28':'#d71920';
+};
+
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(DB_NAME,2);
+  req.onupgradeneeded=()=>{
+   const d=req.result;
+   if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
+   if(!d.objectStoreNames.contains(PLAYLIST_STORE))d.createObjectStore(PLAYLIST_STORE,{keyPath:'id',autoIncrement:true});
+  };
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+}
+function getAll(store){
+ return new Promise((resolve,reject)=>{
+  const req=db.transaction(store,'readonly').objectStore(store).getAll();
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+}
+function addRecord(store,record){
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  const req=tx.objectStore(store).add(record);
+  let id;
+  req.onsuccess=()=>id=req.result;
+  tx.oncomplete=()=>resolve(id);
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error||new Error('Save failed'));
+ });
+}
+function putRecord(store,record){
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  tx.objectStore(store).put(record);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error||new Error('Update failed'));
+ });
+}
+function deleteRecord(store,id){
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  tx.objectStore(store).delete(id);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error||new Error('Delete failed'));
+ });
+}
+const allTracks=()=>getAll(STORE);
+const allPlaylists=()=>getAll(PLAYLIST_STORE);
+const saveTrack=t=>addRecord(STORE,t);
+const updateTrack=t=>putRecord(STORE,t);
+const removeTrack=id=>deleteRecord(STORE,id);
+const savePlaylist=p=>addRecord(PLAYLIST_STORE,p);
+const updatePlaylist=p=>putRecord(PLAYLIST_STORE,p);
+const removePlaylist=id=>deleteRecord(PLAYLIST_STORE,id);
+
+function say(msg){$('status').textContent=msg}
+function languageLabel(v){
+ return ({Korean:'한국어',English:'English',Japanese:'日本語',Chinese:'中文',Other:'Other',legacy:'Legacy · Unspecified'})[v]||'Legacy · Unspecified';
+}
+function isLegacy(t){return !t.language||!LANGUAGES.includes(t.language)}
+function filteredTracks(tracks,cat,lang,q){
+ q=(q||'').trim().toLowerCase();
+ return tracks.filter(t=>(cat==='All'||t.category===cat)&&(lang==='All'||(lang==='legacy'?isLegacy(t):t.language===lang))&&String(t.name||'').toLowerCase().includes(q));
+}
+function makeEmpty(text){
+ const e=document.createElement('div');e.className='empty';e.textContent=text;return e;
+}
+function stopPlayback(){
+ player.pause();player.removeAttribute('src');player.load();currentId=null;
+ if(objectUrl){URL.revokeObjectURL(objectUrl);objectUrl=null}
+ $('nowTitle').textContent='Select an audio track';
+ $('nowMeta').textContent='Ready to play';
+ $('playPause').textContent='▶ Play';
+}
+function playTrack(t){
+ if(!t)return;
+ if(objectUrl)URL.revokeObjectURL(objectUrl);
+ objectUrl=URL.createObjectURL(t.blob);
+ currentId=t.id;player.src=objectUrl;
+ $('nowTitle').textContent=t.name||'Untitled audio';
+ $('nowMeta').textContent=(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
+ $('playPause').textContent='Ⅱ Pause';
+ player.play().then(()=>say('Playing: '+(t.name||'Untitled audio'))).catch(()=>say('Tap Play on the audio controls to start playback.'));
+}
+async function playRelative(direction){
+ if(!queue.length){say('Select a track first.');return}
+ const tracks=await allTracks();
+ let i=queueIndex+direction;
+ while(i>=0&&i<queue.length){
+  const t=tracks.find(x=>x.id===queue[i]);
+  if(t){queueIndex=i;playTrack(t);return}
+  i+=direction;
+ }
+ say(direction>0?'End of playback queue.':'Beginning of playback queue.');
+}
+function makeTrackCard(t,manage=false,filteredQueue=null){
+ const card=document.createElement('article');card.className='track';
+ const top=document.createElement('div');top.className='tracktop';
+ const name=document.createElement('div');name.className='trackname';name.textContent=t.name||'Untitled audio';
+ top.append(name);
+ const badge=document.createElement('span');badge.className='trackbadge';badge.textContent=t.category||'Other';
+ card.append(top,badge);
+ const sub=document.createElement('div');sub.className='sub';sub.textContent=languageLabel(isLegacy(t)?'legacy':t.language);
+ card.append(sub);
+ const actions=document.createElement('div');actions.className='actions';
+ const play=document.createElement('button');play.className='primary';play.textContent='▶ Play';
+ play.onclick=()=>{
+  if(filteredQueue){queue=filteredQueue.map(x=>x.id);queueIndex=queue.indexOf(t.id)}
+  else{queue=[t.id];queueIndex=0}
+  playTrack(t);
+ };
+ const edit=document.createElement('button');edit.textContent='Edit';
+ edit.onclick=async()=>{
+  const nameVal=prompt('Audio name:',t.name||'');
+  if(nameVal===null)return;
+  const cat=prompt('Category: '+CATEGORIES.join(', '),CATEGORIES.includes(t.category)?t.category:'Other');
+  if(cat===null)return;
+  if(!CATEGORIES.includes(cat)){say('Choose a listed category.');return}
+  const lang=prompt('Language: '+LANGUAGES.join(', '),LANGUAGES.includes(t.language)?t.language:'Korean');
+  if(lang===null)return;
+  if(!LANGUAGES.includes(lang)){say('Choose a listed language.');return}
+  t.name=nameVal.trim()||t.name;t.category=cat;t.language=lang;
+  await updateTrack(t);await renderAll();say('Audio details updated.');
+ };
+ const del=document.createElement('button');del.textContent='Delete';
+ del.onclick=async()=>{
+  if(!confirm('Delete this audio from the app library?'))return;
+  if(currentId===t.id)stopPlayback();
+  await removeTrack(t.id);
+  queue=queue.filter(id=>id!==t.id);
+  await renderAll();say('Audio deleted.');
+ };
+ actions.append(play,edit,del);
+ card.append(actions);
+ return card;
+}
+async function renderPlayerTracks(){
+ if(!db)return;
+ const tracks=await allTracks();
+ const filtered=filteredTracks(tracks,$('category').value,$('language').value,$('search').value);
+ $('list').replaceChildren();
+ if(!filtered.length)$('list').append(makeEmpty(tracks.length?'No audio matches these filters.':'Tap Add Audio to import your first track.'));
+ filtered.forEach(t=>$('list').append(makeTrackCard(t,false,filtered)));
+}
+async function renderManage(){
+ if(!db)return;
+ const tracks=await allTracks();
+ const filtered=filteredTracks(tracks,$('manageCategory').value,$('manageLanguage').value,$('manageSearch').value);
+ $('manageList').replaceChildren();
+ if(!filtered.length)$('manageList').append(makeEmpty(tracks.length?'No audio matches these filters.':'No audio has been imported yet.'));
+ filtered.forEach(t=>$('manageList').append(makeTrackCard(t,true,filtered)));
+}
+async function renderAll(){
+ await renderPlayerTracks();
+ if($('manageScreen').classList.contains('active'))await renderManage();
+ if($('playlistScreen').classList.contains('active'))await renderPlaylists();
+}
+$('previous').onclick=()=>playRelative(-1);
+$('next').onclick=()=>playRelative(1);
+$('playPause').onclick=()=>{
+ if(!player.src){say('Select an audio track first.');return}
+ if(player.paused)player.play().then(()=>$('playPause').textContent='Ⅱ Pause').catch(()=>say('Playback could not start.'));
+ else{player.pause();$('playPause').textContent='▶ Play'}
+};
+player.addEventListener('play',()=>$('playPause').textContent='Ⅱ Pause');
+player.addEventListener('pause',()=>$('playPause').textContent='▶ Play');
+player.addEventListener('ended',()=>playRelative(1));
+player.addEventListener('error',()=>{if(player.currentSrc)say('This file could not be played. Check its audio format.')});
+
+function setupImport(manage=false){
+ const ids=manage?{
+  panel:'manageAddPanel',name:'manageNewName',cat:'manageNewCategory',lang:'manageNewLanguage',
+  files:'manageFiles',choose:'manageChooseFiles',selected:'manageSelectedFiles',
+  save:'manageSaveSelected',cancel:'manageCancelAdd'
+ }:{
+  panel:'addPanel',name:'newName',cat:'newCategory',lang:'newLanguage',
+  files:'files',choose:'chooseFiles',selected:'selectedFiles',
+  save:'saveSelected',cancel:'cancelAdd'
+ };
+ let chosen=[];
+ const updateChosen=()=>$(ids.selected).textContent=chosen.length?chosen.map(f=>f.name).join(', '):'No files selected';
+ const open=()=>{
+  $(ids.panel).style.display='block';
+  $(ids.cat).value=manage?($('manageCategory').value==='All'?'Other':$('manageCategory').value):selectedCategory;
+  $(ids.lang).value=manage?($('manageLanguage').value==='All'?'Korean':$('manageLanguage').value):selectedLanguage;
+  $(ids.name).value='';chosen=[];$(ids.files).value='';updateChosen();
+  $(ids.panel).scrollIntoView({behavior:'smooth',block:'nearest'});
+ };
+ $(ids.choose).onclick=()=>$(ids.files).click();
+ $(ids.files).onchange=e=>{
+  chosen=[...e.target.files];updateChosen();
+  $(ids.name).value=chosen.length===1?chosen[0].name.replace(/\.[^.]+$/,''):'';
+ };
+ $(ids.cancel).onclick=()=>{$(ids.panel).style.display='none';chosen=[];$(ids.files).value='';updateChosen()};
+ $(ids.save).onclick=async()=>{
+  if(!chosen.length){say('Choose one or more audio files first.');return}
+  const category=$(ids.cat).value,language=$(ids.lang).value,custom=$(ids.name).value.trim();
+  $(ids.save).disabled=true;say('Saving audio…');let count=0,skipped=0;
+  try{
+   for(let i=0;i<chosen.length;i++){
+    const f=chosen[i];
+    if(!f.type.startsWith('audio/')&&!/\.(mp3|m4a|aac|wav|ogg|flac|aiff|wma)$/i.test(f.name)){skipped++;continue}
+    await saveTrack({name:chosen.length===1&&custom?custom:f.name.replace(/\.[^.]+$/,''),category,language,blob:f,addedAt:Date.now()});
+    count++;
+   }
+   $(ids.panel).style.display='none';chosen=[];$(ids.files).value='';updateChosen();
+   if(!manage){selectedCategory=category;selectedLanguage=language;$('category').value=category;$('language').value=language}
+   await renderAll();
+   say(count+' audio file(s) saved.'+(skipped?' '+skipped+' unsupported file(s) skipped.':''));
+  }catch(err){say('Save failed. Check available browser storage and keep your original files.')}
+  finally{$(ids.save).disabled=false}
+ };
+ return open;
+}
+const openPlayerImport=setupImport(false);
+const openManageImport=setupImport(true);
+$('add').onclick=openPlayerImport;
+$('manageAdd').onclick=openManageImport;
+$('category').onchange=renderPlayerTracks;
+$('language').onchange=renderPlayerTracks;
+$('search').oninput=renderPlayerTracks;
+$('manageCategory').onchange=renderManage;
+$('manageLanguage').onchange=renderManage;
+$('manageSearch').oninput=renderManage;
+
+async function renderPlaylists(){
+ if(!db)return;
+ const tracks=await allTracks(),playlists=await allPlaylists();
+ const choiceBox=$('playlistTrackChoices');choiceBox.replaceChildren();
+ if(!tracks.length)choiceBox.append(makeEmpty('Import audio before creating a playlist.'));
+ else tracks.forEach(t=>{
+  const label=document.createElement('label');label.className='track-check';
+  const cb=document.createElement('input');cb.type='checkbox';cb.value=String(t.id);cb.className='playlist-choice';
+  const span=document.createElement('span');span.textContent=(t.name||'Untitled audio')+' · '+(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
+  label.append(cb,span);choiceBox.append(label);
+ });
+ const list=$('playlistList');list.replaceChildren();
+ if(!playlists.length)list.append(makeEmpty('No playlists yet. Create one above.'));
+ playlists.forEach(p=>{
+  const card=document.createElement('article');card.className='playlist-card';
+  const title=document.createElement('div');title.className='playlist-title';title.textContent=p.name||'Untitled playlist';
+  const desc=document.createElement('div');desc.className='sub';desc.textContent=(p.trackIds||[]).length+' tracks · sequential playback';
+  const actions=document.createElement('div');actions.className='playlist-actions';
+  const play=document.createElement('button');play.className='primary';play.textContent='▶ Play playlist';
+  play.onclick=async()=>{
+   const fresh=await allTracks(),valid=(p.trackIds||[]).filter(id=>fresh.some(t=>t.id===id));
+   if(!valid.length){say('This playlist has no available tracks.');return}
+   queue=valid;queueIndex=0;
+   const t=fresh.find(x=>x.id===queue[0]);showScreen('playerScreen');playTrack(t);
+  };
+  const edit=document.createElement('button');edit.textContent='Edit order';
+  edit.onclick=()=>openOrderEditor(p);
+  const rename=document.createElement('button');rename.textContent='Rename';
+  rename.onclick=async()=>{
+   const name=prompt('Playlist name:',p.name||'');
+   if(name===null)return;
+   p.name=name.trim()||p.name;p.updatedAt=Date.now();await updatePlaylist(p);await renderPlaylists();say('Playlist updated.');
+  };
+  const del=document.createElement('button');del.textContent='Delete';
+  del.onclick=async()=>{if(confirm('Delete this playlist?')){await removePlaylist(p.id);await renderPlaylists();say('Playlist deleted.')}};
+  actions.append(play,edit,rename,del);card.append(title,desc,actions);list.append(card);
+ });
+}
+$('savePlaylist').onclick=async()=>{
+ const name=$('playlistName').value.trim();
+ const trackIds=[...document.querySelectorAll('.playlist-choice:checked')].map(cb=>Number(cb.value));
+ if(!name){say('Enter a playlist name.');return}
+ if(!trackIds.length){say('Select at least one track.');return}
+ const now=Date.now();
+ try{
+  await savePlaylist({name,trackIds,createdAt:now,updatedAt:now});
+  $('playlistName').value='';await renderPlaylists();say('Playlist saved.');
+ }catch(e){say('Could not save playlist.')}
+};
+$('clearPlaylistForm').onclick=()=>{
+ $('playlistName').value='';
+ document.querySelectorAll('.playlist-choice').forEach(cb=>cb.checked=false);
+};
+let editingOrderId=null,orderDraft=[];
+function openOrderEditor(p){
+ editingOrderId=p.id;orderDraft=[...(p.trackIds||[])];
+ $('playlistOrderTitle').textContent='Playback order · '+(p.name||'Playlist');
+ $('playlistOrderPanel').style.display='block';renderOrderRows();
+ $('playlistOrderPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function renderOrderRows(){
+ const tracks=await allTracks(),box=$('playlistOrderRows');box.replaceChildren();
+ const available=orderDraft.map((id,index)=>({id,index,t:tracks.find(x=>x.id===id)})).filter(x=>x.t);
+ if(!available.length)box.append(makeEmpty('This playlist has no available tracks.'));
+ available.forEach(({id,index,t})=>{
+  const row=document.createElement('div');row.className='order-row';
+  const name=document.createElement('div');name.className='order-name';name.textContent=(index+1)+'. '+(t.name||'Untitled audio');
+  const up=document.createElement('button');up.textContent='↑';up.disabled=index===0;up.setAttribute('aria-label','Move up');
+  up.onclick=()=>{[orderDraft[index-1],orderDraft[index]]=[orderDraft[index],orderDraft[index-1]];renderOrderRows()};
+  const down=document.createElement('button');down.textContent='↓';down.disabled=index===orderDraft.length-1;down.setAttribute('aria-label','Move down');
+  down.onclick=()=>{[orderDraft[index+1],orderDraft[index]]=[orderDraft[index],orderDraft[index+1]];renderOrderRows()};
+  const remove=document.createElement('button');remove.textContent='×';remove.setAttribute('aria-label','Remove from playlist');
+  remove.onclick=()=>{orderDraft.splice(index,1);renderOrderRows()};
+  row.append(name,up,down,remove);box.append(row);
+ });
+}
+$('saveOrder').onclick=async()=>{
+ const playlists=await allPlaylists(),p=playlists.find(x=>x.id===editingOrderId);
+ if(!p)return;
+ p.trackIds=orderDraft.filter(id=>id!==undefined);p.updatedAt=Date.now();
+ await updatePlaylist(p);$('playlistOrderPanel').style.display='none';await renderPlaylists();say('Playlist order saved.');
+};
+$('cancelOrder').onclick=()=>{$('playlistOrderPanel').style.display='none';editingOrderId=null;orderDraft=[]};
+
+(async()=>{
+ try{
+  if(!('indexedDB' in window))throw Error('IndexedDB unavailable');
+  db=await openDB();
+  if(navigator.storage&&navigator.storage.persist){try{await navigator.storage.persist()}catch{}}
+  await renderAll();
+  say('Ready · audio is stored locally on this device.');
+ }catch(e){say('Could not open local storage. Reopen this app in Safari and try again.')}
+ if('serviceWorker' in navigator&&location.protocol.startsWith('http')){
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ }
+})();
+</script>
+</body>
+</html>
