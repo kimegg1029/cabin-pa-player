@@ -1,1 +1,19 @@
-manifest.json
+
+{
+  "name": "Cabin PA Player",
+  "short_name": "Cabin PA",
+  "description": "Personal announcement audio player",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0c1726",
+  "theme_color": "#10243a",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
