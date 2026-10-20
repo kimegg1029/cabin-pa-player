@@ -256,6 +256,20 @@ audio{width:100%;height:42px;display:block}
  font-size:12px;color:var(--muted);margin-top:14px;
  line-height:1.5;min-height:18px
 }
+#toast {
+ position:fixed;left:50%;top:50%;z-index:9999;
+ width:max-content;max-width:min(86vw,420px);
+ padding:14px 18px;border-radius:15px;
+ background:rgba(20,27,38,.96);color:#fff;
+ box-shadow:0 12px 32px rgba(0,0,0,.28);
+ font-size:14px;line-height:1.45;font-weight:750;text-align:center;
+ opacity:0;visibility:hidden;pointer-events:none;
+ transform:translate(-50%,-46%) scale(.97);
+ transition:opacity .14s ease,transform .14s ease,visibility .14s;
+}
+#toast.show {
+ opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)
+}
 .empty {
  padding:24px 15px;text-align:center;border:1px dashed var(--border);
  border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6
@@ -618,6 +632,7 @@ body.has-mini-player #miniPlayerDock #now{box-shadow:none}
  <div id="status" role="status">로컬 저장소 확인 중…</div>
  <footer>오디오는 이 기기의 브라우저에 저장됩니다. 원본 파일을 별도로 백업하세요. 이 앱은 개인 청취 및 교육용이며 인증된 항공기 안내 방송 장비를 대체하지 않습니다.</footer>
 </main>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 const DB_NAME='CabinPAPlayer';
@@ -631,6 +646,8 @@ let selectedCategory='Other';
 let selectedLanguageGroup='KoreanEnglish';
 let queue=[];
 let queueRenderToken=0;
+let queueMutationPromise=Promise.resolve();
+let toastTimer=null;
 let sortSettings={};
 
 const $=id=>document.getElementById(id);
@@ -664,6 +681,18 @@ function isLegacy(t) {
 
 function say(msg) {
  $('status').textContent=msg;
+}
+
+function showToast(msg,duration=1100) {
+ const toast=$('toast');
+ if(!toast)return;
+ toast.textContent=msg;
+ toast.classList.add('show');
+ if(toastTimer!==null)clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>{
+  toast.classList.remove('show');
+  toastTimer=null;
+ },duration);
 }
 
 function showScreen(id) {
@@ -829,6 +858,66 @@ async function persistQueue() {
  await putRecord(QUEUE_STORE,{id:'main',trackIds:[...queue],updatedAt:Date.now()});
 }
 
+// Serialize every Play List mutation so fast taps cannot overwrite each other.
+function serializeQueueChange(action) {
+ const result=queueMutationPromise.then(action,action);
+ queueMutationPromise=result.catch(()=>{});
+ return result;
+}
+
+async function moveQueueItem(trackId,direction) {
+ return serializeQueueChange(async()=>{
+  const before=[...queue];
+  const from=queue.findIndex(id=>id===trackId);
+  const to=from+direction;
+  if(from<0||to<0||to>=queue.length)return;
+  [queue[from],queue[to]]=[queue[to],queue[from]];
+  try {
+   await persistQueue();
+   await renderQueue();
+  } catch(error) {
+   queue=before;
+   try { await persistQueue(); } catch {}
+   await renderQueue().catch(()=>{});
+   say('Play List 순서를 저장하지 못했습니다.');
+   console.error('moveQueueItem failed',error);
+  }
+ });
+}
+
+async function removeQueueItem(trackId) {
+ return serializeQueueChange(async()=>{
+  const before=[...queue];
+  if(!queue.includes(trackId))return;
+  queue=queue.filter(id=>id!==trackId);
+  try {
+   await persistQueue();
+   await renderQueue();
+   say('Play List에서 음원을 제거했습니다. 원본 오디오는 유지됩니다.');
+  } catch(error) {
+   queue=before;
+   try { await persistQueue(); } catch {}
+   await renderQueue().catch(()=>{});
+   say('Play List에서 음원을 제거하지 못했습니다. 다시 시도하세요.');
+   console.error('removeQueueItem failed',error);
+  }
+ });
+}
+
+async function removeTrackFromQueueIfPresent(trackId) {
+ return serializeQueueChange(async()=>{
+  const before=[...queue];
+  queue=queue.filter(id=>id!==trackId);
+  try {
+   await persistQueue();
+  } catch(error) {
+   queue=before;
+   console.error('removeTrackFromQueueIfPresent failed',error);
+   throw error;
+  }
+ });
+}
+
 function trackGroup(t) {
  const lang=isLegacy(t)?'legacy':t.language;
  if(lang==='Japanese')return 'Japanese';
@@ -883,10 +972,25 @@ async function moveTrackInGroup(id,direction) {
 }
 
 async function addToQueue(track) {
- if(queue.includes(track.id)) { say('이 음원은 이미 Play List에 있습니다.'); return; }
- queue.push(track.id);
- try { await persistQueue(); await renderQueue(); say('Play List에 음원을 추가했습니다.'); }
- catch(e) { queue=queue.filter(id=>id!==track.id); say('Play List 저장에 실패했습니다.'); }
+ return serializeQueueChange(async()=>{
+  if(queue.includes(track.id)) {
+   showToast('이미 Play List에 있습니다.');
+   return;
+  }
+  const before=[...queue];
+  queue=[...queue,track.id];
+  try {
+   await persistQueue();
+   if($('playlistScreen').classList.contains('active')) await renderQueue();
+   showToast('Play List에 음원을 추가했습니다.');
+  } catch(error) {
+   queue=before;
+   try { await persistQueue(); } catch {}
+   if($('playlistScreen').classList.contains('active')) await renderQueue().catch(()=>{});
+   showToast('Play List 저장에 실패했습니다.');
+   console.error('addToQueue failed',error);
+  }
+ });
 }
 
 /* 등록일 표시 */
@@ -960,11 +1064,12 @@ function makeTrackCard(t,manage=false,filteredQueue=null) {
  const play=document.createElement('button');
  play.className='primary';
  play.textContent=manage?'선택':'▶ 재생';
- play.setAttribute('aria-label',manage?'오디오 선택':'오디오 바로 재생');
+ play.setAttribute('aria-label',manage?'오디오 선택':'재생바 열기');
 
  play.onclick=()=>{
-  if(manage)selectTrack(t);
-  else playTrack(t);
+  // Selecting an item opens the player; playback starts only from the player controls.
+  selectTrack(t);
+  if(!manage) $('now').scrollIntoView({behavior:'smooth',block:'nearest'});
  };
 
  const edit=document.createElement('button');
@@ -1049,12 +1154,16 @@ function makeTrackCard(t,manage=false,filteredQueue=null) {
 
   if(currentId===t.id)stopPlayback();
 
-  await removeTrack(t.id);
-  queue=queue.filter(id=>id!==t.id);
-  try { await persistQueue(); } catch {}
-
-  await renderAll();
-  say('오디오가 삭제되었습니다.');
+  try {
+   await removeTrack(t.id);
+   await removeTrackFromQueueIfPresent(t.id);
+   if(currentId===t.id)stopPlayback();
+   await renderAll();
+   say('오디오가 삭제되었습니다.');
+  } catch(error) {
+   say('오디오 삭제에 실패했습니다. 다시 시도하세요.');
+   console.error('library track delete failed',error);
+  }
  };
 
  if(!manage) {
@@ -1201,10 +1310,9 @@ function stopPlayback() {
 }
 
 function playTrack(t) {
+ // Compatibility helper: choosing a library item must never autoplay.
  if(!t)return;
  selectTrack(t);
- player.play().then(()=>say('재생 중: '+(t.name||'제목 없는 오디오')))
-  .catch(()=>say('재생 버튼을 눌러 음원을 재생하세요.'));
 }
 
 $('playPause').onclick=()=>{
@@ -1412,9 +1520,9 @@ function updateQueuePlayButtons() {
   card.classList.toggle('active-queue-track',isCurrent);
   const button=card.querySelector('.queue-play');
   if(!button)return;
-  const isPlaying=isCurrent&&!player.paused;
-  button.textContent=isPlaying?'Ⅱ':'▶';
-  button.setAttribute('aria-label',isPlaying?'일시정지':'이 음원 재생');
+  button.textContent='▶';
+  button.setAttribute('aria-label','재생바 열기');
+  button.title='재생바 열기';
  });
 }
 
@@ -1422,28 +1530,36 @@ function updateQueuePlayButtons() {
 async function renderQueue() {
  if(!db)return;
  const renderToken=++queueRenderToken;
- await loadQueueIds();
- const tracks=await allTracks();
- // If another render started while IndexedDB was resolving, only the newest
- // render may update the queue DOM or move the shared audio player.
- if(renderToken!==queueRenderToken)return;
  const list=$('queueList');
- const validQueue=queue.filter(id=>tracks.some(t=>t.id===id));
- if(validQueue.length!==queue.length) {
-  queue=validQueue;
-  await persistQueue();
-  if(renderToken!==queueRenderToken)return;
- }
- list.replaceChildren();
- $('queueCount').textContent=queue.length+'개 음원';
+ const now=$('now');
+ const dock=$('miniPlayerDock');
 
- if(!queue.length) {
+ // Move the shared player out before replacing queue children. This prevents
+ // deleting/detaching the node that contains the active audio controls.
+ // Keep the dock visible during the async refresh so the player never vanishes.
+ if(list.contains(now)) {
+  dock.append(now);
+  if(currentId!==null&&$('playlistScreen').classList.contains('active')) {
+   now.classList.remove('now-inline');
+   dock.classList.add('docked');
+   document.body.classList.add('has-mini-player');
+  }
+ }
+
+ const tracks=await allTracks();
+ if(renderToken!==queueRenderToken)return;
+ const trackById=new Map(tracks.map(t=>[t.id,t]));
+ const visibleQueue=queue.filter(id=>trackById.has(id));
+ list.replaceChildren();
+ $('queueCount').textContent=visibleQueue.length+'개 음원';
+
+ if(!visibleQueue.length) {
   list.append(makeEmpty('Play List가 비어 있습니다. 언어별 음원 목록에서 List+ 버튼을 눌러 추가하세요.'));
  }
 
  let activeCard=null;
- queue.forEach((id,index)=>{
-  const t=tracks.find(item=>item.id===id);
+ visibleQueue.forEach((id,index)=>{
+  const t=trackById.get(id);
   if(!t)return;
 
   const card=document.createElement('article');
@@ -1470,59 +1586,26 @@ async function renderQueue() {
   actions.className='queue-row-actions';
   const play=document.createElement('button');
   play.className='queue-play';
-  play.textContent=currentId===t.id&&!player.paused?'Ⅱ':'▶';
-  play.setAttribute('aria-label',currentId===t.id&&!player.paused?'일시정지':'이 음원 재생');
+  play.textContent='▶';
+  play.setAttribute('aria-label','재생바 열기');
+  play.title='재생바 열기';
   play.onclick=()=>{
-   if(currentId===t.id&&!player.paused) {
-    player.pause();
-    updateQueuePlayButtons();
-    say('일시정지했습니다.');
-    return;
-   }
-
-   // Do not await IndexedDB/rendering before play(): iOS Safari requires the
-   // media play request to occur directly in the user's tap handler.
+   // The queue-row button selects the audio only; the visible player button
+   // or native audio controls are responsible for starting playback.
    if(currentId!==t.id)selectTrack(t);
-   if(player.ended) {
-    try { player.currentTime=0; } catch(e) {}
-   }
-
-   const now=$('now');
-   const dock=$('miniPlayerDock');
    card.after(now);
    now.classList.add('visible','now-inline');
    dock.classList.remove('docked');
    document.body.classList.remove('has-mini-player');
-
-   let playPromise;
-   try {
-    playPromise=player.play();
-   } catch(e) {
-    say('재생을 시작할 수 없습니다. 파일 형식을 확인하세요.');
-    updateQueuePlayButtons();
-    return;
-   }
    updateQueuePlayButtons();
-   Promise.resolve(playPromise).then(()=>{
-    say('재생 중: '+(t.name||'제목 없는 오디오'));
-   }).catch(()=>{
-    say('재생을 시작할 수 없습니다. 이 음원을 다시 눌러 재생하세요.');
-   }).finally(updateQueuePlayButtons);
+   now.scrollIntoView({behavior:'smooth',block:'nearest'});
   };
 
   const remove=document.createElement('button');
   remove.textContent='×';
   remove.setAttribute('aria-label','Play List에서 제거');
-  remove.onclick=async()=>{
-   queue=queue.filter((item,i)=>i!==index);
-   try {
-    await persistQueue();
-    await renderQueue();
-    say('Play List에서 음원을 제거했습니다. 원본 오디오는 유지됩니다.');
-   } catch(e) {
-    say('Play List에서 음원을 제거하지 못했습니다.');
-   }
-  };
+  remove.title='Play List에서 제거';
+  remove.onclick=()=>removeQueueItem(t.id);
 
   actions.append(play,remove);
   row.append(number,copy,actions);
@@ -1533,33 +1616,20 @@ async function renderQueue() {
   const up=document.createElement('button');
   up.textContent='↑ 순서 올리기';
   up.disabled=index===0;
-  up.onclick=async()=>{
-   if(index<=0)return;
-   [queue[index-1],queue[index]]=[queue[index],queue[index-1]];
-   await persistQueue();
-   await renderQueue();
-  };
+  up.onclick=()=>moveQueueItem(t.id,-1);
   const down=document.createElement('button');
   down.textContent='↓ 순서 내리기';
-  down.disabled=index===queue.length-1;
-  down.onclick=async()=>{
-   if(index>=queue.length-1)return;
-   [queue[index+1],queue[index]]=[queue[index],queue[index+1]];
-   await persistQueue();
-   await renderQueue();
-  };
+  down.disabled=index===visibleQueue.length-1;
+  down.onclick=()=>moveQueueItem(t.id,1);
   reorder.append(up,down);
   card.append(reorder);
   list.append(card);
   if(currentId===t.id)activeCard=card;
  });
 
- // A queue render can finish after the user has navigated away. Never move
- // #now into the hidden playlist screen: that used to leave stale DOM state.
+ // A queue render that finishes after navigation must not move the player into
+ // the now-hidden queue screen.
  if(renderToken!==queueRenderToken||!$('playlistScreen').classList.contains('active'))return;
-
- const now=$('now');
- const dock=$('miniPlayerDock');
  if(currentId!==null&&activeCard) {
   activeCard.after(now);
   now.classList.add('visible','now-inline');
@@ -1583,7 +1653,22 @@ async function renderQueue() {
 $('clearQueue').onclick=async()=>{
  if(!queue.length) { say('Play List가 이미 비어 있습니다.'); return; }
  if(!confirm('Play List의 모든 음원을 초기화할까요? 원본 오디오 파일은 삭제되지 않습니다.'))return;
- queue=[]; await persistQueue(); await renderQueue(); updateQueuePlayButtons(); say('Play List를 초기화했습니다. 원본 오디오는 유지됩니다.');
+ await serializeQueueChange(async()=>{
+  const before=[...queue];
+  queue=[];
+  try {
+   await persistQueue();
+   await renderQueue();
+   updateQueuePlayButtons();
+   say('Play List를 초기화했습니다. 원본 오디오는 유지됩니다.');
+  } catch(error) {
+   queue=before;
+   try { await persistQueue(); } catch {}
+   await renderQueue().catch(()=>{});
+   say('Play List 초기화에 실패했습니다. 다시 시도하세요.');
+   console.error('clearQueue failed',error);
+  }
+ });
 };
 
 /* 앱 초기화 */
