@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#151d28">
+<link rel="manifest" href="./manifest.json">
+<title>Cabin PA Player</title>
+
+<style>
+:root {
+ color-scheme:light;
+ --bg:#f6f7f9;--surface:#fff;--surface2:#fff3f3;--text:#17212f;
+ --muted:#758092;--accent:#d71920;--accent2:#b90f18;
+ --border:#e6e9ee;--shadow:0 8px 24px rgba(20,32,50,.07);
+ --header:#fff;--soft:#f0f2f5;--success:#16805d;
+}
+body.dark {
+ color-scheme:dark;
+ --bg:#10151d;--surface:#1a2330;--surface2:#321f25;--text:#f4f6f9;
+ --muted:#aab5c4;--accent:#ff454c;--accent2:#ff656a;
+ --border:#303b4a;--shadow:0 8px 24px rgba(0,0,0,.2);
+ --header:#151d28;--soft:#222d3b;--success:#55cba0;
+}
+*{box-sizing:border-box}
+body {
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ transition:background .2s,color .2s
+}
+button,input,select{font:inherit}
+button {
+ border:0;border-radius:14px;padding:12px 14px;
+ background:var(--soft);color:var(--text);font-weight:650;
+ cursor:pointer;transition:transform .12s,background .15s
+}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:var(--accent);color:white}
+.primary:hover{background:var(--accent2)}
+.ghost{background:transparent;border:1px solid var(--border)}
+
+header {
+ background:var(--header);border-bottom:1px solid var(--border);
+ position:sticky;top:0;z-index:10
+}
+.header-inner {
+ max-width:760px;margin:auto;padding:14px 18px;
+ display:flex;align-items:center;gap:12px
+}
+
+/* 빨간색 마름모 로고 */
+.brand-mark {
+ width:42px;height:42px;display:grid;place-items:center;flex-shrink:0
+}
+.brand-mark::before {
+ content:"";display:block;width:25px;height:25px;
+ background:#d71920;transform:rotate(45deg);border-radius:2px
+}
+.brand{flex:1;min-width:0}
+.brand h1 {
+ font-size:17px;line-height:1.2;margin:0 0 4px;
+ font-weight:850;letter-spacing:-.35px
+}
+.brand p {
+ font-size:10px;letter-spacing:1.35px;color:var(--muted);
+ margin:0;font-weight:750
+}
+.icon-btn {
+ width:42px;height:42px;padding:0;border:1px solid var(--border);
+ border-radius:14px;background:var(--surface);
+ display:grid;place-items:center;font-size:18px
+}
+main {
+ max-width:760px;margin:0 auto;padding:24px 18px 40px;
+ min-height:calc(100dvh - 72px)
+}
+.screen{display:none}
+.screen.active{display:block;animation:enter .18s ease-out}
+@keyframes enter {
+ from{opacity:.55;transform:translateY(5px)}
+ to{opacity:1;transform:none}
+}
+.eyebrow {
+ font-size:11px;color:var(--accent);letter-spacing:1.4px;
+ font-weight:850;text-transform:uppercase;margin:0 0 9px
+}
+.screen-title {
+ font-size:23px;line-height:1.2;letter-spacing:-.5px;
+ margin:0 0 6px;font-weight:850
+}
+.screen-desc {
+ font-size:14px;line-height:1.5;color:var(--muted);margin:0
+}
+.hero {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:24px;padding:16px 18px;margin-bottom:16px;
+ box-shadow:var(--shadow);position:relative;overflow:hidden
+}
+.hero:after {
+ content:"";position:absolute;width:125px;height:125px;
+ border-radius:50%;background:var(--surface2);
+ right:-40px;top:-44px;pointer-events:none
+}
+.hero>*{position:relative;z-index:1}
+.hero .eyebrow{margin-bottom:6px}
+.home-grid {
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px
+}
+.home-tile {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:22px;min-height:142px;padding:18px 16px;
+ text-align:left;display:flex;flex-direction:column;
+ align-items:flex-start;justify-content:space-between;box-shadow:var(--shadow)
+}
+.home-tile:hover{border-color:var(--accent)}
+.tile-icon {
+ width:43px;height:43px;display:grid;place-items:center;
+ background:var(--surface2);color:var(--accent);border-radius:15px
+}
+.tile-icon svg{width:23px;height:23px}
+.tile-label{font-size:15px;font-weight:800;letter-spacing:-.2px}
+.tile-arrow{font-size:12px;color:var(--muted);margin-left:7px}
+
+.section-head {
+ display:flex;align-items:center;gap:10px;margin:22px 0 12px
+}
+.section-head h3{font-size:14px;margin:0;font-weight:800}
+.section-head .line{height:1px;background:var(--border);flex:1}
+.back-row{display:flex;align-items:center;gap:9px;margin-bottom:20px}
+.back-row button{padding:9px 12px}
+.back-row span{font-size:12px;color:var(--muted);font-weight:650}
+.choice-list{display:grid;gap:10px;margin-top:22px}
+.choice {
+ display:flex;align-items:center;gap:14px;text-align:left;
+ background:var(--surface);border:1px solid var(--border);
+ padding:15px;border-radius:17px;min-height:72px
+}
+.choice .choice-icon {
+ width:42px;height:42px;border-radius:13px;background:var(--surface2);
+ color:var(--accent);display:grid;place-items:center;font-size:18px;flex-shrink:0
+}
+.choice .choice-text{flex:1}
+.choice strong{display:block;font-size:15px}
+.choice small {
+ display:block;color:var(--muted);font-size:12px;margin-top:4px;font-weight:500
+}
+.choice .chevron{color:var(--muted);font-size:20px}
+.panel {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:20px;padding:16px;box-shadow:var(--shadow)
+}
+.toolbar {
+ display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0
+}
+.toolbar button{min-height:46px}
+.field{margin:13px 0}
+.field label {
+ display:block;font-size:12px;color:var(--muted);
+ font-weight:750;margin-bottom:7px
+}
+input[type=search],input[type=text],select {
+ width:100%;padding:13px 14px;border:1px solid var(--border);
+ border-radius:13px;background:var(--surface);color:var(--text);outline:none
+}
+input:focus,select:focus{border-color:var(--accent)}
+#addPanel{display:none;margin:14px 0}
+#selectedFiles {
+ font-size:12px;color:var(--muted);margin-top:8px;
+ line-height:1.5;overflow-wrap:anywhere
+}
+.filters {
+ display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px
+}
+
+/* 플레이어 툴바 */
+.player-toolbar {
+ display:flex;align-items:center;justify-content:flex-end;
+ gap:8px;margin:8px 0 14px;position:relative
+}
+.player-icon-btn {
+ width:36px;height:36px;padding:0;border:1px solid var(--border);
+ border-radius:11px;background:var(--surface);color:var(--muted);
+ display:grid;place-items:center;font-size:20px;font-weight:500
+}
+.player-icon-btn.add-icon {
+ background:var(--accent);color:#fff;border-color:var(--accent);
+ font-size:26px;font-weight:400
+}
+.player-menu-wrap{position:relative}
+.player-menu {
+ display:none;position:absolute;top:43px;right:0;z-index:20;
+ min-width:170px;padding:5px;border:1px solid var(--border);
+ border-radius:12px;background:var(--surface);box-shadow:var(--shadow)
+}
+.player-menu.open{display:block}
+.player-menu button {
+ display:block;width:100%;padding:11px 12px;border-radius:8px;
+ text-align:left;background:transparent;font-size:13px;font-weight:600
+}
+.player-menu button:hover{background:var(--soft)}
+#searchField{display:none;margin:0 0 12px}
+#searchField.open{display:block}
+#searchField input{padding:11px 13px;border-radius:11px}
+#playerFilters{display:none}
+#list{display:grid;gap:10px;margin-top:14px}
+.actions button[aria-label*="재생목록 순서"]{min-width:48px;min-height:48px;font-size:20px;font-weight:800}
+.track {
+ background:var(--surface);border:1px solid var(--border);
+ border-radius:17px;padding:15px
+}
+.tracktop{display:flex;align-items:center;gap:10px}
+.trackname {
+ flex:1;min-width:0;overflow-wrap:anywhere;font-size:14px;font-weight:800
+}
+.track-select {
+ display:block;width:100%;padding:0;border:0;border-radius:5px;
+ text-align:left;background:transparent;color:var(--text);
+ font-weight:800;font-size:14px;overflow-wrap:anywhere
+}
+.track-select:hover{color:var(--accent);background:transparent}
+.trackbadge {
+ display:inline-flex;background:var(--surface2);color:var(--accent);
+ border-radius:8px;padding:5px 8px;font-size:10px;
+ font-weight:800;margin-top:8px
+}
+.sub{color:var(--muted);font-size:12px;margin-top:7px}
+.track-date {
+ color:var(--muted);font-size:10px;line-height:1.4;
+ margin-top:5px;opacity:.85
+}
+.actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:13px}
+.actions button{width:100%;min-width:0;min-height:50px;padding:8px 3px;font-size:12px;white-space:normal;overflow-wrap:anywhere}
+#now{display:none;margin-top:16px}
+#now.visible{display:block}
+.now-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.album-art {
+ width:54px;height:54px;border-radius:17px;background:var(--accent);
+ display:grid;place-items:center;color:white;flex-shrink:0
+}
+.album-art svg{width:27px;height:27px}
+.now-copy{flex:1;min-width:0}
+.now-label {
+ font-size:10px;letter-spacing:1.2px;color:var(--accent);
+ font-weight:850;margin-bottom:5px
+}
+#nowTitle{font-weight:800;font-size:15px;overflow-wrap:anywhere}
+#nowMeta{font-size:12px;color:var(--muted);margin-top:4px}
+audio{width:100%;height:42px;display:block}
+.play-controls {
+ display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:9px;margin-top:12px
+}
+.play-controls button{min-height:46px}
+.play-controls .primary{font-size:14px}
+#status {
+ font-size:12px;color:var(--muted);margin-top:14px;
+ line-height:1.5;min-height:18px
+}
+.empty {
+ padding:24px 15px;text-align:center;border:1px dashed var(--border);
+ border-radius:16px;color:var(--muted);font-size:13px;line-height:1.6
+}
+.track-check {
+ display:flex;gap:10px;align-items:center;padding:11px 0;
+ border-bottom:1px solid var(--border);font-size:13px
+}
+.track-check input{accent-color:var(--accent);width:18px;height:18px}
+.track-check span{flex:1;overflow-wrap:anywhere}
+.playlist-card {
+ padding:15px;border:1px solid var(--border);
+ background:var(--surface);border-radius:17px;margin-top:10px
+}
+.playlist-title{font-weight:800;overflow-wrap:anywhere}
+.playlist-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.playlist-actions button{flex:1;font-size:12px;padding:10px 8px}
+.order-row {
+ display:flex;align-items:center;gap:8px;padding:10px 0;
+ border-bottom:1px solid var(--border)
+}
+.order-row .order-name {
+ flex:1;min-width:0;font-size:13px;overflow-wrap:anywhere
+}
+.order-row button{padding:8px 10px}
+footer {
+ font-size:11px;line-height:1.6;color:var(--muted);padding:25px 2px 0
+}
+
+/* 언어 선택 및 기내 터치 환경 */
+.language-home-grid{grid-template-columns:1fr;gap:11px}
+.home-tile.language-tile,.home-tile.playlist-home-tile{
+ min-height:78px;padding:14px 17px;flex-direction:row;align-items:center;
+ justify-content:flex-start;gap:15px;border-radius:18px
+}
+.language-tile .tile-icon,.playlist-home-tile .tile-icon{width:48px;height:48px;flex-shrink:0;font-size:17px;font-weight:850}
+.language-tile .tile-label,.playlist-home-tile .tile-label{font-size:16px}
+.playlist-home-tile{border:2px solid var(--accent);background:var(--surface2)}
+.playlist-home-tile .tile-icon{background:var(--accent);color:#fff;font-size:25px}
+button{min-height:48px}
+.icon-btn{min-width:48px;min-height:48px;width:48px;height:48px}
+.player-icon-btn{width:48px;height:48px;min-height:48px;font-size:23px}
+.player-icon-btn.add-icon{font-size:30px}
+.player-icon-btn.sort-reset-icon{font-size:27px;color:var(--accent);font-weight:750}
+.actions button{min-height:48px;font-size:12px;padding-left:2px;padding-right:2px}
+.track{padding:16px}
+.track-select{min-height:48px;font-size:15px}
+.queue-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 12px}
+.queue-count{font-size:13px;color:var(--muted);font-weight:750}
+.reset-queue-btn{min-height:48px;border-color:var(--accent);color:var(--accent);white-space:nowrap}
+.queue-card{background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:13px;margin:10px 0}
+.queue-card.active-queue-track{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.queue-row{display:flex;align-items:center;gap:10px}
+.queue-number{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:var(--surface2);color:var(--accent);font-weight:850;flex-shrink:0}
+.queue-track-title{flex:1;min-width:0;font-size:15px;font-weight:800;overflow-wrap:anywhere}
+.queue-track-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.queue-row-actions{display:flex;gap:6px;flex-shrink:0}
+.queue-row-actions button{min-width:48px;min-height:48px;padding:8px;font-size:17px}
+.queue-row-actions .queue-play{background:var(--accent);color:#fff}
+.queue-reorder{display:flex;gap:7px;margin-top:10px}
+.queue-reorder button{flex:1;min-height:48px}
+#miniPlayerDock{display:none}
+#miniPlayerDock.docked{
+ display:block;position:fixed;z-index:40;left:0;right:0;bottom:0;
+ padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+ background:var(--header);border-top:1px solid var(--border);box-shadow:0 -8px 24px rgba(0,0,0,.15)
+}
+#miniPlayerDock #now{display:block;margin:0 auto;max-width:760px;padding:12px;border-radius:16px}
+#miniPlayerDock #now .now-top{margin-bottom:9px}
+#miniPlayerDock #now .album-art{width:44px;height:44px;border-radius:13px}
+#miniPlayerDock #now audio{height:38px}
+#miniPlayerDock #now .play-controls{margin-top:7px}
+#miniPlayerDock #now .play-controls button{min-height:50px}
+#now.now-inline{display:block;margin:10px 0 14px;padding:14px;border-color:var(--accent)}
+#now.now-inline .now-top{margin-bottom:10px}
+#now.now-inline audio{height:44px}
+#now.now-inline .play-controls button{min-height:54px;font-size:16px}
+body.has-mini-player main{padding-bottom:210px}
+body.has-mini-player #miniPlayerDock #now{box-shadow:none}
+.track .actions .add-to-queue{background:var(--surface2);color:var(--accent);border:1px solid var(--accent);font-weight:800}
+.single-play-control{grid-template-columns:1fr}
+@media(max-width:420px){
+ .actions{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+ .actions button{font-size:11px;padding:7px 1px;letter-spacing:-.2px}
+ .queue-row{gap:7px}
+ .queue-number{width:29px;height:29px}
+ .queue-track-title{font-size:14px}
+ .queue-row-actions{gap:4px}
+ .queue-row-actions button{min-width:46px;padding:6px}
+ .reset-queue-btn{font-size:12px;padding:10px}
+}
+
+@media(min-width:560px) {
+ main{padding-top:30px}
+ .home-tile{min-height:158px;padding:21px}
+ .hero{padding:16px 20px}
+ .screen-title{font-size:23px}
+}
+@media(max-width:370px) {
+ .screen-title{font-size:22px}
+ .home-tile{min-height:128px;padding:14px}
+ .tile-label{font-size:13px}
+ .filters{grid-template-columns:1fr}
+ .actions{gap:5px}
+ .player-icon-btn{width:34px;height:34px}
+}
+</style>
+</head>
+
+<body class="dark">
+<header>
+ <div class="header-inner">
+  <div class="brand-mark" aria-label="빨간색 마름모 로고" role="img"></div>
+  <div class="brand">
+   <h1>Cabin PA Player</h1>
+   <p>PERSONAL ANNOUNCEMENT LIBRARY</p>
+  </div>
+  <button class="icon-btn" id="themeToggle" aria-label="라이트 모드로 변경" title="라이트 모드로 변경">☀</button>
+ </div>
+</header>
+
+<main>
+ <section class="screen active" id="homeScreen">
+  <div class="hero">
+   <p class="eyebrow">Cabin announcement</p>
+   <h2 class="screen-title">Select Language</h2>
+   <p class="screen-desc">안내 방송 언어를 선택하세요.</p>
+  </div>
+
+  <div class="home-grid language-home-grid">
+   <button class="home-tile language-tile" data-language-group="KoreanEnglish">
+    <span class="tile-icon">가A</span>
+    <span class="tile-label">한국어 &amp; English <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile language-tile" data-language-group="Japanese">
+    <span class="tile-icon">あ</span>
+    <span class="tile-label">日本語 <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile language-tile" data-language-group="Chinese">
+    <span class="tile-icon">文</span>
+    <span class="tile-label">中文 <span class="tile-arrow">↗</span></span>
+   </button>
+   <button class="home-tile playlist-home-tile" id="openQueueHome">
+    <span class="tile-icon">♫</span>
+    <span class="tile-label">Play List <span class="tile-arrow">↗</span></span>
+   </button>
+  </div>
+
+  <footer>Audio is stored locally on this device. Keep a separate backup of original files.</footer>
+ </section>
+
+ <section class="screen" id="playerScreen">
+  <div class="back-row">
+   <button class="ghost" data-back="homeScreen">← 홈</button>
+   <span>음원 목록</span>
+  </div>
+
+  <div class="hero">
+   <p class="eyebrow">선택한 언어</p>
+   <h2 class="screen-title" id="playerHeading">한국어 &amp; English</h2>
+   <p class="screen-desc" id="playerDescription">음원을 등록하고 Play List에 추가하세요.</p>
+  </div>
+
+  <div class="player-toolbar" id="playerToolbar">
+   <button class="player-icon-btn add-icon" id="add" aria-label="오디오 추가" title="오디오 추가">＋</button>
+   <button class="player-icon-btn" id="searchToggle" aria-label="오디오 제목 검색" title="검색">⌕</button>
+   <button class="player-icon-btn sort-reset-icon" id="resetTrackSort" aria-label="이름순 초기화" title="이름순 초기화">↻</button>
+   <div class="player-menu-wrap">
+    <button class="player-icon-btn" id="menuToggle" aria-label="메뉴" title="메뉴">☰</button>
+    <div class="player-menu" id="playerMenu">
+     <button id="openManageFromPlayer">오디오 관리</button>
+    </div>
+   </div>
+  </div>
+
+  <div id="searchField">
+   <input id="search" type="search" placeholder="오디오 제목 검색" aria-label="오디오 제목 검색">
+  </div>
+
+  <section class="panel" id="addPanel" aria-label="오디오 추가">
+   <h3 style="margin:0 0 5px;font-size:17px">오디오 추가</h3>
+   <p class="screen-desc">음원을 등록하면 현재 선택한 언어 목록에 저장됩니다.</p>
+
+   <div class="field">
+    <label for="newName">오디오 이름</label>
+    <input id="newName" type="text" placeholder="미입력시 오디오 파일과 제목 동일">
+   </div>
+
+   <div class="field" id="newCategoryField" style="display:none">
+    <label for="newCategory">카테고리</label>
+    <select id="newCategory">
+     <option value="Boarding">탑승</option>
+     <option value="Safety">안전</option>
+     <option value="Service">서비스</option>
+     <option value="Arrival">도착</option>
+     <option value="Other">기타</option>
+     <option value="Sound">Sound</option>
+    </select>
+   </div>
+
+   <input id="files" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
+   <button class="ghost" id="chooseFiles">오디오 파일 선택</button>
+   <div id="selectedFiles">선택된 파일 없음</div>
+
+   <div class="toolbar">
+    <button class="primary" id="saveSelected">오디오 저장</button>
+    <button id="cancelAdd">취소</button>
+   </div>
+  </section>
+
+  <div class="filters" id="playerFilters" style="display:none">
+   <select id="category" aria-label="카테고리별 필터">
+    <option value="All">전체 카테고리</option>
+    <option value="Boarding">탑승</option>
+    <option value="Safety">안전</option>
+    <option value="Service">서비스</option>
+    <option value="Arrival">도착</option>
+    <option value="Other">기타</option>
+    <option value="Sound">Sound</option>
+   </select>
+
+   <select id="language" aria-label="언어별 필터">
+    <option value="All">전체 언어</option>
+    <option value="Korean">한국어</option>
+    <option value="English">영어</option>
+    <option value="Japanese">일본어</option>
+    <option value="Chinese">중국어</option>
+    <option value="Other">기타</option>
+    <option value="legacy">기존 파일 · 미지정</option>
+   </select>
+  </div>
+
+  <div id="list"></div>
+
+  <section class="panel" id="now">
+   <div class="now-top">
+    <div class="album-art">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+     </svg>
+    </div>
+    <div class="now-copy">
+     <div class="now-label">선택한 오디오</div>
+     <div id="nowTitle">오디오를 선택하세요</div>
+     <div id="nowMeta">재생할 오디오를 선택하세요.</div>
+    </div>
+   </div>
+
+   <audio id="player" controls playsinline preload="metadata"></audio>
+
+   <div class="play-controls single-play-control">
+    <button class="primary" id="playPause">▶ 재생</button>
+   </div>
+  </section>
+ </section>
+
+ <section class="screen" id="manageScreen">
+  <div class="back-row">
+   <button class="ghost" data-back="homeScreen">← 홈</button>
+   <span>라이브러리 관리</span>
+  </div>
+
+  <p class="eyebrow">내 오디오 라이브러리</p>
+  <h2 class="screen-title">오디오 관리</h2>
+  <p class="screen-desc">오디오를 가져오고 수정하거나 삭제하세요. 순차 재생용 재생목록도 만들 수 있습니다.</p>
+
+  <div class="toolbar">
+   <button class="primary" id="manageAdd">＋ 오디오 가져오기</button>
+   <button id="openPlaylists">♫ 재생목록</button>
+  </div>
+
+  <div class="filters">
+   <select id="manageCategory">
+    <option value="All">전체 카테고리</option>
+    <option value="Boarding">탑승</option>
+    <option value="Safety">안전</option>
+    <option value="Service">서비스</option>
+    <option value="Arrival">도착</option>
+    <option value="Other">기타</option>
+    <option value="Sound">Sound</option>
+   </select>
+
+   <select id="manageLanguage">
+    <option value="All">전체 언어</option>
+    <option value="Korean">한국어</option>
+    <option value="English">영어</option>
+    <option value="Japanese">일본어</option>
+    <option value="Chinese">중국어</option>
+    <option value="Other">기타</option>
+    <option value="legacy">기존 파일 · 미지정</option>
+   </select>
+  </div>
+
+  <div class="field"><input id="manageSearch" type="search" placeholder="오디오 제목 검색"></div>
+  <div id="manageList"></div>
+
+  <section class="panel" id="manageAddPanel" style="display:none;margin-top:14px">
+   <h3 style="margin:0 0 5px;font-size:17px">오디오 가져오기</h3>
+
+   <div class="field">
+    <label for="manageNewName">오디오 이름 (파일 1개에 적용)</label>
+    <input id="manageNewName" type="text" placeholder="오디오 이름 입력">
+   </div>
+
+   <div class="filters">
+    <div class="field">
+     <label for="manageNewCategory">카테고리</label>
+     <select id="manageNewCategory">
+      <option value="Boarding">탑승</option>
+      <option value="Safety">안전</option>
+      <option value="Service">서비스</option>
+      <option value="Arrival">도착</option>
+      <option value="Other">기타</option>
+      <option value="Sound">Sound</option>
+     </select>
+    </div>
+
+    <div class="field">
+     <label for="manageNewLanguage">언어</label>
+     <select id="manageNewLanguage">
+      <option value="Korean">한국어</option>
+      <option value="English">영어</option>
+      <option value="Japanese">일본어</option>
+      <option value="Chinese">중국어</option>
+      <option value="Other">기타</option>
+     </select>
+    </div>
+   </div>
+
+   <input id="manageFiles" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.flac" multiple hidden>
+   <button id="manageChooseFiles" class="ghost">오디오 파일 선택</button>
+   <div id="manageSelectedFiles" class="sub">선택된 파일 없음</div>
+
+   <div class="toolbar">
+    <button class="primary" id="manageSaveSelected">오디오 저장</button>
+    <button id="manageCancelAdd">취소</button>
+   </div>
+  </section>
+ </section>
+
+ <section class="screen" id="playlistScreen">
+  <div class="back-row">
+   <button class="ghost" data-back="homeScreen">← 홈</button>
+   <span>Play List</span>
+  </div>
+
+  <p class="eyebrow">재생 대기열</p>
+  <h2 class="screen-title">Play List</h2>
+  <p class="screen-desc">언어별 음원 목록에서 추가한 음원을 원하는 순서로 재생하세요. 자동 연속 재생은 지원하지 않습니다.</p>
+
+  <div class="queue-toolbar">
+   <span id="queueCount" class="queue-count">0개 음원</span>
+   <button class="ghost reset-queue-btn" id="clearQueue">Play List 초기화</button>
+  </div>
+  <div id="queueList"></div>
+ </section>
+
+ <div id="miniPlayerDock" aria-label="현재 재생 중인 음원"></div>
+
+ <div id="status" role="status">로컬 저장소 확인 중…</div>
+ <footer>오디오는 이 기기의 브라우저에 저장됩니다. 원본 파일을 별도로 백업하세요. 이 앱은 개인 청취 및 교육용이며 인증된 항공기 안내 방송 장비를 대체하지 않습니다.</footer>
+</main>
+
+<script>
+const DB_NAME='CabinPAPlayer';
+const STORE='tracks';
+const PLAYLIST_STORE='playlists'; // 기존 데이터 보존용으로 유지
+const QUEUE_STORE='playqueue';
+const LANGUAGES=['Korean','English','Japanese','Chinese','Other'];
+
+let db,currentId=null,objectUrl=null;
+let selectedCategory='Other';
+let selectedLanguageGroup='KoreanEnglish';
+let queue=[];
+let queueRenderToken=0;
+let sortSettings={};
+
+const $=id=>document.getElementById(id);
+const player=$('player');
+
+function categoryLabel(v) {
+ return ({
+  Boarding:'탑승',
+  Safety:'안전',
+  Service:'서비스',
+  Arrival:'도착',
+  Other:'기타',
+  Sound:'Sound'
+ })[v]||v||'기타';
+}
+
+function languageLabel(v) {
+ return ({
+  Korean:'한국어',
+  English:'영어',
+  Japanese:'일본어',
+  Chinese:'중국어',
+  Other:'기타',
+  legacy:'기존 파일 · 미지정'
+ })[v]||'기존 파일 · 미지정';
+}
+
+function isLegacy(t) {
+ return !t.language||!LANGUAGES.includes(t.language);
+}
+
+function say(msg) {
+ $('status').textContent=msg;
+}
+
+function showScreen(id) {
+ const target=$(id);
+ if(!target||!target.classList.contains('screen'))return;
+ document.querySelectorAll('.screen').forEach(screen=>{
+  screen.classList.toggle('active',screen===target);
+ });
+ closePlayerMenu();
+ placePlayerForScreen(id);
+ window.scrollTo({top:0,behavior:'smooth'});
+
+ if(id==='manageScreen')renderManage().catch(()=>say('오디오 관리 목록을 불러오지 못했습니다.'));
+ if(id==='playlistScreen')renderQueue().catch(()=>say('Play List를 불러오지 못했습니다.'));
+ if(id==='playerScreen')renderPlayerTracks().catch(()=>say('음원 목록을 불러오지 못했습니다.'));
+}
+
+document.querySelectorAll('[data-back]').forEach(b=>{
+ b.addEventListener('click',()=>showScreen(b.dataset.back));
+});
+
+document.querySelectorAll('[data-language-group]').forEach(b=>{
+ b.addEventListener('click',()=>{
+  selectedLanguageGroup=b.dataset.languageGroup;
+  selectedCategory='Other';
+  $('playerHeading').textContent=selectedLanguageGroup==='KoreanEnglish'?'한국어 & English':selectedLanguageGroup==='Japanese'?'日本語':'中文';
+  $('playerDescription').textContent='음원을 등록하고 원하는 음원을 Play List에 추가하세요.';
+  $('category').value='All';
+  $('language').value='All';
+  $('newCategory').value='Other';
+  $('search').value='';
+  $('searchField').classList.remove('open');
+  showScreen('playerScreen');
+ });
+});
+
+$('openQueueHome').onclick=()=>showScreen('playlistScreen');
+
+/* 첫 화면에서는 숨겼지만 기존 오디오 관리 기능은 메뉴에서 이용 가능 */
+$('openManageFromPlayer').onclick=()=>{
+ closePlayerMenu();
+ showScreen('manageScreen');
+};
+
+$('openPlaylists').onclick=()=>showScreen('playlistScreen');
+
+/* 나이트 모드 */
+$('themeToggle').onclick=()=>{
+ const dark=document.body.classList.toggle('dark');
+ $('themeToggle').textContent=dark?'☀':'☾';
+ $('themeToggle').setAttribute('aria-label',dark?'라이트 모드로 변경':'나이트 모드로 변경');
+ $('themeToggle').title=dark?'라이트 모드로 변경':'나이트 모드로 변경';
+ document.querySelector('meta[name="theme-color"]').content=dark?'#151d28':'#d71920';
+};
+
+function closePlayerMenu() {
+ $('playerMenu').classList.remove('open');
+}
+
+$('menuToggle').onclick=e=>{
+ e.stopPropagation();
+ $('playerMenu').classList.toggle('open');
+};
+
+document.addEventListener('click',e=>{
+ if(!$('playerToolbar').contains(e.target))closePlayerMenu();
+});
+
+$('searchToggle').onclick=()=>{
+ const field=$('searchField');
+ const opening=!field.classList.contains('open');
+ field.classList.toggle('open',opening);
+
+ if(opening) {
+  $('search').focus();
+ } else {
+  $('search').value='';
+  renderPlayerTracks();
+ }
+};
+
+/* 기존 IndexedDB 데이터베이스와 저장 구조 유지 */
+function openDB() {
+ return new Promise((resolve,reject)=>{
+  const req=indexedDB.open(DB_NAME,3);
+
+  req.onupgradeneeded=()=>{
+   const d=req.result;
+
+   if(!d.objectStoreNames.contains(STORE)) {
+    d.createObjectStore(STORE,{keyPath:'id',autoIncrement:true});
+   }
+
+   if(!d.objectStoreNames.contains(PLAYLIST_STORE)) {
+    d.createObjectStore(PLAYLIST_STORE,{keyPath:'id',autoIncrement:true});
+   }
+
+   if(!d.objectStoreNames.contains(QUEUE_STORE)) {
+    d.createObjectStore(QUEUE_STORE,{keyPath:'id'});
+   }
+  };
+
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+}
+
+function getAll(store) {
+ return new Promise((resolve,reject)=>{
+  const req=db.transaction(store,'readonly').objectStore(store).getAll();
+  req.onsuccess=()=>resolve(req.result);
+  req.onerror=()=>reject(req.error);
+ });
+
+}
+
+function addRecord(store,record) {
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  const req=tx.objectStore(store).add(record);
+  let id;
+
+  req.onsuccess=()=>id=req.result;
+  tx.oncomplete=()=>resolve(id);
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error||new Error('저장 실패'));
+ });
+}
+
+function putRecord(store,record) {
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  tx.objectStore(store).put(record);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error||new Error('수정 실패'));
+ });
+}
+
+function deleteRecord(store,id) {
+ return new Promise((resolve,reject)=>{
+  const tx=db.transaction(store,'readwrite');
+  tx.objectStore(store).delete(id);
+  tx.oncomplete=()=>resolve();
+  tx.onerror=()=>reject(tx.error);
+  tx.onabort=()=>reject(tx.error||new Error('삭제 실패'));
+ });
+}
+
+const allTracks=()=>getAll(STORE);
+const saveTrack=t=>addRecord(STORE,t);
+const updateTrack=t=>putRecord(STORE,t);
+const removeTrack=id=>deleteRecord(STORE,id);
+
+async function loadQueueIds() {
+ const rows=await getAll(QUEUE_STORE);
+ const saved=rows.find(x=>x.id==='main');
+ queue=(saved&&Array.isArray(saved.trackIds)?saved.trackIds:[]).filter(id=>id!==undefined&&id!==null);
+ return queue;
+}
+
+async function persistQueue() {
+ await putRecord(QUEUE_STORE,{id:'main',trackIds:[...queue],updatedAt:Date.now()});
+}
+
+function trackGroup(t) {
+ const lang=isLegacy(t)?'legacy':t.language;
+ if(lang==='Japanese')return 'Japanese';
+ if(lang==='Chinese')return 'Chinese';
+ if(lang==='Other')return 'Other';
+ return 'KoreanEnglish';
+}
+
+function compareTrackNames(a,b) {
+ return String(a.name||'').localeCompare(String(b.name||''), undefined, {numeric:true,sensitivity:'base'});
+}
+
+async function loadSortSettings() {
+ const rows=await getAll(QUEUE_STORE);
+ sortSettings={};
+ rows.filter(r=>typeof r.id==='string'&&r.id.startsWith('sort:')).forEach(r=>{
+  sortSettings[r.id.slice(5)]={mode:r.mode==='custom'?'custom':'name',order:Array.isArray(r.order)?r.order:[]};
+ });
+}
+
+function getSortSetting(group) {
+ return sortSettings[group]||{mode:'name',order:[]};
+}
+
+async function saveSortSetting(group,setting) {
+ const normalized={mode:setting.mode==='custom'?'custom':'name',order:Array.isArray(setting.order)?setting.order:[]};
+ sortSettings[group]=normalized;
+ await putRecord(QUEUE_STORE,{id:'sort:'+group,...normalized,updatedAt:Date.now()});
+}
+
+function sortGroupTracks(tracks,group) {
+ const alpha=[...tracks].sort(compareTrackNames);
+ const setting=getSortSetting(group);
+ if(setting.mode!=='custom')return alpha;
+ const positions=new Map(setting.order.map((id,i)=>[id,i]));
+ return alpha.sort((a,b)=>{
+  const ai=positions.has(a.id)?positions.get(a.id):Number.MAX_SAFE_INTEGER;
+  const bi=positions.has(b.id)?positions.get(b.id):Number.MAX_SAFE_INTEGER;
+  return ai===bi?compareTrackNames(a,b):ai-bi;
+ });
+}
+
+async function moveTrackInGroup(id,direction) {
+ const group=selectedLanguageGroup;
+ const tracks=(await allTracks()).filter(t=>trackGroup(t)===group);
+ const ordered=sortGroupTracks(tracks,group);
+ const from=ordered.findIndex(t=>t.id===id),to=from+direction;
+ if(from<0||to<0||to>=ordered.length)return;
+ [ordered[from],ordered[to]]=[ordered[to],ordered[from]];
+ await saveSortSetting(group,{mode:'custom',order:ordered.map(t=>t.id)});
+ await renderPlayerTracks();
+}
+
+async function addToQueue(track) {
+ if(queue.includes(track.id)) { say('이 음원은 이미 Play List에 있습니다.'); return; }
+ queue.push(track.id);
+ try { await persistQueue(); await renderQueue(); say('Play List에 음원을 추가했습니다.'); }
+ catch(e) { queue=queue.filter(id=>id!==track.id); say('Play List 저장에 실패했습니다.'); }
+}
+
+/* 등록일 표시 */
+function formatAddedDate(t) {
+ if(!t.addedAt)return '등록일 정보 없음';
+
+ const date=new Date(t.addedAt);
+ if(Number.isNaN(date.getTime()))return '등록일 정보 없음';
+
+ const year=date.getFullYear();
+ const month=String(date.getMonth()+1).padStart(2,'0');
+ const day=String(date.getDate()).padStart(2,'0');
+
+ return `등록일 ${year}.${month}.${day}`;
+}
+
+function filteredTracks(tracks,cat,lang,q) {
+ q=(q||'').trim().toLowerCase();
+
+ return tracks.filter(t=>
+  (cat==='All'||t.category===cat)&&
+  (lang==='All'||(lang==='legacy'?isLegacy(t):t.language===lang))&&
+  String(t.name||'').toLowerCase().includes(q)
+ );
+}
+
+function makeEmpty(message) {
+ const e=document.createElement('div');
+ e.className='empty';
+ e.textContent=message;
+ return e;
+}
+
+function makeTrackCard(t,manage=false,filteredQueue=null) {
+ const card=document.createElement('article');
+ card.className='track';
+
+ const top=document.createElement('div');
+ top.className='tracktop';
+
+ const name=document.createElement('button');
+ name.className='track-select trackname';
+ name.textContent=t.name||'제목 없는 오디오';
+ name.setAttribute('aria-label','오디오 선택: '+(t.name||'제목 없는 오디오'));
+
+ name.onclick=()=>{
+  selectTrack(t);
+ };
+
+ top.append(name);
+
+ const badge=document.createElement('span');
+ badge.className='trackbadge';
+ badge.textContent=categoryLabel(t.category||'Other');
+ if(manage) card.append(top,badge);
+ else card.append(top);
+
+ const sub=document.createElement('div');
+ sub.className='sub';
+ sub.textContent=languageLabel(isLegacy(t)?'legacy':t.language);
+ card.append(sub);
+
+ const dateLine=document.createElement('div');
+ dateLine.className='track-date';
+ dateLine.textContent=formatAddedDate(t);
+ card.append(dateLine);
+
+ const actions=document.createElement('div');
+ actions.className='actions';
+
+ const play=document.createElement('button');
+ play.className='primary';
+ play.textContent=manage?'선택':'▶ 재생';
+ play.setAttribute('aria-label',manage?'오디오 선택':'오디오 바로 재생');
+
+ play.onclick=()=>{
+  if(manage)selectTrack(t);
+  else playTrack(t);
+ };
+
+ const edit=document.createElement('button');
+ edit.textContent='수정';
+
+ edit.onclick=async()=>{
+  const nameVal=prompt('오디오 이름:',t.name||'');
+  if(nameVal===null)return;
+
+  const categoryOptions='탑승, 안전, 서비스, 도착, 기타, Sound';
+  const cat=prompt('카테고리 입력 ('+categoryOptions+')',categoryLabel(t.category));
+
+  if(cat===null)return;
+
+  const categoryMap={
+   '탑승':'Boarding',
+   '안전':'Safety',
+   '서비스':'Service',
+   '도착':'Arrival',
+   '기타':'Other',
+   'Sound':'Sound',
+   'Boarding':'Boarding',
+   'Safety':'Safety',
+   'Service':'Service',
+   'Arrival':'Arrival',
+   'Other':'Other'
+  };
+
+  if(!categoryMap[cat]) {
+   say('목록에 있는 카테고리를 입력하세요.');
+   return;
+  }
+
+  const lang=prompt(
+   '언어 입력 (한국어, 영어, 일본어, 중국어, 기타)',
+   languageLabel(t.language)
+  );
+
+  if(lang===null)return;
+
+  const languageMap={
+   '한국어':'Korean',
+   '영어':'English',
+   '일본어':'Japanese',
+   '중국어':'Chinese',
+   '기타':'Other',
+   'Korean':'Korean',
+   'English':'English',
+   'Japanese':'Japanese',
+   'Chinese':'Chinese',
+   'Other':'Other'
+  };
+
+  if(!languageMap[lang]) {
+   say('목록에 있는 언어를 입력하세요.');
+   return;
+  }
+
+  t.name=nameVal.trim()||t.name;
+  t.category=categoryMap[cat];
+  t.language=languageMap[lang];
+
+  /* 최초 등록일은 유지 */
+  await updateTrack(t);
+  await renderAll();
+  say('오디오 정보가 수정되었습니다.');
+ };
+
+ let addQueue=null;
+ if(!manage) {
+  addQueue=document.createElement('button');
+  addQueue.className='add-to-queue';
+  addQueue.textContent='List+'
+  addQueue.onclick=()=>addToQueue(t);
+ }
+
+ const del=document.createElement('button');
+ del.textContent='삭제';
+
+ del.onclick=async()=>{
+  if(!confirm('앱 라이브러리에서 이 오디오를 삭제할까요?'))return;
+
+  if(currentId===t.id)stopPlayback();
+
+  await removeTrack(t.id);
+  queue=queue.filter(id=>id!==t.id);
+  try { await persistQueue(); } catch {}
+
+  await renderAll();
+  say('오디오가 삭제되었습니다.');
+ };
+
+ if(!manage) {
+  const up=document.createElement('button');
+  up.className='ghost';
+  up.textContent='↑';
+  up.title='재생목록 순서 위로 한 칸';
+  up.setAttribute('aria-label','재생목록 순서 위로 한 칸');
+  const down=document.createElement('button');
+  down.className='ghost';
+  down.textContent='↓';
+  down.title='재생목록 순서 아래로 한 칸';
+  down.setAttribute('aria-label','재생목록 순서 아래로 한 칸');
+  const orderedForButtons=filteredQueue||[];
+  const pos=orderedForButtons.findIndex(x=>x.id===t.id);
+  up.disabled=pos<=0;
+  down.disabled=pos<0||pos>=orderedForButtons.length-1;
+  up.onclick=()=>moveTrackInGroup(t.id,-1);
+  down.onclick=()=>moveTrackInGroup(t.id,1);
+  actions.append(play,addQueue,up,down);
+ } else {
+  actions.append(play,edit,del);
+ }
+ card.append(actions);
+
+ return card;
+}
+
+async function renderPlayerTracks() {
+ if(!db)return;
+ const tracks=await allTracks();
+ const q=$('search').value.trim().toLowerCase();
+ const groupTracks=tracks.filter(t=>trackGroup(t)===selectedLanguageGroup);
+ const ordered=sortGroupTracks(groupTracks,selectedLanguageGroup);
+ const filtered=ordered.filter(t=>String(t.name||'').toLowerCase().includes(q));
+ $('list').replaceChildren();
+ if(!filtered.length) {
+  $('list').append(makeEmpty(
+   groupTracks.length?'검색 조건에 맞는 음원이 없습니다.':'이 언어에 등록된 음원이 없습니다. ＋ 버튼으로 음원을 등록하세요.'
+  ));
+ }
+ filtered.forEach(t=>$('list').append(makeTrackCard(t,false,ordered)));
+}
+async function renderManage() {
+ if(!db)return;
+
+ const tracks=await allTracks();
+ const filtered=filteredTracks(
+  tracks,
+  $('manageCategory').value,
+  $('manageLanguage').value,
+  $('manageSearch').value
+ );
+
+ $('manageList').replaceChildren();
+
+ if(!filtered.length) {
+  $('manageList').append(makeEmpty(
+   tracks.length
+    ?'필터 조건에 맞는 오디오가 없습니다.'
+    :'아직 가져온 오디오가 없습니다.'
+  ));
+ }
+
+ filtered.forEach(t=>$('manageList').append(makeTrackCard(t,true,filtered)));
+}
+
+async function renderAll() {
+ await renderPlayerTracks();
+
+ if($('manageScreen').classList.contains('active')) {
+  await renderManage();
+ }
+
+ if($('playlistScreen').classList.contains('active')) {
+  await renderQueue();
+ }
+}
+
+/* 오디오 선택 및 수동 재생: 음원 종료 후 자동으로 다음 음원은 재생하지 않음 */
+function placePlayerForScreen(screenId) {
+ const now=$('now');
+ const dock=$('miniPlayerDock');
+ const library=$('playerScreen');
+ if(!now||!dock||!library)return;
+ const onLibrary=screenId==='playerScreen';
+ const onQueue=screenId==='playlistScreen';
+
+ if(currentId===null) {
+  now.classList.remove('visible','now-inline');
+  dock.classList.remove('docked');
+  document.body.classList.remove('has-mini-player');
+  if(!library.contains(now))library.append(now);
+  return;
+ }
+
+ now.classList.add('visible');
+ if(onQueue||onLibrary) {
+  now.classList.remove('now-inline');
+  // Keep the player visible during asynchronous queue rendering; renderQueue
+  // moves it inline under the active queue item when rendering is complete.
+  if(!dock.contains(now))dock.append(now);
+  dock.classList.add('docked');
+  document.body.classList.add('has-mini-player');
+  return;
+ }
+
+ // Keep audio state, but don't let a fixed player overlay the home/manage screens.
+ now.classList.remove('visible','now-inline');
+ dock.classList.remove('docked');
+ document.body.classList.remove('has-mini-player');
+ if(!library.contains(now))library.append(now);
+}
+
+function selectTrack(t) {
+ if(!t)return;
+ if(objectUrl)URL.revokeObjectURL(objectUrl);
+ objectUrl=URL.createObjectURL(t.blob);
+ currentId=t.id;
+ player.pause();
+ player.src=objectUrl;
+ player.load();
+ $('nowTitle').textContent=t.name||'제목 없는 오디오';
+ $('nowMeta').textContent=categoryLabel(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
+ $('playPause').textContent='▶ 재생';
+ $('now').classList.add('visible');
+ placePlayerForScreen(document.querySelector('.screen.active')?.id||'playerScreen');
+ say('음원 선택 완료 · 재생 버튼을 눌러 재생하세요.');
+}
+
+function stopPlayback() {
+ player.pause();
+ player.removeAttribute('src');
+ player.load();
+ currentId=null;
+ if(objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl=null; }
+ $('nowTitle').textContent='오디오를 선택하세요';
+ $('nowMeta').textContent='재생할 오디오를 선택하세요.';
+ $('playPause').textContent='▶ 재생';
+ $('now').classList.remove('visible');
+ $('miniPlayerDock').classList.remove('docked');
+ document.body.classList.remove('has-mini-player');
+ if(!$('playerScreen').contains($('now'))) $('playerScreen').append($('now'));
+}
+
+function playTrack(t) {
+ if(!t)return;
+ selectTrack(t);
+ player.play().then(()=>say('재생 중: '+(t.name||'제목 없는 오디오')))
+  .catch(()=>say('재생 버튼을 눌러 음원을 재생하세요.'));
+}
+
+$('playPause').onclick=()=>{
+ if(!player.src) { say('먼저 음원을 선택하세요.'); return; }
+ if(player.paused) {
+  player.play().then(()=>$('playPause').textContent='Ⅱ 일시정지').catch(()=>say('재생을 시작할 수 없습니다.'));
+ } else {
+  player.pause();
+  $('playPause').textContent='▶ 재생';
+ }
+};
+player.addEventListener('play',()=> {
+ $('playPause').textContent='Ⅱ 일시정지';
+ updateQueuePlayButtons();
+});
+player.addEventListener('pause',()=> {
+ $('playPause').textContent='▶ 재생';
+ updateQueuePlayButtons();
+});
+player.addEventListener('ended',()=>{
+ $('playPause').textContent='▶ 재생';
+ say('재생이 끝났습니다. 다음 음원은 자동 재생되지 않습니다.');
+});
+player.addEventListener('timeupdate',()=>{
+ const current=document.getElementById('queueCurrentTime');
+ if(current)current.textContent=formatTime(player.currentTime);
+ const total=document.getElementById('queueDuration');
+ if(total&&Number.isFinite(player.duration))total.textContent=formatTime(player.duration);
+});
+player.addEventListener('error',()=>{ if(player.currentSrc)say('이 파일을 재생할 수 없습니다. 오디오 형식을 확인하세요.'); });
+function formatTime(seconds) {
+ if(!Number.isFinite(seconds)||seconds<0)return '0:00';
+ const m=Math.floor(seconds/60),s=Math.floor(seconds%60);
+ return m+':'+String(s).padStart(2,'0');
+}
+
+/* 오디오 가져오기 */
+function setupImport(manage=false) {
+ const ids=manage?{
+  panel:'manageAddPanel',
+  name:'manageNewName',
+  cat:'manageNewCategory',
+  lang:'manageNewLanguage',
+  files:'manageFiles',
+  choose:'manageChooseFiles',
+  selected:'manageSelectedFiles',
+  save:'manageSaveSelected',
+  cancel:'manageCancelAdd'
+ }:{
+  panel:'addPanel',
+  name:'newName',
+  cat:'newCategory',
+  lang:null,
+  files:'files',
+  choose:'chooseFiles',
+  selected:'selectedFiles',
+  save:'saveSelected',
+  cancel:'cancelAdd'
+ };
+
+ let chosen=[];
+
+ const updateChosen=()=>{
+  $(ids.selected).textContent=chosen.length
+   ?chosen.map(f=>f.name).join(', ')
+   :'선택된 파일 없음';
+ };
+
+ const open=()=>{
+  $(ids.panel).style.display='block';
+  if(!manage) {
+   $('newCategoryField').style.display='none';
+  }
+
+  $(ids.cat).value=manage
+   ?($('manageCategory').value==='All'?'Other':$('manageCategory').value)
+   :selectedCategory;
+
+  if(manage) $(ids.lang).value=$('manageLanguage').value==='All'?'Korean':$('manageLanguage').value;
+
+  $(ids.name).value='';
+  chosen=[];
+  $(ids.files).value='';
+  updateChosen();
+
+  $(ids.panel).scrollIntoView({behavior:'smooth',block:'nearest'});
+ };
+
+ $(ids.choose).onclick=()=>$(ids.files).click();
+
+ $(ids.files).onchange=e=>{
+  chosen=[...e.target.files];
+  updateChosen();
+
+  $(ids.name).value=chosen.length===1
+   ?chosen[0].name.replace(/\.[^.]+$/,'')
+   :'';
+ };
+
+ $(ids.cancel).onclick=()=>{
+  $(ids.panel).style.display='none';
+  chosen=[];
+  $(ids.files).value='';
+  updateChosen();
+ };
+
+ $(ids.save).onclick=async()=>{
+  if(!chosen.length) {
+   say('먼저 오디오 파일을 하나 이상 선택하세요.');
+   return;
+  }
+
+  const category=$(ids.cat).value;
+  const language=manage ? $(ids.lang).value : (selectedLanguageGroup==='Japanese'?'Japanese':selectedLanguageGroup==='Chinese'?'Chinese':'Korean');
+  const custom=$(ids.name).value.trim();
+
+  $(ids.save).disabled=true;
+  say('오디오 저장 중…');
+
+  let count=0,skipped=0;
+
+  try {
+   for(const f of chosen) {
+    if(
+     !f.type.startsWith('audio/')&&
+     !/\.(mp3|m4a|aac|wav|ogg|flac|aiff|wma)$/i.test(f.name)
+    ) {
+     skipped++;
+     continue;
+    }
+
+    await saveTrack({
+     name:chosen.length===1&&custom
+      ?custom
+      :f.name.replace(/\.[^.]+$/,''),
+     category,
+     language,
+     blob:f,
+     addedAt:Date.now()
+    });
+
+    count++;
+   }
+
+   $(ids.panel).style.display='none';
+    chosen=[];
+   $(ids.files).value='';
+   updateChosen();
+
+   if(!manage) {
+    selectedCategory='Other';
+    $('category').value='All';
+    $('language').value='All';
+    $('playerDescription').textContent='음원을 등록하고 원하는 음원을 Play List에 추가하세요.';
+   }
+
+   await renderAll();
+
+   say(
+    count+'개 오디오 파일을 저장했습니다.'+
+    (skipped?' '+skipped+'개 지원하지 않는 파일은 건너뛰었습니다.':'')
+   );
+  } catch(err) {
+   say('저장에 실패했습니다. 브라우저 저장 공간을 확인하고 원본 파일을 보관하세요.');
+  } finally {
+   $(ids.save).disabled=false;
+  }
+ };
+
+ return open;
+}
+
+const openPlayerImport=setupImport(false);
+const openManageImport=setupImport(true);
+
+$('add').onclick=()=>{
+ closePlayerMenu();
+ openPlayerImport();
+};
+
+$('manageAdd').onclick=openManageImport;
+
+$('category').onchange=renderPlayerTracks;
+$('language').onchange=renderPlayerTracks;
+$('search').oninput=renderPlayerTracks;
+$('resetTrackSort').onclick=async()=>{
+ closePlayerMenu();
+ try {
+  await saveSortSetting(selectedLanguageGroup,{mode:'name',order:[]});
+  await renderPlayerTracks();
+  say('현재 언어의 음원을 이름순으로 정렬했습니다.');
+ } catch(e) {
+  say('정렬 설정을 저장하지 못했습니다.');
+ }
+};
+
+$('manageCategory').onchange=renderManage;
+$('manageLanguage').onchange=renderManage;
+$('manageSearch').oninput=renderManage;
+
+/* 지속 저장되는 단일 Play List 대기열 */
+function updateQueuePlayButtons() {
+ document.querySelectorAll('#queueList .queue-card').forEach(card=>{
+  const isCurrent=card.dataset.trackId===String(currentId);
+  card.classList.toggle('active-queue-track',isCurrent);
+  const button=card.querySelector('.queue-play');
+  if(!button)return;
+  const isPlaying=isCurrent&&!player.paused;
+  button.textContent=isPlaying?'Ⅱ':'▶';
+  button.setAttribute('aria-label',isPlaying?'일시정지':'이 음원 재생');
+ });
+}
+
+/* 지속 저장되는 단일 Play List 대기열 */
+async function renderQueue() {
+ if(!db)return;
+ const renderToken=++queueRenderToken;
+ await loadQueueIds();
+ const tracks=await allTracks();
+ // If another render started while IndexedDB was resolving, only the newest
+ // render may update the queue DOM or move the shared audio player.
+ if(renderToken!==queueRenderToken)return;
+ const list=$('queueList');
+ const validQueue=queue.filter(id=>tracks.some(t=>t.id===id));
+ if(validQueue.length!==queue.length) {
+  queue=validQueue;
+  await persistQueue();
+  if(renderToken!==queueRenderToken)return;
+ }
+ list.replaceChildren();
+ $('queueCount').textContent=queue.length+'개 음원';
+
+ if(!queue.length) {
+  list.append(makeEmpty('Play List가 비어 있습니다. 언어별 음원 목록에서 List+ 버튼을 눌러 추가하세요.'));
+ }
+
+ let activeCard=null;
+ queue.forEach((id,index)=>{
+  const t=tracks.find(item=>item.id===id);
+  if(!t)return;
+
+  const card=document.createElement('article');
+  card.className='queue-card'+(currentId===t.id?' active-queue-track':'');
+  card.dataset.trackId=String(t.id);
+
+  const row=document.createElement('div');
+  row.className='queue-row';
+  const number=document.createElement('div');
+  number.className='queue-number';
+  number.textContent=String(index+1);
+  const copy=document.createElement('div');
+  copy.style.flex='1';
+  copy.style.minWidth='0';
+  const title=document.createElement('div');
+  title.className='queue-track-title';
+  title.textContent=t.name||'제목 없는 오디오';
+  const sub=document.createElement('div');
+  sub.className='queue-track-sub';
+  sub.textContent=languageLabel(isLegacy(t)?'legacy':t.language);
+  copy.append(title,sub);
+
+  const actions=document.createElement('div');
+  actions.className='queue-row-actions';
+  const play=document.createElement('button');
+  play.className='queue-play';
+  play.textContent=currentId===t.id&&!player.paused?'Ⅱ':'▶';
+  play.setAttribute('aria-label',currentId===t.id&&!player.paused?'일시정지':'이 음원 재생');
+  play.onclick=()=>{
+   if(currentId===t.id&&!player.paused) {
+    player.pause();
+    updateQueuePlayButtons();
+    say('일시정지했습니다.');
+    return;
+   }
+
+   // Do not await IndexedDB/rendering before play(): iOS Safari requires the
+   // media play request to occur directly in the user's tap handler.
+   if(currentId!==t.id)selectTrack(t);
+   if(player.ended) {
+    try { player.currentTime=0; } catch(e) {}
+   }
+
+   const now=$('now');
+   const dock=$('miniPlayerDock');
+   card.after(now);
+   now.classList.add('visible','now-inline');
+   dock.classList.remove('docked');
+   document.body.classList.remove('has-mini-player');
+
+   let playPromise;
+   try {
+    playPromise=player.play();
+   } catch(e) {
+    say('재생을 시작할 수 없습니다. 파일 형식을 확인하세요.');
+    updateQueuePlayButtons();
+    return;
+   }
+   updateQueuePlayButtons();
+   Promise.resolve(playPromise).then(()=>{
+    say('재생 중: '+(t.name||'제목 없는 오디오'));
+   }).catch(()=>{
+    say('재생을 시작할 수 없습니다. 이 음원을 다시 눌러 재생하세요.');
+   }).finally(updateQueuePlayButtons);
+  };
+
+  const remove=document.createElement('button');
+  remove.textContent='×';
+  remove.setAttribute('aria-label','Play List에서 제거');
+  remove.onclick=async()=>{
+   queue=queue.filter((item,i)=>i!==index);
+   try {
+    await persistQueue();
+    await renderQueue();
+    say('Play List에서 음원을 제거했습니다. 원본 오디오는 유지됩니다.');
+   } catch(e) {
+    say('Play List에서 음원을 제거하지 못했습니다.');
+   }
+  };
+
+  actions.append(play,remove);
+  row.append(number,copy,actions);
+  card.append(row);
+
+  const reorder=document.createElement('div');
+  reorder.className='queue-reorder';
+  const up=document.createElement('button');
+  up.textContent='↑ 순서 올리기';
+  up.disabled=index===0;
+  up.onclick=async()=>{
+   if(index<=0)return;
+   [queue[index-1],queue[index]]=[queue[index],queue[index-1]];
+   await persistQueue();
+   await renderQueue();
+  };
+  const down=document.createElement('button');
+  down.textContent='↓ 순서 내리기';
+  down.disabled=index===queue.length-1;
+  down.onclick=async()=>{
+   if(index>=queue.length-1)return;
+   [queue[index+1],queue[index]]=[queue[index],queue[index+1]];
+   await persistQueue();
+   await renderQueue();
+  };
+  reorder.append(up,down);
+  card.append(reorder);
+  list.append(card);
+  if(currentId===t.id)activeCard=card;
+ });
+
+ // A queue render can finish after the user has navigated away. Never move
+ // #now into the hidden playlist screen: that used to leave stale DOM state.
+ if(renderToken!==queueRenderToken||!$('playlistScreen').classList.contains('active'))return;
+
+ const now=$('now');
+ const dock=$('miniPlayerDock');
+ if(currentId!==null&&activeCard) {
+  activeCard.after(now);
+  now.classList.add('visible','now-inline');
+  dock.classList.remove('docked');
+  document.body.classList.remove('has-mini-player');
+ } else if(currentId!==null) {
+  dock.append(now);
+  now.classList.add('visible');
+  now.classList.remove('now-inline');
+  dock.classList.add('docked');
+  document.body.classList.add('has-mini-player');
+ } else {
+  now.classList.remove('visible','now-inline');
+  dock.classList.remove('docked');
+  document.body.classList.remove('has-mini-player');
+  if(!$('playerScreen').contains(now))$('playerScreen').append(now);
+ }
+ updateQueuePlayButtons();
+}
+
+$('clearQueue').onclick=async()=>{
+ if(!queue.length) { say('Play List가 이미 비어 있습니다.'); return; }
+ if(!confirm('Play List의 모든 음원을 초기화할까요? 원본 오디오 파일은 삭제되지 않습니다.'))return;
+ queue=[]; await persistQueue(); await renderQueue(); updateQueuePlayButtons(); say('Play List를 초기화했습니다. 원본 오디오는 유지됩니다.');
+};
+
+/* 앱 초기화 */
+(async()=>{
+ try {
+  if(!('indexedDB' in window))throw Error('IndexedDB 사용 불가');
+
+  db=await openDB();
+
+  if(navigator.storage&&navigator.storage.persist) {
+   try {
+    await navigator.storage.persist();
+   } catch {}
+  }
+
+  await loadQueueIds();
+  await loadSortSettings();
+  await renderAll();
+  say('준비 완료 · 오디오는 이 기기에 저장됩니다.');
+ } catch(e) {
+  say('로컬 저장소를 열 수 없습니다. Safari에서 앱을 다시 열고 시도하세요.');
+ }
+
+ if('serviceWorker' in navigator&&location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+ }
+})();
+</script>
+</body>
+</html>
