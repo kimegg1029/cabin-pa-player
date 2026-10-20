@@ -642,6 +642,7 @@ const QUEUE_STORE='playqueue';
 const LANGUAGES=['Korean','English','Japanese','Chinese','Other'];
 
 let db,currentId=null,objectUrl=null;
+let playerOpen=false;
 let selectedCategory='Other';
 let selectedLanguageGroup='KoreanEnglish';
 let queue=[];
@@ -698,6 +699,12 @@ function showToast(msg,duration=1100) {
 function showScreen(id) {
  const target=$(id);
  if(!target||!target.classList.contains('screen'))return;
+ // Keep list screens clean on entry; a player appears only after an item is selected there.
+ playerOpen=false;
+ const now=$('now');
+ if(now) { now.classList.remove('visible','now-inline'); $('playerScreen').append(now); }
+ $('miniPlayerDock').classList.remove('docked');
+ document.body.classList.remove('has-mini-player');
  document.querySelectorAll('.screen').forEach(screen=>{
   screen.classList.toggle('active',screen===target);
  });
@@ -1028,6 +1035,8 @@ function makeTrackCard(t,manage=false,filteredQueue=null) {
  const card=document.createElement('article');
  card.className='track';
 
+ card.dataset.trackId=String(t.id);
+
  const top=document.createElement('div');
  top.className='tracktop';
 
@@ -1067,9 +1076,19 @@ function makeTrackCard(t,manage=false,filteredQueue=null) {
  play.setAttribute('aria-label',manage?'오디오 선택':'재생바 열기');
 
  play.onclick=()=>{
-  // Selecting an item opens the player; playback starts only from the player controls.
+  // Selecting an item opens the shared player directly beneath that item; it never autoplays.
   selectTrack(t);
-  if(!manage) $('now').scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(!manage) {
+   playerOpen=true;
+   const now=$('now');
+   card.after(now);
+   now.classList.add('visible','now-inline');
+   $('miniPlayerDock').classList.remove('docked');
+   document.body.classList.remove('has-mini-player');
+   now.scrollIntoView({behavior:'smooth',block:'nearest'});
+  } else {
+   placePlayerForScreen(document.querySelector('.screen.active')?.id||'manageScreen');
+  }
  };
 
  const edit=document.createElement('button');
@@ -1194,6 +1213,11 @@ function makeTrackCard(t,manage=false,filteredQueue=null) {
 
 async function renderPlayerTracks() {
  if(!db)return;
+ const now=$('now');
+ if($('list').contains(now)) {
+  $('playerScreen').append(now);
+  now.classList.remove('visible','now-inline');
+ }
  const tracks=await allTracks();
  const q=$('search').value.trim().toLowerCase();
  const groupTracks=tracks.filter(t=>trackGroup(t)===selectedLanguageGroup);
@@ -1206,6 +1230,14 @@ async function renderPlayerTracks() {
   ));
  }
  filtered.forEach(t=>$('list').append(makeTrackCard(t,false,ordered)));
+ if(playerOpen&&currentId!==null) {
+  const selected=filtered.find(t=>t.id===currentId);
+  if(selected) {
+   const card=[...$('list').querySelectorAll('.track')].find(el=>el.dataset.trackId===String(selected.id));
+   if(card) { card.after(now); now.classList.add('visible','now-inline'); }
+   else { now.classList.remove('visible','now-inline'); playerOpen=false; }
+  } else { now.classList.remove('visible','now-inline'); playerOpen=false; }
+ } else { now.classList.remove('visible','now-inline'); }
 }
 async function renderManage() {
  if(!db)return;
@@ -1251,27 +1283,22 @@ function placePlayerForScreen(screenId) {
  if(!now||!dock||!library)return;
  const onLibrary=screenId==='playerScreen';
  const onQueue=screenId==='playlistScreen';
-
- if(currentId===null) {
+ if(onLibrary||onQueue) {
+  // List entry never restores a stale player; selection opens it inline explicitly.
   now.classList.remove('visible','now-inline');
   dock.classList.remove('docked');
   document.body.classList.remove('has-mini-player');
   if(!library.contains(now))library.append(now);
   return;
  }
-
- now.classList.add('visible');
- if(onQueue||onLibrary) {
+ if(screenId==='manageScreen'&&currentId!==null) {
+  now.classList.add('visible');
   now.classList.remove('now-inline');
-  // Keep the player visible during asynchronous queue rendering; renderQueue
-  // moves it inline under the active queue item when rendering is complete.
   if(!dock.contains(now))dock.append(now);
   dock.classList.add('docked');
   document.body.classList.add('has-mini-player');
   return;
  }
-
- // Keep audio state, but don't let a fixed player overlay the home/manage screens.
  now.classList.remove('visible','now-inline');
  dock.classList.remove('docked');
  document.body.classList.remove('has-mini-player');
@@ -1290,7 +1317,6 @@ function selectTrack(t) {
  $('nowMeta').textContent=categoryLabel(t.category||'Other')+' · '+languageLabel(isLegacy(t)?'legacy':t.language);
  $('playPause').textContent='▶ 재생';
  $('now').classList.add('visible');
- placePlayerForScreen(document.querySelector('.screen.active')?.id||'playerScreen');
  say('음원 선택 완료 · 재생 버튼을 눌러 재생하세요.');
 }
 
@@ -1299,6 +1325,7 @@ function stopPlayback() {
  player.removeAttribute('src');
  player.load();
  currentId=null;
+ playerOpen=false;
  if(objectUrl) { URL.revokeObjectURL(objectUrl); objectUrl=null; }
  $('nowTitle').textContent='오디오를 선택하세요';
  $('nowMeta').textContent='재생할 오디오를 선택하세요.';
@@ -1534,16 +1561,13 @@ async function renderQueue() {
  const now=$('now');
  const dock=$('miniPlayerDock');
 
- // Move the shared player out before replacing queue children. This prevents
- // deleting/detaching the node that contains the active audio controls.
- // Keep the dock visible during the async refresh so the player never vanishes.
+ // Move the shared player out before replacing queue children. Do not flash
+ // a fixed dock during refresh; the player is reinserted inline only when opened.
  if(list.contains(now)) {
-  dock.append(now);
-  if(currentId!==null&&$('playlistScreen').classList.contains('active')) {
-   now.classList.remove('now-inline');
-   dock.classList.add('docked');
-   document.body.classList.add('has-mini-player');
-  }
+  $('playerScreen').append(now);
+  now.classList.remove('visible','now-inline');
+  dock.classList.remove('docked');
+  document.body.classList.remove('has-mini-player');
  }
 
  const tracks=await allTracks();
@@ -1593,6 +1617,7 @@ async function renderQueue() {
    // The queue-row button selects the audio only; the visible player button
    // or native audio controls are responsible for starting playback.
    if(currentId!==t.id)selectTrack(t);
+   playerOpen=true;
    card.after(now);
    now.classList.add('visible','now-inline');
    dock.classList.remove('docked');
@@ -1630,17 +1655,11 @@ async function renderQueue() {
  // A queue render that finishes after navigation must not move the player into
  // the now-hidden queue screen.
  if(renderToken!==queueRenderToken||!$('playlistScreen').classList.contains('active'))return;
- if(currentId!==null&&activeCard) {
+ if(playerOpen&&currentId!==null&&activeCard) {
   activeCard.after(now);
   now.classList.add('visible','now-inline');
   dock.classList.remove('docked');
   document.body.classList.remove('has-mini-player');
- } else if(currentId!==null) {
-  dock.append(now);
-  now.classList.add('visible');
-  now.classList.remove('now-inline');
-  dock.classList.add('docked');
-  document.body.classList.add('has-mini-player');
  } else {
   now.classList.remove('visible','now-inline');
   dock.classList.remove('docked');
